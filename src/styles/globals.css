@@ -2,17 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-
+:root {
+	--container-size: 500px;
+	--circle-size: calc(var(--container-size) / 8);
+	--item-size: calc(var(--container-size) / 3);
+	--primary-color: #e17b77;
+	--secondary-color: #fff;
+}
 
 .timeline-container {
 	display: flex;
 	position: relative;
-	height: 400px;
+	height: var(--container-size);
 	width: 100%;
+	overflow: auto;
+	-webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+	-ms-overflow-style: none;
+  scrollbar-width: none;
+	cursor: grab;
+}
+
+.timeline-container::-webkit-scrollbar {
+  display: none;
 }
 
 .timeline-container::after {
-	background-color: #e17b77;
+	background-color: var(--primary-color);
 	content: '';
 	position: absolute;
 	bottom: calc(50% - 2px);
@@ -24,7 +41,6 @@
 	display: flex;
 	align-self: flex-start;
 	position: relative;
-	width: 50%;
 }
 
 .timeline-item:nth-child(odd) {
@@ -33,33 +49,32 @@
 }
 
 .timeline-item-content {
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-	border-radius: 50%;
-	background-color: #e17b77;
-	color: #fff;
+	border-radius: 20px;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	padding: 15px;
 	position: relative;
-	width: 160px;
-	height: 160px;
+	width: var(--item-size);
+	height: var(--item-size);
 	text-align: center;
 }
 
 .timeline-item-content::after {
 	content: '';
-	background-color: #e17b77;
+	background-color: var(--primary-color);
 	position: absolute;
 	right: 50%;
-	top: calc(50% + 50px);
+	top: calc(50% + var(--circle-size));
 	width: 4px;
 	height: 50%;
 }
 
 .timeline-item:nth-child(odd) .timeline-item-content::after {
 	top: auto;
-	bottom: calc(50% + 50px);
+	bottom: calc(50% + var(--circle-size));
 }
 
 .timeline-item-content p {
@@ -70,28 +85,23 @@
 }
 
 .timeline-item-content .circle {
-	background-color: #fff;
-	border: 3px solid #e17b77;
+	background-color: var(--primary-color);
+	display: flex;
+	align-items: center;
 	border-radius: 50%;
 	position: absolute;
-	right: calc(50% - 8px);
-	bottom: -50px;
-	width: 20px;
-	height: 20px;
+	right: calc(50% - (var(--circle-size) / 2) + 2px);
+	bottom: calc(-1 * var(--circle-size) / 2 - (var(--container-size) / 2 - var(--item-size)));
+	width: var(--circle-size);
+	height: var(--circle-size);
 	z-index: 100;
 }
 
-.timeline-item-content .date {
-	position: relative;
-	bottom: -120px;
+.timeline-item-content .circle > * {
+	width: 100%;
 }
 
 .timeline-item:nth-child(odd) .timeline-item-content .circle {
 	bottom: auto;
-	top: -50px;
-}
-
-.timeline-item:nth-child(odd) .timeline-item-content .date {
-	bottom: auto;
-	top: -175px;
+	top: calc(-1 * var(--circle-size) / 2 - (var(--container-size) / 2 - var(--item-size)));;
 }

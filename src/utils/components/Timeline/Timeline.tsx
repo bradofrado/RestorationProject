@@ -1,19 +1,23 @@
 import dayjs from 'dayjs';
+import ScrollDrag from '../ScrollDrag';
 
 export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
-	return <div className="timeline-container">
-		{items?.map((item, i) => <TimelineItem {...item} key={i}/>)}
-	</div>
+	return <ScrollDrag rootClass="timeline-container">
+		<>
+			{items?.map((item, i) => <TimelineItem {...item} key={i}/>)}
+		</>
+	</ScrollDrag>
 }
 
 export const TimelineItem: React.FC<ITimelineItem> = (props: ITimelineItem) => {
-	const date = dayjs(props.date).format('DD/MM/YYY');
+	const date = dayjs(props.date).format('MMM, D');
 	return <>
 		<div className="timeline-item">
         <div className="timeline-item-content">
             <p>{props.text}</p>
-            <span className="circle" />
-						<span className="date">{date}</span>
+						<div className="circle">
+							<span className="">{date}</span>
+						</div>
         </div>
     </div>	
 		</> 
