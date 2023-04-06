@@ -4,7 +4,7 @@
 
 :root {
 	--container-size: 500px;
-	--circle-size: calc(var(--container-size) / 8);
+	--circle-size: calc(var(--container-size) / 14);
 	--item-size: calc(var(--container-size) / 3);
 	--primary-color: #e17b77;
 	--secondary-color: #fff;
@@ -41,50 +41,54 @@
 	display: flex;
 	align-self: flex-start;
 	position: relative;
+	color: var(--secondary-color);
+	text-align: center;
 }
 
-.timeline-item:nth-child(odd) {
+.timeline-item-content {
+	width: var(--item-size);
+	height: var(--item-size);
+}
+
+.timeline-item.below {
 	align-self: flex-end;
 	padding-right: 0;
 }
 
-.timeline-item-content {
+.restoration-item {
 	border-radius: 20px;
 	background-color: var(--primary-color);
-	color: var(--secondary-color);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	padding: 15px;
-	position: relative;
-	width: var(--item-size);
-	height: var(--item-size);
-	text-align: center;
+	/* position: relative; */
+	height: 100%;
 }
 
-.timeline-item-content::after {
+.timeline-item-connector::after {
 	content: '';
 	background-color: var(--primary-color);
 	position: absolute;
 	right: 50%;
-	top: calc(50% + var(--circle-size));
+	top: 100%;
 	width: 4px;
 	height: 50%;
 }
 
-.timeline-item:nth-child(odd) .timeline-item-content::after {
+.timeline-item.below .timeline-item-connector::after {
 	top: auto;
-	bottom: calc(50% + var(--circle-size));
+	bottom: 100%;
 }
 
-.timeline-item-content p {
+.restoration-item p {
 	font-size: 16px;
 	line-height: 24px;
 	margin: 15px 0;
 	max-width: 250px;
 }
 
-.timeline-item-content .circle {
+.timeline-item .circle {
 	background-color: var(--primary-color);
 	display: flex;
 	align-items: center;
@@ -97,11 +101,22 @@
 	z-index: 100;
 }
 
-.timeline-item-content .circle > * {
+.timeline-item .circle.small {
+	right: calc(50% - (var(--circle-size) / 4) + 2px);
+	bottom: calc(-1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size)));
+	width: var(--circle-size) / 2;
+	height: var(--circle-size) / 2;
+}
+
+.timeline-item .circle > * {
 	width: 100%;
 }
 
-.timeline-item:nth-child(odd) .timeline-item-content .circle {
+.timeline-item.below .circle {
 	bottom: auto;
 	top: calc(-1 * var(--circle-size) / 2 - (var(--container-size) / 2 - var(--item-size)));;
+}
+
+.timeline-item.below .circle.small {
+	top: calc(-1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size)));;
 }

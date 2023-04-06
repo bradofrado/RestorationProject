@@ -23,7 +23,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
 				<main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#a5b100] to-[#707204]">
-					<div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+					<div className="container flex flex-col items-center justify-center gap-12 px-4">
 						<Component {...pageProps} />
 					</div>
 				</main>
