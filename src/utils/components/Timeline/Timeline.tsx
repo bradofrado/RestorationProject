@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import ScrollDrag from '../ScrollDrag';
 import { CSSProperties, ReactNode } from 'react';
+import { RestorationTimelineItem } from './TimelineService';
 
 interface TimelineProps {
 	items: RestorationTimelineItem[]
@@ -49,7 +50,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				return item;
 			}));
 		}
-		
+
 		return timeItems.slice().sort((a, b) => a.x - b.x);
 	})();
 
@@ -134,13 +135,4 @@ export interface TimelineItem {
 	below: boolean,
 	content?: ReactNode,
 	date?: string
-}
-
-export type TimelineCategory = "Book of Mormon";
-
-export interface RestorationTimelineItem {
-	date: Date,
-	category: TimelineCategory,
-	text: string,
-	links: string[],
 }

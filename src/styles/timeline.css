@@ -15,7 +15,7 @@
 
 .condensed-timeline-row-label {
 	padding-right: 1rem;
-	padding-top: 1rem;
+	padding-top: .75rem;
 	text-align: right;
 	font-style: italic;
 }
@@ -26,8 +26,8 @@
 	--tw-border-opacity: 1;
 	border-color: rgb(163 163 163 / var(--tw-border-opacity));
 	padding-left: 1rem;
-	padding-top: 1rem;
-	padding-bottom: 1rem;
+	padding-top: .75rem;
+	padding-bottom: .75rem;
 }
 
 .condensed-timeline-row:first-child .condensed-timeline-row-label,
@@ -48,7 +48,7 @@
 	content: " ";
 	position: absolute;
 	left: -5px;
-	top: 19px;
+	top: 15px;
 	margin-top: 0.5rem;
 	height: 0.5rem;
 	width: 0.5rem;

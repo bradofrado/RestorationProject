@@ -1,5 +1,5 @@
-import Format from "~/utils/dateutils";
-import { RestorationTimelineItem } from "./Timeline";
+import { DateFormat } from "~/utils/utils";
+import { type RestorationTimelineItem } from "./TimelineService";
 
 interface CondensedTimelineProps {
 	items: RestorationTimelineItem[];
@@ -27,7 +27,7 @@ const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
 	return <>
 		<div className="condensed-timeline-row">
 			<div className="condensed-timeline-row-label">
-				<p>{Format.fullText(item.date)}</p>
+				<p>{DateFormat.fullText(item.date)}</p>
 			</div>
 			<div className="condensed-timeline-row-content">
 				<p>
@@ -43,7 +43,7 @@ interface AnnotationProps {
 	link: string,
 	id: number
 }
-const Annotation : React.FC<AnnotationProps> = (props: AnnotationProps) => {
+export const Annotation : React.FC<AnnotationProps> = (props: AnnotationProps) => {
 	const {link, id} = props;
 	return <>
 		<span className="relative font-normal">

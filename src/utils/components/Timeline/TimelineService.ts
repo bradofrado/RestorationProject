@@ -1,5 +1,3 @@
-import type { RestorationTimelineItem, TimelineCategory } from "./Timeline";
-
 export class TimelineService {
 	getItems(category?: TimelineCategory): RestorationTimelineItem[] {
 		if (category) {
@@ -8,6 +6,17 @@ export class TimelineService {
 
 		return items;
 	}
+}
+
+export type TimelineCategory = "Book of Mormon" | "Book of Mormon Translation";
+export type TimelineSubcategory = "Seer stone in a hat" | "Two spectacles";
+
+export interface RestorationTimelineItem {
+	date: Date,
+	category: TimelineCategory,
+	subcategory?: TimelineSubcategory,
+	text: string,
+	links: string[],
 }
 
 const items: RestorationTimelineItem[] = [
@@ -72,4 +81,25 @@ const items: RestorationTimelineItem[] = [
 		text: "Majority of Book of Mormon is translated",
 		links: [],
 	},
+	{
+		date: new Date(1829, 7, 11),
+		category: "Book of Mormon Translation",
+		subcategory: "Seer stone in a hat",
+		text: "\"The greatest piece of superstition that has ever come within the sphere of our knowledge is one which has for sometime past, and still occupies the attention of a few superstitious and bigoted individuals of this quarter. It is generally known and spoken of as the \"Golden Bible.\"…It was said that the leaves of the Bible were plates, of gold about eight inches long, six wide, and one eighth of an inch thick, on which were engraved characters or hieroglyphics. By placing the spectacles in a hat, and looking into it, Smith could (he said so, at least,) interpret these characters….\" -Jonathan Hadley",
+		links: ["https://user.xmission.com/~research/central/palmyrafreeman.pdf"],
+	},
+	{
+		date: new Date(1879, 9, 1),
+		category: "Book of Mormon Translation",
+		subcategory: "Seer stone in a hat",
+		text: "\"In writing for your father I frequently wrote day after day, often sitting at the table close by him, he sitting with his face buried in his hat, with the stone in it, and dictating hour after hour with nothing between us…\" -Emma Smith",
+		links: ["https://archive.org/details/TheSaintsHerald_Volume_26_1879/page/n287/mode/2up?view=theater"]
+	},
+	{
+		date: new Date(1831, 1, 7),
+		category: "Book of Mormon Translation",
+		subcategory: "Seer stone in a hat",
+		text: "\"The engraving being unintelligible to learned & unlearned. there is said to have been in the box with the plates two transparent stones in the form of spectacles thro which the translator looked on the engraving & afterwards put his face into a hat & the interpretation then flowed into his mind. which he uttered to the amanuensis who wrote it down\" -Christian Goodwillie",
+		links: ["https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1065&context=mormonhistory"]
+	}
 ]
