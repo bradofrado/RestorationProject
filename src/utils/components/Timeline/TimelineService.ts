@@ -4,120 +4,120 @@ export class TimelineService {
 	getItems(): RestorationTimelineItem[] {
 		return [
 			{
-				date: new Date(1831, 0, 12),
+				date: new Date(1827, 10, 12),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is Janurary 12th, 1831",
+				text: "Joseph restrieves plates from the hill",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1831, 1, 9),
+				date: new Date(1827, 11, 9),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is Feburary 9th, 1831",
+				text: "Joseph and Emaa move to Harmony PA",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1831, 1, 29),
+				date: new Date(1828, 1, 28),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is Feburary 29th, 1831",
+				text: "Book of lehi is translated",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1831, 1, 1),
+				date: new Date(1828, 2, 1),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is Feburary 1th, 1831",
+				text: "Martin Harris takes translated characters to N.Y",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1832, 3, 15),
+				date: new Date(1828, 7, 15),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is April 15th, 1832",
+				text: "Martin Harris takes and loses the 116 pages of the Book of Lehi",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1833, 10, 19),
+				date: new Date(1828, 8, 19),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is November 19th, 1833",
+				text: "Joseph rebuked and loses the plates and gift to translate",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1833, 11, 9),
+				date: new Date(1828, 10, 1),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is December 9th, 1833",
+				text: "Plates and interpreters have been returned to Joseph",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1840, 6, 9),
+				date: new Date(1828, 10, 30),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is July 9th, 1840",
+				text: "Sporadic translation with various scribes",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1845, 7, 9),
+				date: new Date(1829, 5, 9),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is August 9th, 1845",
+				text: "Oliver Cowdery arrives and begins acting as the primary translation scribe",
 				link: {
 					url: "https://google.com",
 					text: "google"
 				},
 			},
 			{
-				date: new Date(1850, 10, 9),
+				date: new Date(1829, 7, 9),
 				category: {
 					color: "red",
 					tag: "tag"
 				},
-				text: "This is November 9th, 1850",
+				text: "Majority of Book of Mormon is translated",
 				link: {
 					url: "https://google.com",
 					text: "google"
