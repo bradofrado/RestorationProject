@@ -49,28 +49,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				return item;
 			}));
 		}
-
-		// let currDate: Date | null = null;
-		// let currDateCount = 0;
-		// for (let i = 0; i < sorted.length; i++) {
-		// 	const item = sorted[i] as RestorationTimelineItem;
-		// 	if (!currDate || (item.date.getFullYear() != currDate.getFullYear() || (item.date.getMonth() - currDate.getMonth()) > 1)) {
-		// 		currDate = item.date;
-		// 		currDateCount = 0;
-		// 	} else {
-		// 		currDateCount++;
-		// 	}
-
-		// 	timeItems.push({
-		// 		date: dayjs(item.date).format("D"),
-		// 		x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
-		// 		below: currDateCount % 2 === 0,
-		// 		content: <div className="restoration-item timeline-item-connector">
-		// 								<p>{item.text}</p>
-		// 						</div>
-		// 	});
-		// }
-
+		
 		return timeItems.slice().sort((a, b) => a.x - b.x);
 	})();
 
@@ -157,15 +136,11 @@ export interface TimelineItem {
 	date?: string
 }
 
+export type TimelineCategory = "Book of Mormon";
+
 export interface RestorationTimelineItem {
 	date: Date,
-	category: {
-		color: string,
-		tag: string
-	},
+	category: TimelineCategory,
 	text: string,
-	link: {
-		url: string,
-		text: string
-	},
+	links: string[],
 }
