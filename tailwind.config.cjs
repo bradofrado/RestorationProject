@@ -4,7 +4,8 @@ const config = {
   theme: {
     extend: {
 			colors: {
-				'bom': '#F1635C'
+				'bom': '#F1635C',
+				'primary': '#28d5e6',
 			},
 		},
   },

@@ -6,8 +6,9 @@
 :root {
 	--container-size: 500px;
 	--circle-size: calc(var(--container-size) / 14);
-	--item-size: calc(var(--container-size) / 3);
+	--item-size: calc(var(--container-size) / 4);
 	--primary-color: #28d5e6;
+	--bom-color: #F1635C;
 	--secondary-color: #fff;
 }
 
@@ -72,14 +73,15 @@
 
 .restoration-item {
 	border-radius: 20px;
-	color: #000;
+	background-color: var(--bom-color);
+	color: var(--secondary-color);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	padding: 15px;
-	/* position: relative; */
-	align-self: flex-start;
-	display: none;
+	/* align-self: flex-start; */
+	display: flex;
+	max-height: 200px;
 }
 
 .timeline-item:hover .restoration-item {
@@ -88,7 +90,7 @@
 }
 
 .below .restoration-item {
-	align-self: flex-end;
+	/* align-self: flex-end; */
 }
 
 .timeline-item-connector::before {
@@ -100,6 +102,7 @@
 	width: 4px;
 	height: 18%;
 }
+
 
 .timeline-item.below .timeline-item-connector::before {
 	top: auto;
@@ -119,11 +122,21 @@
 	justify-content: center;
 }
 
+.timeline-item.absolute .date-indicator {
+	border-color: var(--bom-color);
+	color: var(--bom-color);
+}
+
+.timeline-item.absolute .timeline-item-connector::before {
+	background-color: var(--bom-color);
+}
+
 .restoration-item p {
 	font-size: 16px;
 	line-height: 24px;
 	margin: 15px 0;
 	max-width: 250px;
+	overflow: hidden;
 }
 
 .timeline-item .circle {

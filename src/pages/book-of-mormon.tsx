@@ -4,6 +4,7 @@ import { type TimelineSubcategory, type RestorationTimelineItem } from "~/utils/
 import { TimelineService } from "~/utils/components/Timeline/TimelineService";
 import { DateFormat, groupBy } from "~/utils/utils";
 import { useService } from "~/utils/react-service-container";
+import Link from "next/link";
 
 const countLinks = (items: RestorationTimelineItem[]) => {
 	return items.reduce((prev, curr) => prev + curr.links.length, 0);
@@ -17,8 +18,9 @@ const Book_of_mormon : NextPage= () => {
 	//TODO: make this so we are not calculating the anotation count in two places (CondensedTimeline also)
 	let annotationCount = countLinks(bomItems);
 	return <>
-		<div className="max-w-4xl px-4 mx-auto sm:px-24">
-			<h1 className="mx-auto text-3xl font-bold my-10 text-bom">Book of Mormon Translation</h1>
+		<div className="max-w-4xl px-4 mx-auto sm:px-24 my-10">
+			<Link href="/timeline" className="text-xs italic font-bold text-gray-600 no-underline uppercase hover:text-gray-800">&lt; Back to timeline</Link>
+			<h1 className="mx-auto text-3xl font-bold my-5 text-bom">Book of Mormon Translation</h1>
 			<div>
 				<p>
 					The translation of the Book of Mormon can be considered the most pivotal question regarding the truthfulness of the restoration. 

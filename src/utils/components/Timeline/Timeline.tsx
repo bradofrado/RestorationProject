@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import ScrollDrag from '../ScrollDrag';
-import { CSSProperties, ReactNode } from 'react';
-import { RestorationTimelineItem } from './TimelineService';
+import { type CSSProperties, type ReactNode } from 'react';
+import { type RestorationTimelineItem } from './TimelineService';
+import Link from 'next/link';
 
 interface TimelineProps {
 	items: RestorationTimelineItem[]
@@ -24,18 +25,8 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 	const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 	const monthItems = (() => {
 		let timeItems: TimelineItem[] = [];
-		const offset = 166;
 		const firstYear = firstDate.getFullYear();
-		const getYearOffset = (year: number) => {
-			return year * months.length * offset;
-		}
-		const getMonthOffset = (month: number) => {
-			return month * offset;
-		}
-		const getDayOffset = (day: number) => {
-			return day / 31.0 * offset;
-		}
-
+		
 		for (let i = 0; i < yearDiff; i++) {
 			timeItems = timeItems.concat(months.map((m, inx) => {
 				//const content = m === 0 ? <div className="date-indicator timeline-item-connector">{firstYear + i}</div> : null;
@@ -55,7 +46,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 	})();
 
 	const timeItems = (() => {
-		const offset = 166;
+		const offset = 125;
 		const firstYear = firstDate.getFullYear();
 		const getYearOffset = (year: number) => {
 			return year * months.length * offset;
@@ -82,9 +73,9 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				date: dayjs(item.date).format("MMM, D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <div className="restoration-item timeline-item-connector">
+				content: <Link className="restoration-item timeline-item-connector" href="/book-of-mormon" title={item.text}>
 										<p>{item.text}</p>
-								</div>,
+								</Link>,
 			});
 		}
 
@@ -92,15 +83,17 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 	})();
 
 
-	return <div className="w-full">
-		{/* <h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-100">{yearDiff}</h1> */}
-		<ScrollDrag rootClass="timeline-container">
-			<>
-				{monthItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
-				{timeItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
-			</>
-		</ScrollDrag>
-	</div>
+	return <>
+		<div className="w-full">
+			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-600">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
+			<ScrollDrag rootClass="timeline-container">
+				<>
+					{monthItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
+					{timeItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
+				</>
+			</ScrollDrag>
+		</div>
+	</>
 }
 
 

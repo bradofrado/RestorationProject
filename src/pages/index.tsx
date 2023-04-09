@@ -8,22 +8,19 @@ const Index: NextPage = () => {
   const homeService = useService(HomeService);
 	const name = homeService.getName();
   return (
-    <>
-      <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-5xl font-extrabold tracking-tight text-bom sm:text-[5rem] my-10">
 				{name}
 			</h1>
 			<div className="flex">
 				<Link
-					className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+					className="p-3 font-bold text-white no-underline rounded bg-bom white hover:bg-primary"
 					href="/timeline"
 				>
-					<h3 className="text-2xl font-bold">Restoration Timeline →</h3>
-					<div className="text-lg">
-						Learn about the Restoration of the Church of Jesus Christ of Latter-day Saints from primary accounts
-					</div>
+					Go to timeline
 				</Link>
 			</div>
-    </>
+    </div>
   );
 };
 
