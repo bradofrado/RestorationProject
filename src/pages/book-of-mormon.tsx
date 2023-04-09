@@ -43,6 +43,18 @@ const Book_of_mormon : NextPage= () => {
 					return content;
 				})}
 			</div>
+			<div className="py-5">
+				<h2 className="text-xl font-bold">Other sources</h2>
+				<p className="my-5">
+					Here are a few other insights to scholars and other professionals that give insights to the Book of Mormon and the methods of translation.
+				</p>
+				<ul className="list-disc px-10">
+					<li>Book of Mormon Translation, Gospel Topics Essay from churchofjesuschrist.org <Annotation link="https://www.churchofjesuschrist.org/study/manual/gospel-topics-essays/book-of-mormon-translation?lang=eng" id={annotationCount + 1}/></li>
+					<li>The Translation Miracle of the Book of Mormon by Elder Robert K. Dellenbach <Annotation link="https://www.churchofjesuschrist.org/study/general-conference/1995/04/the-translation-miracle-of-the-book-of-mormon?lang=eng" id={annotationCount + 2}/></li>
+					<li>The Credibility of the Book of Mormon Translators by Richard L. Anderson <Annotation link="https://rsc.byu.edu/book-mormon-authorship/credibility-book-mormon-translators" id={annotationCount + 3}/></li>
+					<li>The Book of Mormon: Historical Setting for Its Translation and Publication by Larry C. Porter <Annotation link="https://rsc.byu.edu/joseph-smith-prophet-man/book-mormon-historical-setting-its-translation-publication" id={annotationCount + 4}/></li>
+				</ul>
+			</div>
 		</div>
 	</>
 }

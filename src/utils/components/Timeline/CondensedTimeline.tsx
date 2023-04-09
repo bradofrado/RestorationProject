@@ -24,10 +24,11 @@ interface TimelineRowProps {
 }
 const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
 	const {item, linkNumber} = props;
+	const date = item.endDate ? `${DateFormat.fullText(item.date)} to ${DateFormat.fullText(item.endDate)}` : DateFormat.fullText(item.date);
 	return <>
 		<div className="condensed-timeline-row">
 			<div className="condensed-timeline-row-label">
-				<p>{DateFormat.fullText(item.date)}</p>
+				<p>{date}</p>
 			</div>
 			<div className="condensed-timeline-row-content">
 				<p>
