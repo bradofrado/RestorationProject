@@ -28,7 +28,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 		const firstYear = firstDate.getFullYear();
 		
 		for (let i = 0; i < yearDiff; i++) {
-			timeItems = timeItems.concat(months.map((m, inx) => {
+			timeItems = timeItems.concat(months.map(m => {
 				//const content = m === 0 ? <div className="date-indicator timeline-item-connector">{firstYear + i}</div> : null;
 				const item: TimelineItem = {
 					graphDate: dayjs(new Date(firstYear + i, m, 1)).format("MMM"), 
