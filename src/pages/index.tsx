@@ -4,7 +4,7 @@ import Link from "next/link";
 const Index: NextPage = () => {
  return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-5xl font-extrabold tracking-tight text-bom sm:text-[5rem] my-10">
+      <h1 className="text-5xl font-extrabold tracking-tight text-gray-800 sm:text-[5rem] my-10">
 				Witnesses of the Restoration
 			</h1>
 			<div className="flex">

@@ -28,10 +28,10 @@ const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
 	return <>
 		<div className="condensed-timeline-row">
 			<div className="condensed-timeline-row-label">
-				<p>{date}</p>
+				<p className="md:text-xl">{date}</p>
 			</div>
 			<div className="condensed-timeline-row-content">
-				<p>
+				<p className="md:text-xl">
 					<span>{item.text}</span>
 					<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNumber + i + 1}/>)}</span>
 				</p>
