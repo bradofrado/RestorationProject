@@ -35,7 +35,9 @@ const Book_of_mormon : NextPage= () => {
 				<h2 className="text-xl font-bold">Translation Methods</h2>
 				<p className="my-5">
 				There are many accounts of the method of translation for the Book of Mormon. Some agree, and some disagree. When considering all of the accounts, scholars
-				consider it best to view them with a &#34;this and that&#34; approach as opposed to a &#34;either this or that&#34; approach.
+				consider it best to view them with a &#34;this and that&#34; approach as opposed to a &#34;either this or that&#34; approach. The reason for this is that the contempory accounts
+				of the translation process suggest that Joseph used a variety of methods of translation instead of just one. Not one of these accounts was there for the full translation process--
+				only Joseph Smith himself who did not give any details to the methods.
 				</p>
 				{Object.entries(groupBy(bomTranslationItems, "subcategory")).map(([title, items], i) => {
 					const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;

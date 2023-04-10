@@ -24,38 +24,38 @@ const items: RestorationTimelineItem[] = [
 	{
 		date: new Date(1827, 8, 22),
 		category: "Book of Mormon",
-		text: "Joseph obtains the plates with Emma from the hill",
+		text: "Joseph obtains the plates with Emma from the hill.",
 		links: ["https://www.josephsmithpapers.org/paper-summary/lucy-mack-smith-history-1845/112"],
 	},
 	{
 		date: new Date(1827, 10, 9),
 		category: "Book of Mormon",
-		text: "Joseph and Emma move to Harmony, PA",
+		text: "Joseph and Emma move to Harmony, PA.",
 		links: ["https://www.josephsmithpapers.org/paper-summary/history-1838-1856-volume-a-1-23-december-1805-30-august-1834/10"],
 	},
 	{
 		date: new Date(1828, 0, 1),
 		category: "Book of Mormon",
-		text: "Martin Harris comes to Palmyra and sayas that God told him in a vision to take some characters to New York (Charles Anthony)",
+		text: "Martin Harris comes to Palmyra and says that God told him in a vision to take some characters to New York (Charles Anthony).",
 		links: ["https://www.josephsmithpapers.org/paper-summary/history-circa-summer-1832/5"]
 	},
 	{
 		date: new Date(1828, 3, 12),
 		endDate: new Date(1828, 5, 14),
 		category: "Book of Mormon",
-		text: "When Martin Harris returns, he and Joseph earnestly translate 116 pages of the Book of Mormon",
+		text: "When Martin Harris returns, he and Joseph earnestly translate 116 pages of the Book of Mormon.",
 		links: ["https://www.josephsmithpapers.org/paper-summary/history-1838-1856-volume-a-1-23-december-1805-30-august-1834/10"],
 	},
 	{
 		date: new Date(1828, 5, 1),
 		category: "Book of Mormon",
-		text: "Martin Harris takes and loses the 116 pages of the Book of Lehi",
+		text: "Martin Harris takes and loses the 116 pages of the Book of Lehi.",
 		links: ["https://www.josephsmithpapers.org/paper-summary/revelation-book-1/3"],
 	},
 	{
 		date: new Date(1828, 6, 1),
 		category: "Book of Mormon",
-		text: "Joseph rebuked and loses the plates and gift to translate",
+		text: "Joseph rebuked and loses the plates and gift to translate.",
 		links: ["https://catalog.churchofjesuschrist.org/assets?id=cbff7497-0764-4f7d-9aec-702b5f9b8f27&crate=0&index=0"],
 	},
 	{
@@ -68,7 +68,7 @@ const items: RestorationTimelineItem[] = [
 		date: new Date(1829, 3, 7),
 		endDate: new Date(1829, 5, 1),
 		category: "Book of Mormon",
-		text: "Oliver Cowdery arrives and begins acting as the primary translation scribe. The majority of the Book of Mormon is translated",
+		text: "Oliver Cowdery arrives and begins acting as the primary translation scribe. The majority of the Book of Mormon is translated.",
 		links: ["https://www.churchofjesuschrist.org/study/scriptures/pgp/js-h/1?lang=eng"],
 	},
 	{
