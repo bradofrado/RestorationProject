@@ -14,7 +14,7 @@ const Book_of_mormon : NextPage= () => {
 	const timelineService = useService(TimelineService);
 	const bomItems = timelineService.getItems("Book of Mormon");
 	const bomTranslationItems = timelineService.getItems("Book of Mormon Translation");
-
+ 
 	//TODO: make this so we are not calculating the anotation count in two places (CondensedTimeline also)
 	let annotationCount = countLinks(bomItems);
 	return <>

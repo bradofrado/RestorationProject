@@ -1,11 +1,19 @@
+import { type HexColor } from "~/utils/types";
+
 export class TimelineService {
 	getItems(category?: TimelineCategory): RestorationTimelineItem[] {
+		let _items = items;
 		if (category) {
-			return items.filter(x => x.category === category);
+			_items = items.filter(x => x.category === category);
 		}
 
-		return items;
+		return _items.map((item) => item.color === undefined ? {...item, color: colors[item.category]}: item );
 	}
+}
+
+const colors: {[key in TimelineCategory]: HexColor} = {
+	'Book of Mormon': '#F1635C',
+	'Book of Mormon Translation': '#f1975c'
 }
 
 export type TimelineCategory = "Book of Mormon" | "Book of Mormon Translation";
@@ -18,6 +26,7 @@ export interface RestorationTimelineItem {
 	subcategory?: TimelineSubcategory,
 	text: string,
 	links: string[],
+	color?: HexColor
 }
 
 const items: RestorationTimelineItem[] = [

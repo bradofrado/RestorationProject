@@ -1,8 +1,10 @@
 import dayjs from 'dayjs';
 import ScrollDrag from '../ScrollDrag';
-import { type CSSProperties, type ReactNode } from 'react';
+import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react';
 import { type RestorationTimelineItem } from './TimelineService';
 import Link from 'next/link';
+import { PrimaryColor, type HexColor } from '~/utils/types';
+import React from 'react';
 
 interface TimelineProps {
 	items: RestorationTimelineItem[]
@@ -35,7 +37,8 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 					//x: getMonthOffset(inx) + getYearOffset(i),
 					x: 0,
 					below: false,
-					date: m === 0 ? (firstYear + i).toString() : undefined
+					date: m === 0 ? (firstYear + i).toString() : undefined,
+					color: PrimaryColor
 				};
 
 				return item;
@@ -69,6 +72,10 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				currDateCount++;
 			}
 
+			if (item.color == undefined) {
+				throw new Error(`item ${item.category} does not have color`);
+			}
+
 			timeItems.push({
 				date: dayjs(item.date).format("MMM, D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
@@ -76,6 +83,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				content: <Link className="restoration-item timeline-item-connector" href="/book-of-mormon" title={item.text}>
 										<p className="text-sm md:text-base">{item.text}</p>
 								</Link>,
+				color: item.color
 			});
 		}
 
@@ -98,8 +106,9 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 
 
 const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
-	const {date, x, content, below, graphDate} = props;
-	//const date = dayjs(item.date).format('MMM');
+	const ref = useRef<HTMLDivElement>(null);
+	const {date, x, content, below, graphDate, color} = props;
+	
 	let belowClass = below ? ' below' : '';
 	const style: CSSProperties | undefined = x > 0 ? {left: `${x}px`} : undefined;
 	if (x > 0) {
@@ -107,8 +116,13 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
 	} else {
 		belowClass += ' relative';
 	}
+
+	useEffect(() => {
+		ref.current?.style.setProperty('--bom-color', color);
+	}, [color]);
+
 	return <>
-		<div className={"timeline-item" + belowClass} style={style}>
+		<div className={"timeline-item" + belowClass} style={style} ref={ref}>
 				<div className="timeline-item-content">
 					{date && <div className="date-indicator timeline-item-connector">{date}</div>}
 				</div>
@@ -126,6 +140,7 @@ export interface TimelineItem {
 	graphDate?: string,
 	x: number,
 	below: boolean,
-	content?: ReactNode,
-	date?: string
+	content?: ReactElement,
+	date?: string,
+	color: HexColor
 }
