@@ -80,7 +80,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				date: dayjs(item.date).format("MMM, D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <Link className="restoration-item timeline-item-connector" href="/book-of-mormon" title={item.text}>
+				content: <Link className="restoration-item timeline-item-connector" href={`/${item.page}`} title={item.text}>
 										<p className="text-sm md:text-base">{item.text}</p>
 								</Link>,
 				color: item.color
