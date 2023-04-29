@@ -3,7 +3,7 @@ import ScrollDrag from '../ScrollDrag';
 import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react';
 import { type RestorationTimelineItem } from './TimelineService';
 import Link from 'next/link';
-import { PrimaryColor, type HexColor } from '~/utils/types';
+import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
 
 interface TimelineProps {

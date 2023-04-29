@@ -1,4 +1,4 @@
-import { type HexColor } from "~/utils/types";
+import { type HexColor } from "~/utils/types/colors";
 import { type TimelinePages } from "../event-page/EventPageService";
 
 export class TimelineService {
