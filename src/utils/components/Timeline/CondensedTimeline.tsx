@@ -1,14 +1,16 @@
 import { DateFormat } from "~/utils/utils";
 import { type RestorationTimelineItem } from "./TimelineService";
 
-interface CondensedTimelineProps {
-	items: RestorationTimelineItem[];
+export interface CondensedTimelineProps {
+	items: RestorationTimelineItem[],
+	className?: string
 }
+
 const CondensedTimeline : React.FC<CondensedTimelineProps> = (props: CondensedTimelineProps) => {
-	const {items} = props;
+	const {items, className} = props;
 	let linkCounts = 0;
 	return <>
-		<div className="condensed-timeline-container pt-5">
+		<div className={`condensed-timeline-container pt-5 ${className || ''}`}>
 			{items.map((item, i) => {
 				const content = <TimelineRow item={item} key={i} linkNumber={linkCounts}/>
 				linkCounts += item.links.length;
@@ -33,7 +35,7 @@ const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
 			<div className="condensed-timeline-row-content">
 				<p className="md:text-xl">
 					<span>{item.text}</span>
-					<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNumber + i + 1}/>)}</span>
+					<span contentEditable="false">{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNumber + i + 1}/>)}</span>
 				</p>
 			</div>
 		</div>
