@@ -39,12 +39,13 @@ const BookOfMormonTranslationMethods: EventPageComponent = ({linkCount}) => {
 
 interface TranslationMethodsContainerProps {
 	items: RestorationTimelineItem[],
-	annotationCount: number
+	annotationCount: number,
+	className?: string
 }
-export const TranslationMethodsContainer = ({items, annotationCount}: TranslationMethodsContainerProps) => {
+export const TranslationMethodsContainer = ({items, annotationCount, className}: TranslationMethodsContainerProps) => {
 	return <>
 		{Object.entries(groupBy(items, "subcategory")).map(([title, items], i) => {
-				const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
+				const content = <TranslationMethods className={className} items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
 				annotationCount += countLinks(items);
 				return content;
 			})}
@@ -54,14 +55,15 @@ export const TranslationMethodsContainer = ({items, annotationCount}: Translatio
 interface TranslationMethodsProps {
 	items: RestorationTimelineItem[],
 	title: TimelineSubcategory,
-	linkNumber: number
+	linkNumber: number,
+	className?: string
 }
 
 const TranslationMethods: React.FC<TranslationMethodsProps> = (props: TranslationMethodsProps) => {
-	const {items, title, linkNumber} = props;
+	const {items, title, linkNumber, className} = props;
 	let linkNum = linkNumber;
 	return <>
-		<ul className="">
+		<ul className={className || ''}>
 			<li>
 				<h3 className="text-xl">{title}</h3>
 				<ul className="list-disc px-10 py-2">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Editable from './Editable'
+import Editable, { ButtonIcon } from './Editable'
 import { type PolymorphicComponentProps } from '../types/polymorphic'
 import CondensedTimeline from './Timeline/CondensedTimeline'
 import { useService } from '../react-service-container'
@@ -63,16 +63,22 @@ const EditableList: React.ElementType<onDeleteComponent> = ({onDelete}) => {
 		},
 	]
 
+	const editIcons: ButtonIcon[] = [
+		{icon: DeleteIcon, handler: onDelete},
+		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1}/>,
+	];
+
+	if (type != 'custom') {
+		editIcons.push(<DropdownList className="ml-1" items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />)
+	}
+	
 	return <>
-		{!listItems[0]?.value && <Editable as="ul" className="list-disc px-10" editable={type == 'custom'}
-			icons={[{icon: DeleteIcon, handler: onDelete},
-							<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1}/>,
-							<DropdownList className="ml-1" items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />
-							]}>
+		{(!listItems[0]?.value || type == 'custom') && <Editable as="ul" className="list-disc px-10" editable={type == 'custom'}
+			icons={editIcons}>
 			{type == 'custom' && <li></li>}
 			{items != null && items.map((item, i) => <li key={i}>{item.text}</li>) }
 		</Editable>}
-		{listItems[0]?.value && items != null && <TranslationMethodsContainer items={items} annotationCount={0}/>}
+		{listItems[0]?.value && items != null && <Editable as={TranslationMethodsContainer} icons={editIcons} items={items} annotationCount={0}/>}
 	</>
 }
 

@@ -13,7 +13,7 @@ type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
   EditableProps
 >
 
-type ButtonIcon = {
+export type ButtonIcon = {
 	icon: IconComponent,
 	handler: () => void,
 } | JSX.Element
