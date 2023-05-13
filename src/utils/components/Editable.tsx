@@ -1,11 +1,11 @@
-import React from "react";
+import React, { type PropsWithChildren } from "react";
 import { type PolymorphicComponentProps } from "../types/polymorphic";
-import { DeleteIcon, IconComponent } from "./icons/icons";
+import { type IconComponent } from "./icons/icons";
 
-interface EditableProps {
-	children: string,
+interface EditableProps extends PropsWithChildren {
 	className?: string,
-	icons?: ButtonIcon[]
+	icons?: ButtonIcon[],
+	editable?: 'true' | 'false' | boolean
 }
 
 type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
@@ -18,14 +18,14 @@ type ButtonIcon = {
 	handler: () => void,
 } | JSX.Element
 
-function Editable<T extends React.ElementType>({children, as, className, icons, ...rest}: TextProps<T>) {
+function Editable<T extends React.ElementType>({children, as, className, icons, editable = 'true', ...rest}: TextProps<T>) {
 	const Component = as || 'span';
 
-	const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer' + (className || '');
+	const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer ' + (className || '');
 	
 	return <div className="relative"> 
 		
-		<Component {...rest} contentEditable="true" className={classAll}>{children}</Component>
+		<Component {...rest} contentEditable={editable} className={classAll}>{children}</Component>
 		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 ">
 			{icons?.map((icon, i) => {
 				if ("icon" in icon) {

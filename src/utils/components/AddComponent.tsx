@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Editable from './Editable'
 import { type PolymorphicComponentProps } from '../types/polymorphic'
 import CondensedTimeline from './Timeline/CondensedTimeline'
 import { useService } from '../react-service-container'
-import { type TimelineCategory, TimelineService } from './Timeline/TimelineService'
-import { DeleteIcon, EditIcon } from './icons/icons'
-import Dropdown, { type DropdownItem } from './Dropdown'
+import { type TimelineCategory, TimelineService, RestorationTimelineItem } from './Timeline/TimelineService'
+import { AdjustIcon, ArchiveIcon, CheckIcon, DeleteIcon, EditIcon, IconComponent } from './icons/icons'
+import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, ListItem } from './Dropdown'
 import Header from './base/baseComponents'
+import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
 
 export interface onDeleteComponent {
 	onDelete: () => void
@@ -34,13 +35,45 @@ const EditableCondensedTimeline: React.ElementType<onDeleteComponent> = ({onDele
 	return <>
 	 				<Editable as={CondensedTimeline} items={items} 
 						icons={[{icon: DeleteIcon, handler: onDelete}, 
-											<Dropdown className="rounded-md bg-slate-50 hover:bg-slate-300 p-1 ml-1" 
-													key={1} items={dropdownItems}>
-												<EditIcon className="h-5 w-5"/>
-											</Dropdown>]}>
+											<DropdownIcon className="ml-1" 
+													key={1} items={dropdownItems} icon={EditIcon}/>]}
+						>
 						Text
 					</Editable>
 				</>
+}
+
+const EditableList: React.ElementType<onDeleteComponent> = ({onDelete}) => {
+	const [type, setType] = useState<TimelineCategory | 'custom'>('custom');
+	const timelineService = useService(TimelineService);
+	const [listItems, setListItems] = useState<ListItem[]>([{label: 'Group', value: false}])
+	const items = type != 'custom' ? timelineService.getItems(type) : null;
+	const dropdownItems: DropdownItem[] = [
+		{
+			label: 'Custom',
+			handler: () => setType('custom')
+		},
+		{
+			label: 'Book of Mormon',
+			handler: () => setType('Book of Mormon')
+		},
+		{
+			label: 'Book of Mormon Translation',
+			handler: () => setType('Book of Mormon Translation')
+		},
+	]
+
+	return <>
+		{!listItems[0]?.value && <Editable as="ul" className="list-disc px-10" editable={type == 'custom'}
+			icons={[{icon: DeleteIcon, handler: onDelete},
+							<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1}/>,
+							<DropdownList className="ml-1" items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />
+							]}>
+			{type == 'custom' && <li></li>}
+			{items != null && items.map((item, i) => <li key={i}>{item.text}</li>) }
+		</Editable>}
+		{listItems[0]?.value && items != null && <TranslationMethodsContainer items={items} annotationCount={0}/>}
+	</>
 }
 
 const components: Component[] = [
@@ -60,6 +93,10 @@ const components: Component[] = [
 		label: 'Timeline',
 		component: EditableCondensedTimeline
 	},
+	{
+		label: 'List',
+		component: EditableList
+	}
 ]
 
 

@@ -8,8 +8,10 @@ import { Annotation } from "../Timeline/CondensedTimeline";
 const BookOfMormonTranslationMethods: EventPageComponent = ({linkCount}) => {
 	const timelineService = useService(TimelineService);
 	const bomTranslationItems = timelineService.getItems("Book of Mormon Translation");
-	let annotationCount = linkCount;
-	return <>
+	const annotationCount = bomTranslationItems.reduce((prev, curr) => {
+		return prev + curr.links.length;
+	}, linkCount)
+  return <>
 		<div className="py-5">
 			<h2 className="text-xl font-bold">Translation Methods</h2>
 			<p className="my-5">
@@ -18,11 +20,7 @@ const BookOfMormonTranslationMethods: EventPageComponent = ({linkCount}) => {
 			of the translation process suggest that Joseph used a variety of methods of translation instead of just one. Not one of these accounts was there for the full translation process--
 			only Joseph Smith himself who did not give any details to the methods.
 			</p>
-			{Object.entries(groupBy(bomTranslationItems, "subcategory")).map(([title, items], i) => {
-				const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
-				annotationCount += countLinks(items);
-				return content;
-			})}
+			<TranslationMethodsContainer items={bomTranslationItems} annotationCount={linkCount}/>
 		</div>
 		<div className="py-5">
 			<h2 className="text-xl font-bold">Other sources</h2>
@@ -39,11 +37,26 @@ const BookOfMormonTranslationMethods: EventPageComponent = ({linkCount}) => {
 	</>
 }
 
+interface TranslationMethodsContainerProps {
+	items: RestorationTimelineItem[],
+	annotationCount: number
+}
+export const TranslationMethodsContainer = ({items, annotationCount}: TranslationMethodsContainerProps) => {
+	return <>
+		{Object.entries(groupBy(items, "subcategory")).map(([title, items], i) => {
+				const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
+				annotationCount += countLinks(items);
+				return content;
+			})}
+	</>
+}
+
 interface TranslationMethodsProps {
 	items: RestorationTimelineItem[],
 	title: TimelineSubcategory,
 	linkNumber: number
 }
+
 const TranslationMethods: React.FC<TranslationMethodsProps> = (props: TranslationMethodsProps) => {
 	const {items, title, linkNumber} = props;
 	let linkNum = linkNumber;
@@ -53,13 +66,7 @@ const TranslationMethods: React.FC<TranslationMethodsProps> = (props: Translatio
 				<h3 className="text-xl">{title}</h3>
 				<ul className="list-disc px-10 py-2">
 					{items.map((item, i) => {
-					const [quote, name] = item.text.split('-');
-					const content = <li key={i}>
-							<span className="italic" >{quote}</span>
-							<span className="font-medium">-{name} </span>
-							<span className="">{DateFormat.fullText(item.date)}</span>
-							<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNum + i + 1}/>)}</span>
-						</li>
+					const content = <RestorationQuote item={item} linkNum={linkNum}/>
 					linkNum += item.links.length;
 					return content;
 					})}
@@ -67,6 +74,18 @@ const TranslationMethods: React.FC<TranslationMethodsProps> = (props: Translatio
 			</li>
 		</ul>
 	</>
+}
+
+export const RestorationQuote = ({item, linkNum}: {item: RestorationTimelineItem, linkNum: number}) => {
+	const [quote, name] = item.text.split('-');
+	return (
+		<li>
+			<span className="italic" >{quote}</span>
+			<span className="font-medium">-{name} </span>
+			<span className="">{DateFormat.fullText(item.date)}</span>
+			<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNum + i + 1}/>)}</span>
+		</li>
+	)
 }
 
 

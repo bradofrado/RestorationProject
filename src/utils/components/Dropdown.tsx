@@ -1,9 +1,10 @@
 import { Menu, Transition } from "@headlessui/react"
 import { Fragment, type PropsWithChildren } from "react"
+import { CheckIcon, IconComponent } from "./icons/icons"
 
 export interface DropdownItem {
 	handler: React.MouseEventHandler<HTMLButtonElement>,
-	label: string
+	label: React.ReactNode
 }
 interface DropdownProps extends PropsWithChildren {
 	items: DropdownItem[],
@@ -50,4 +51,41 @@ const Dropdown = ({children, items, className = "inline-flex w-full justify-cent
 	</>
 }
 
-export default Dropdown
+export interface ListItem {
+	label: React.ReactNode,
+	value: boolean
+}
+
+interface ListItemProps extends Omit<DropdownItemProps, 'items'>{
+	items: ListItem[],
+	setItems: (items: ListItem[]) => void
+}
+
+export const DropdownList = ({items, setItems, ...rest}: ListItemProps) => {
+	const copy = items.slice();
+	const onSelect = (item: ListItem) => {
+		item.value = !item.value;
+		setItems(copy);
+	}
+	const dropdownItems = copy.map(item => ({label: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, handler: () => onSelect(item)}))
+	return <>
+		<DropdownIcon items={dropdownItems} {...rest}/>
+	</>
+}
+
+interface DropdownItemProps {
+	items: DropdownItem[],
+	icon: IconComponent,
+	className: string
+}
+export const DropdownIcon = ({items, icon, className}: DropdownItemProps) => {
+	const Icon = icon;
+	return <>
+		<Dropdown className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className}`} 
+				items={items}>
+			<Icon className="h-5 w-5"/>
+		</Dropdown>
+	</>
+}
+
+export default Dropdown;

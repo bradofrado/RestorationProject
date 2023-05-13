@@ -24,14 +24,9 @@ const Edit_page: NextPage = () => {
 			<Editable as="h1" className="mx-auto text-3xl font-bold my-5 text-bom">
 				Book of Mormon Translation
 			</Editable>
-			<div>
-				<Editable as="p">
-					This is a description
-				</Editable>
-			</div>
-			<div className="py-10">
-				<h2 className="text-xl font-bold">Timeline of Events</h2>
-			</div>
+			<Editable as="p">
+				This is a description
+			</Editable>
 			{components.map((Component: React.ElementType<onDeleteComponent>, i: number) => <Component key={i} onDelete={() => deleteComponent(i)}/>)}
 			<AddComponent onAdd={onAdd}/>
 		</div>
