@@ -1,15 +1,22 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useState } from "react";
-import AddComponent, { type onDeleteComponent } from "~/utils/components/AddComponent";
+import AddComponent, { type ComponentType, CustomComponent, type EditableData } from "~/utils/components/AddComponent";
 import Editable from "~/utils/components/Editable";
+import { ComponentSettings } from "~/utils/components/event-page/EventPageService";
 
 const Edit_page: NextPage = () => {
-	const [components, setComponents] = useState<React.ElementType<onDeleteComponent>[]>([]);
+	const [components, setComponents] = useState<ComponentSettings[]>([]);
 
-	const onAdd = (component: React.ElementType<onDeleteComponent>) => {
+	const onAdd = (component: ComponentType) => {
 		const copy = components.slice();
-		copy.push(component);
+		copy.push({component: component, data: null});
+		setComponents(copy);
+	}
+
+	const onEdit = (data: EditableData, i: number) => {
+		const copy = components.slice();
+		(copy[i] || {data: null}).data = data;
 		setComponents(copy);
 	}
 
@@ -27,7 +34,7 @@ const Edit_page: NextPage = () => {
 			<Editable as="p">
 				This is a description
 			</Editable>
-			{components.map((Component: React.ElementType<onDeleteComponent>, i: number) => <Component key={i} onDelete={() => deleteComponent(i)}/>)}
+			{components.map((editable: ComponentSettings, i: number) => <CustomComponent editable={true} type={editable.component} key={i} onDelete={() => deleteComponent(i)} onEdit={(data: EditableData) => onEdit(data, i)} data={editable.data}/>)}
 			<AddComponent onAdd={onAdd}/>
 		</div>
 	</>

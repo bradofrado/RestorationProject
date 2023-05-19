@@ -43,27 +43,26 @@ interface TranslationMethodsContainerProps {
 	className?: string
 }
 export const TranslationMethodsContainer = ({items, annotationCount, className}: TranslationMethodsContainerProps) => {
-	return <>
+	return <div className={className || ''}>
 		{Object.entries(groupBy(items, "subcategory")).map(([title, items], i) => {
-				const content = <TranslationMethods className={className} items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
+				const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
 				annotationCount += countLinks(items);
 				return content;
 			})}
-	</>
+	</div>
 }
 
 interface TranslationMethodsProps {
 	items: RestorationTimelineItem[],
 	title: TimelineSubcategory,
-	linkNumber: number,
-	className?: string
+	linkNumber: number
 }
 
 const TranslationMethods: React.FC<TranslationMethodsProps> = (props: TranslationMethodsProps) => {
-	const {items, title, linkNumber, className} = props;
+	const {items, title, linkNumber} = props;
 	let linkNum = linkNumber;
 	return <>
-		<ul className={className || ''}>
+		<ul>
 			<li>
 				<h3 className="text-xl">{title}</h3>
 				<ul className="list-disc px-10 py-2">

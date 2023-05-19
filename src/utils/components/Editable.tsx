@@ -5,7 +5,7 @@ import { type IconComponent } from "./icons/icons";
 interface EditableProps extends PropsWithChildren {
 	className?: string,
 	icons?: ButtonIcon[],
-	editable?: 'true' | 'false' | boolean
+	editable?: 'true' | 'false' | boolean,
 }
 
 type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
@@ -22,7 +22,6 @@ function Editable<T extends React.ElementType>({children, as, className, icons, 
 	const Component = as || 'span';
 
 	const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer ' + (className || '');
-	
 	return <div className="relative"> 
 		
 		<Component {...rest} contentEditable={editable} className={classAll}>{children}</Component>
