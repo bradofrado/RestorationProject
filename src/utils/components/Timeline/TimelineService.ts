@@ -1,5 +1,5 @@
 import { type HexColor } from "~/utils/types/colors";
-import { type TimelinePages } from "../event-page/EventPageService";
+import { TimelinePageType } from "~/utils/types/page";
 
 export class TimelineService {
 	getItems(category?: TimelineCategory): RestorationTimelineItem[] {
@@ -27,7 +27,7 @@ export interface RestorationTimelineItem {
 	subcategory?: TimelineSubcategory,
 	text: string,
 	links: string[],
-	page: TimelinePages,
+	page: TimelinePageType,
 	color?: HexColor
 }
 

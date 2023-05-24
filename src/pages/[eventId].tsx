@@ -3,23 +3,25 @@ import CondensedTimeline from "~/utils/components/Timeline/CondensedTimeline";
 import { useService } from "~/utils/react-service-container";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import EventPageService, { type TimelinePages, countLinks } from "~/utils/components/event-page/EventPageService";
+import EventPageService, { countLinks } from "~/utils/components/event-page/EventPageService";
 import { TimelineService } from "~/utils/components/Timeline/TimelineService";
 import { CustomComponent } from "~/utils/components/AddComponent";
+import { isTimelinePage } from "~/utils/types/page";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
-	const { eventId } = router.query;
 	const eventPageService = useService(EventPageService);
-	const timelineService = useService(TimelineService);
-	if (!eventId) {
-		return <></>
+	const { eventId } = router.query;
+	if (!eventId || Array.isArray(eventId) || !isTimelinePage(eventId)) {
+		return <>Invalid</>
 	}
-	const pageData = eventPageService.getPage(eventId as TimelinePages);
+	const pageData = eventPageService.getPage(eventId);
+
+	if (!pageData) {
+		return <>Loading</>
+	}
 	
 	const {title, description, settings} = pageData;
-
-	//const items = timelineService.getItems(timelineItems);
 
 	//TODO: make this so we are not calculating the anotation count in two places (CondensedTimeline also)
 	//const annotationCount = countLinks(items);
