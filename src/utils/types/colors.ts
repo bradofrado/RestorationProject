@@ -1,3 +1,3 @@
 export type HexColor = `#${string}`
 
-export const PrimaryColor = `#FFF`;
+export const PrimaryColor: HexColor = `#FFF`;

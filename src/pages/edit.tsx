@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import AddComponent, { type ComponentType, CustomComponent, type EditableData } from "~/utils/components/AddComponent";
 import Editable from "~/utils/components/Editable";
-import { ComponentSettings } from "~/utils/components/event-page/EventPageService";
+import { ComponentSettings } from "~/utils/services/EventPageService";
 
 const Edit_page: NextPage = () => {
 	const [components, setComponents] = useState<ComponentSettings[]>([]);

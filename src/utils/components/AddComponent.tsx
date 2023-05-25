@@ -2,11 +2,12 @@ import React, { FunctionComponent, useState } from 'react'
 import Editable, { type ButtonIcon } from './Editable'
 import CondensedTimeline from './Timeline/CondensedTimeline'
 import { useService } from '../react-service-container'
-import { type TimelineCategory, TimelineService } from './Timeline/TimelineService'
 import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from './icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from './Dropdown'
 import Header from './base/baseComponents'
 import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
+import { TimelineService } from '../services/TimelineService'
+import { TimelineCategory } from '../types/timeline'
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,

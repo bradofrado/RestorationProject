@@ -1,7 +1,7 @@
 import { EventPage, TimelinePageType } from "~/utils/types/page";
-import { ComponentType, EditableData } from "../AddComponent";
-import { TimelineService, type RestorationTimelineItem, type TimelineCategory } from "../Timeline/TimelineService";
-import BookOfMormonTranslationMethods from "./book-of-mormon-translation";
+import { ComponentType, EditableData } from "../components/AddComponent";
+import { TimelineService, type RestorationTimelineItem, type TimelineCategory } from "./TimelineService";
+import BookOfMormonTranslationMethods from "../components/event-page/book-of-mormon-translation";
 import { api } from "~/utils/api";
 
 class EventPageService {

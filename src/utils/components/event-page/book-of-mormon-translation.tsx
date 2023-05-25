@@ -1,7 +1,7 @@
 import { DateFormat, groupBy } from "~/utils/utils";
-import { countLinks, type EventPageComponent } from "./EventPageService";
+import { countLinks, type EventPageComponent } from "../../services/EventPageService";
 import { useService } from "~/utils/react-service-container";
-import { type RestorationTimelineItem, TimelineService, type TimelineSubcategory } from "../Timeline/TimelineService";
+import { type RestorationTimelineItem, TimelineService, type TimelineSubcategory } from "../../services/TimelineService";
 import { Annotation } from "../Timeline/CondensedTimeline";
 
 

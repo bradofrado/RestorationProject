@@ -1,5 +1,5 @@
+import { RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
-import { type RestorationTimelineItem } from "./TimelineService";
 
 export interface CondensedTimelineProps {
 	items: RestorationTimelineItem[],

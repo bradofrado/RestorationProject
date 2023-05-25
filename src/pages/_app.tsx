@@ -7,8 +7,8 @@ import Head from "next/head";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
-import { TimelineService } from "~/utils/components/Timeline/TimelineService";
-import EventPageService from "~/utils/components/event-page/EventPageService";
+import { TimelineService } from "~/utils/services/TimelineService";
+import EventPageService from "~/utils/services/EventPageService";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

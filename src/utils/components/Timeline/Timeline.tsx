@@ -1,15 +1,18 @@
 import dayjs from 'dayjs';
 import ScrollDrag from '../ScrollDrag';
 import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react';
-import { type RestorationTimelineItem } from './TimelineService';
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
+import { RestorationTimelineItem } from '~/utils/types/timeline';
 
 interface TimelineProps {
 	items: RestorationTimelineItem[]
 }
 export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
+	if (items.length == 0) {
+		return <>Loading</>
+	}
 	const sorted = items.slice().sort((a, b) => {
 		if (a.date < b.date) {
 			return -1;

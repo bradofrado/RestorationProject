@@ -1,34 +1,34 @@
+import { createTRPCRouter, publicProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
+import { type RestorationTimelineItem, type TimelineCategory, isTimelineCategory } from "~/utils/types/timeline";
 import { type HexColor } from "~/utils/types/colors";
-import { TimelinePageType } from "~/utils/types/page";
 
-export class TimelineService {
-	getItems(category?: TimelineCategory): RestorationTimelineItem[] {
-		let _items = items;
-		if (category) {
-			_items = items.filter(x => x.category === category);
-		}
+export const timelineRouter = createTRPCRouter({
+	getItems: publicProcedure
+		.input((val: unknown) => {
+			if (val == undefined) {
+				return val;
+			}
 
-		return _items.map((item) => item.color === undefined ? {...item, color: colors[item.category]}: item );
-	}
-}
+			if (typeof val == 'string' && isTimelineCategory(val)) {
+				return val;
+			}
+
+			throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: `Invalid item ${typeof val}`});
+		})
+		.query(({input}) => {
+			let _items = items;
+			if (input) {
+				_items = items.filter(x => x.category === input);
+			}
+
+			return _items.map((item) => item.color === undefined ? {...item, color: colors[item.category]}: item );
+		})
+})
 
 const colors: {[key in TimelineCategory]: HexColor} = {
 	'Book of Mormon': '#F1635C',
 	'Book of Mormon Translation': '#f1975c'
-}
-
-export type TimelineCategory = "Book of Mormon" | "Book of Mormon Translation";
-export type TimelineSubcategory = "Seer stone in a hat" | "Two spectacles";
-
-export interface RestorationTimelineItem {
-	date: Date,
-	endDate?: Date,
-	category: TimelineCategory,
-	subcategory?: TimelineSubcategory,
-	text: string,
-	links: string[],
-	page: TimelinePageType,
-	color?: HexColor
 }
 
 const items: RestorationTimelineItem[] = [
