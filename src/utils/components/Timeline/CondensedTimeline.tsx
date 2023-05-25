@@ -1,4 +1,4 @@
-import { RestorationTimelineItem } from "~/utils/types/timeline";
+import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
 
 export interface CondensedTimelineProps {

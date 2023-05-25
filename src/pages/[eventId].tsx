@@ -1,10 +1,8 @@
 import { type NextPage } from "next";
-import CondensedTimeline from "~/utils/components/Timeline/CondensedTimeline";
 import { useService } from "~/utils/react-service-container";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import EventPageService, { countLinks } from "~/utils/services/EventPageService";
-import { TimelineService } from "~/utils/services/TimelineService";
+import EventPageService from "~/utils/services/EventPageService";
 import { CustomComponent } from "~/utils/components/AddComponent";
 import { isTimelinePage } from "~/utils/types/page";
 

@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react'
+import React from 'react'
 import Editable, { type ButtonIcon } from './Editable'
 import CondensedTimeline from './Timeline/CondensedTimeline'
 import { useService } from '../react-service-container'
@@ -7,7 +7,7 @@ import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem 
 import Header from './base/baseComponents'
 import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
 import { TimelineService } from '../services/TimelineService'
-import { TimelineCategory } from '../types/timeline'
+import { type TimelineCategory } from '../types/timeline'
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,

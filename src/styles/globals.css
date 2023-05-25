@@ -89,9 +89,6 @@
 	cursor: pointer;
 }
 
-.below .restoration-item {
-	/* align-self: flex-end; */
-}
 
 .timeline-item-connector::before {
 	content: '';

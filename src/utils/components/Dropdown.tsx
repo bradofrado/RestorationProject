@@ -1,6 +1,6 @@
 import { Menu, Transition } from "@headlessui/react"
 import { Fragment, type PropsWithChildren } from "react"
-import { CheckIcon, IconComponent } from "./icons/icons"
+import { CheckIcon, type IconComponent } from "./icons/icons"
 
 export interface DropdownItem {
 	handler: React.MouseEventHandler<HTMLButtonElement>,
