@@ -1,16 +1,9 @@
-import { EventPage, TimelinePageType } from "~/utils/types/page";
-import { ComponentType, EditableData } from "../components/AddComponent";
-import { TimelineService, type RestorationTimelineItem, type TimelineCategory } from "./TimelineService";
-import BookOfMormonTranslationMethods from "../components/event-page/book-of-mormon-translation";
+import { type EventPage } from "~/utils/types/page";
 import { api } from "~/utils/api";
+import { type RestorationTimelineItem } from "../types/timeline";
 
 class EventPageService {
-	private timelineService: TimelineService;
-
-	constructor() {
-		this.timelineService = new TimelineService();
-	}
-	getPage(id: TimelinePageType): EventPage | undefined {
+	getPage(id: string): EventPage | undefined {
 		const query = api.page.getPage.useQuery(id);
 		const data = query.data;
 		

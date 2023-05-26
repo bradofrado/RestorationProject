@@ -9,6 +9,7 @@ import { TranslationMethodsContainer } from './event-page/book-of-mormon-transla
 import { TimelineService } from '../services/TimelineService'
 import { type TimelineCategory } from '../types/timeline'
 import { type EditableData } from '../types/page'
+import { z } from 'zod'
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,
@@ -22,19 +23,6 @@ interface Component {
 	label: string,
 	editable: React.ElementType<EditableComponent>,
 	component: React.ElementType<DataComponent>
-}
-
-
-export const isEditableData = (val: object): val is EditableData => {
-	if (!('content' in val && typeof val.content == 'string')) {
-		return false;
-	}
-
-	if ('properties' in val && !(typeof val.properties == 'string')) {
-		return false;
-	}
-
-	return true;
 }
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
@@ -175,8 +163,12 @@ const components = createComponents(
 	}
 );
 
+const componentsTypes = components.map(x => x.label);
+
 export type ComponentType = typeof components[number]['label'];
-export const isComponentType = (val: string): val is ComponentType => (components.map(x => x.label) as ReadonlyArray<string>).includes(val)
+export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
+	return (componentsTypes as ReadonlyArray<string>).includes(val as string);
+})
 
 type EditableComponentType = {type: ComponentType, editable: true} & EditableComponent;
 type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;

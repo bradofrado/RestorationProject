@@ -1,33 +1,24 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import {
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
-import { isTimelinePage, isEventPage, type EventPage } from "~/utils/types/page";
-
-const validateTimelinePageType = (val: unknown) => {
-	if (typeof val === 'string' && isTimelinePage(val)) {
-		return val;
-	}
-
-	throw new TRPCError({code: "BAD_REQUEST", message: `Invalid input: ${typeof val}`});
-}
+import { type EventPage, PageSchema } from "~/utils/types/page";
 
 export const pageRouter = createTRPCRouter({
 	getPage: publicProcedure
-		.input(validateTimelinePageType)
+		.input(z.string())
 		.query(async ({ input, ctx }) => {
 			const page: EventPage | null = await ctx.prisma.page.findUnique({
 				where: {
 					id: input
 				},
+				
 				include: { settings: {include: {data: true}}}
-			});
+			}) as EventPage | null;
 			if (page == null) {
 				throw new TRPCError({code: "BAD_REQUEST", message: `Invalid input: ${input}`})
 			}
@@ -35,13 +26,7 @@ export const pageRouter = createTRPCRouter({
 			return page;
 		}),
 	createPage: publicProcedure
-		.input((val: unknown) => {
-			if (val && typeof val == 'object' && isEventPage(val)) {
-				return val;
-			}
-
-			throw new TRPCError({code: "BAD_REQUEST", message: `Invalid type ${typeof val}`});
-		})
+		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
 			const page: EventPage = await ctx.prisma.page.create({
 				data: {
@@ -66,7 +51,7 @@ export const pageRouter = createTRPCRouter({
 				include: {
 					settings: {include: {data: true}}
 				}
-			});
+			}) as EventPage;
 
 			return page;
 		})

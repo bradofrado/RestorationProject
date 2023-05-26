@@ -1,64 +1,43 @@
-import { Prisma } from "@prisma/client"
-import { isComponentType, isEditableData } from "../components/AddComponent"
+import { type Prisma } from "@prisma/client"
+import { z } from "zod"
+import { ComponentTypeSchema } from "../components/AddComponent"
 
-// export interface ComponentSettings {
-// 	component: ComponentType,
-// 	data: EditableData | null
-// }
+const data = {
+	select: {content: true, properties: true}
+} satisfies Prisma.EditableDataArgs
 
-const data = Prisma.validator<Prisma.EditableDataArgs>()({
-	select: { content: true, properties: true}
-})
-
-const settingsWithData = Prisma.validator<Prisma.ComponentSettingsArgs>()({
+const settingsWithData ={
 	include: {data: data}
-})
+} satisfies Prisma.ComponentSettingsArgs
 
-const pageWithSettings = Prisma.validator<Prisma.PageArgs>()({
+const pageWithSettings = {
 	include: { settings: settingsWithData}
-})
+} satisfies Prisma.PageArgs
 
-export type ComponentSettings = Prisma.ComponentSettingsGetPayload<typeof settingsWithData>
-export type EventPage = Prisma.PageGetPayload<typeof pageWithSettings>
-export type EditableData = Prisma.EditableDataGetPayload<typeof data>
 
-const isComponentSettings = (val: object): val is ComponentSettings => {
-	if (!('component' in val && 'data' in val)) {
-		return false;
-	}
 
-	if (!(typeof val.component == 'string') || !isComponentType(val.component)) {
-		return false;
-	}
+//export type ComponentSettings = Prisma.ComponentSettingsGetPayload<typeof settingsWithData>
+//export type EventPage = Prisma.PageGetPayload<typeof pageWithSettings>
+//export type EditableData = Prisma.EditableDataGetPayload<typeof data>
 
-	if (val.data == null) {
-		return true;
-	}
+export const EditableDataSchema = z.object({
+	content: z.string(),
+	properties: z.string().nullable()
+}) satisfies z.Schema<Prisma.EditableDataGetPayload<typeof data>>
+export type EditableData = z.infer<typeof EditableDataSchema>
 
-	if (typeof val.data == 'object' && !isEditableData(val.data)) {
-		return false;
-	}
+export const ComponentSettingsSchema = z.object({
+	id: z.number(),
+	pageId: z.string(),
+	component: ComponentTypeSchema,
+	data: EditableDataSchema
+}) satisfies z.Schema<Prisma.ComponentSettingsGetPayload<typeof settingsWithData>>
+export type ComonponentSettings = z.infer<typeof ComponentSettingsSchema>
 
-	return true;
-}
-
-export const isEventPage = (val: object): val is EventPage => {
-	if (!('title' in val && 'description' in val && 'settings' in val)) {
-		return false;
-	}
-
-	if (!Array.isArray(val.settings)) {
-		return false;
-	}
-
-	if (!val.settings.every(v => typeof v == 'object' && isComponentSettings(v as object))) {
-		return false;
-	}
-
-	return true;
-}
-
-const timelinePages = ['book-of-mormon'] as const;
-
-export type TimelinePageType = typeof timelinePages[number];
-export const isTimelinePage = (page: string): page is TimelinePageType => (timelinePages as ReadonlyArray<string>).includes(page)
+export const PageSchema = z.object({
+	id: z.string(),
+	title: z.string(),
+	description: z.string(),
+	settings: z.array(ComponentSettingsSchema)
+}) satisfies z.Schema<Prisma.PageGetPayload<typeof pageWithSettings>>
+export type EventPage = z.infer<typeof PageSchema>

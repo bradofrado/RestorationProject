@@ -4,13 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import EventPageService from "~/utils/services/EventPageService";
 import { CustomComponent } from "~/utils/components/AddComponent";
-import { isTimelinePage } from "~/utils/types/page";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
 	const eventPageService = useService(EventPageService);
 	const { eventId } = router.query;
-	if (!eventId || Array.isArray(eventId) || !isTimelinePage(eventId)) {
+	if (!eventId || Array.isArray(eventId)) {
 		return <>Invalid</>
 	}
 	const pageData = eventPageService.getPage(eventId);
