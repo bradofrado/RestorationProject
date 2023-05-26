@@ -8,6 +8,7 @@ import Header from './base/baseComponents'
 import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
 import { TimelineService } from '../services/TimelineService'
 import { type TimelineCategory } from '../types/timeline'
+import { type EditableData } from '../types/page'
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,
@@ -23,9 +24,17 @@ interface Component {
 	component: React.ElementType<DataComponent>
 }
 
-export interface EditableData {
-	content: string,
-	properties?: string
+
+export const isEditableData = (val: object): val is EditableData => {
+	if (!('content' in val && typeof val.content == 'string')) {
+		return false;
+	}
+
+	if ('properties' in val && !(typeof val.properties == 'string')) {
+		return false;
+	}
+
+	return true;
 }
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
@@ -40,11 +49,11 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 	const dropdownItems: DropdownItem[] = [
 		{
 			label: 'Book of Mormon',
-			handler: () => onEdit({content: 'Book of Mormon'})
+			handler: () => onEdit({content: 'Book of Mormon', properties: null})
 		},
 		{
 			label: 'Book of Mormon Translation',
-			handler: () => onEdit({content: 'Book of Mormon Translation'})
+			handler: () => onEdit({content: 'Book of Mormon Translation', properties: null})
 		}
 	]
 	
@@ -81,15 +90,15 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 	const dropdownItems: DropdownItem[] = [
 		{
 			label: 'Custom',
-			handler: () => onEdit({content: 'custom'})
+			handler: () => onEdit({content: 'custom', properties: null})
 		},
 		{
 			label: 'Book of Mormon',
-			handler: () => onEdit({content: 'Book of Mormon'})
+			handler: () => onEdit({content: 'Book of Mormon', properties: null})
 		},
 		{
 			label: 'Book of Mormon Translation',
-			handler: () => onEdit({content: 'Book of Mormon Translation'})
+			handler: () => onEdit({content: 'Book of Mormon Translation', properties: null})
 		},
 	];
 
@@ -141,7 +150,7 @@ const components = createComponents(
 	{
 		label: 'Header',
 		editable: (({onDelete, onEdit, data}) => <Editable as={Header} icons={[{icon: DeleteIcon, handler: onDelete}]} 
-			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => onEdit({content: e.target.innerHTML})}>
+			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
 										</Editable>) as React.ElementType<EditableComponent>,
 		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ElementType<DataComponent>
@@ -149,7 +158,7 @@ const components = createComponents(
 	{
 		label: 'Paragraph',
 		editable: (({onDelete, onEdit, data}) => <Editable as="p" icons={[{icon: DeleteIcon, handler: onDelete}]} 
-				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => onEdit({content: e.target.innerHTML})}>
+				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
 										</Editable>) as React.ElementType<EditableComponent>,
 		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ElementType<DataComponent>
@@ -167,6 +176,7 @@ const components = createComponents(
 );
 
 export type ComponentType = typeof components[number]['label'];
+export const isComponentType = (val: string): val is ComponentType => (components.map(x => x.label) as ReadonlyArray<string>).includes(val)
 
 type EditableComponentType = {type: ComponentType, editable: true} & EditableComponent;
 type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;
