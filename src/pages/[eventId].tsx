@@ -1,24 +1,32 @@
 import { type NextPage } from "next";
-import { useService } from "~/utils/react-service-container";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import EventPageService from "~/utils/services/EventPageService";
+import { useEventPage } from "~/utils/services/EventPageService";
 import { CustomComponent } from "~/utils/components/AddComponent";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
-	const eventPageService = useService(EventPageService);
 	const { eventId } = router.query;
-	if (!eventId || Array.isArray(eventId)) {
-		return <>Invalid</>
-	}
-	const pageData = eventPageService.getPage(eventId);
-
-	if (!pageData) {
-		return <>Loading</>
+	const isLoading = !eventId || Array.isArray(eventId);
+	if (isLoading) {
+		return <div>Loading...</div>
 	}
 	
-	const {title, description, settings} = pageData;
+	return <EventPage eventId={eventId}/>
+}
+
+const EventPage = ({eventId} : {eventId: string}) => {
+	const query = useEventPage(eventId);
+
+	if (query.isLoading) {
+		return <div>Loading...</div>
+	}
+
+	if (query.isError) {
+		return <div>Error: {query.error.message}</div>
+	}
+	
+	const {title, description, settings} = query.data;
 
 	//TODO: make this so we are not calculating the anotation count in two places (CondensedTimeline also)
 	//const annotationCount = countLinks(items);

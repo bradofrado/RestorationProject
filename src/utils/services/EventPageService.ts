@@ -1,14 +1,23 @@
 import { type EventPage } from "~/utils/types/page";
 import { api } from "~/utils/api";
 import { type RestorationTimelineItem } from "../types/timeline";
+import { UseTRPCQueryResult } from "@trpc/react-query/shared";
+import { TRPCClientErrorLike } from "@trpc/client";
 
-class EventPageService {
-	getPage(id: string): EventPage | undefined {
-		const query = api.page.getPage.useQuery(id);
-		const data = query.data;
-		
-		return data;
-	}
+const useEventPages = () => {
+	return api.page.getPages.useQuery();
+}
+
+export const useEventPage = (eventId: string) => {
+	return api.page.getPage.useQuery(eventId);
+}
+
+export const useEventPagesMutation = () => {
+	const createMutation = api.page.createPage.useMutation();
+	const updateMutation = api.page.updatePage.useMutation();
+	const deleteMutation = api.page.deletePage.useMutation();
+	
+	return {create: createMutation.mutate, update: updateMutation.mutate, deletem: deleteMutation.mutate};
 }
 
 export const countLinks = (items: RestorationTimelineItem[]) => {
@@ -19,4 +28,4 @@ export type EventPageComponent = React.FC<{
 	linkCount: number
 }>
 
-export default EventPageService;
+export default useEventPages;

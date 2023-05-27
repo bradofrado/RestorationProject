@@ -61,7 +61,8 @@ model VerificationToken {
 }
 
 model Page {
-  id          String              @id
+  id          String              @id @default(uuid())
+	url         String							@unique
 	title       String
   description String
   settings    ComponentSettings[]
@@ -71,7 +72,7 @@ model ComponentSettings {
   id             Int       @id @default(autoincrement())
   component      String
 	data           EditableData?
-  page           Page?        @relation(fields: [pageId], references: [id])
+  page           Page?        @relation(fields: [pageId], references: [id], onDelete: Cascade)
   pageId         String?
 }
 
@@ -79,6 +80,6 @@ model EditableData {
   id                Int              @id @default(autoincrement())
   content           String
   properties        String?
-  settings ComponentSettings @relation(fields: [settingsId], references: [id])
+  settings ComponentSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 	settingsId 				Int @unique
 }

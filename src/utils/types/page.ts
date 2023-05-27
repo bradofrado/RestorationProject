@@ -14,12 +14,6 @@ const pageWithSettings = {
 	include: { settings: settingsWithData}
 } satisfies Prisma.PageArgs
 
-
-
-//export type ComponentSettings = Prisma.ComponentSettingsGetPayload<typeof settingsWithData>
-//export type EventPage = Prisma.PageGetPayload<typeof pageWithSettings>
-//export type EditableData = Prisma.EditableDataGetPayload<typeof data>
-
 export const EditableDataSchema = z.object({
 	content: z.string(),
 	properties: z.string().nullable()
@@ -32,12 +26,13 @@ export const ComponentSettingsSchema = z.object({
 	component: ComponentTypeSchema,
 	data: EditableDataSchema
 }) satisfies z.Schema<Prisma.ComponentSettingsGetPayload<typeof settingsWithData>>
-export type ComonponentSettings = z.infer<typeof ComponentSettingsSchema>
+export type ComponentSettings = z.infer<typeof ComponentSettingsSchema>
 
 export const PageSchema = z.object({
 	id: z.string(),
 	title: z.string(),
 	description: z.string(),
-	settings: z.array(ComponentSettingsSchema)
+	settings: z.array(ComponentSettingsSchema),
+	url: z.string()
 }) satisfies z.Schema<Prisma.PageGetPayload<typeof pageWithSettings>>
 export type EventPage = z.infer<typeof PageSchema>

@@ -63,11 +63,11 @@ const DataList: React.ElementType<DataComponent> = ({data}) => {
 	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
 	
 	return <>
-		{(type == 'custom') && <ul className="list-disc px-10">
+		{(!data?.properties || type == 'custom') && <ul className="list-disc px-10">
 			{type == 'custom' && liItems.map((x, i) => <li key={i}>{x}</li>)}
 			{items != null && items.map((item, i) => <li key={i}>{item.text}</li>) }
 		</ul>}
-		{items != null && <TranslationMethodsContainer items={items} annotationCount={0}/>}
+		{data?.properties && items != null && <TranslationMethodsContainer items={items} annotationCount={0}/>}
 	</>
 }
 
