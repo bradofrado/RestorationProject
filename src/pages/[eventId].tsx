@@ -7,6 +7,7 @@ import { CustomComponent } from "~/utils/components/AddComponent";
 const Event_page : NextPage= () => {
 	const router = useRouter();
 	const { eventId } = router.query;
+	
 	const isLoading = !eventId || Array.isArray(eventId);
 	if (isLoading) {
 		return <div>Loading...</div>

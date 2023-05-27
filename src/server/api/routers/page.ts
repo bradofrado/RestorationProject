@@ -6,8 +6,8 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
-import { prisma } from "~/server/db";
-import { type EventPage, PageSchema, ComponentSettings } from "~/utils/types/page";
+import { type prisma } from "~/server/db";
+import { type EventPage, PageSchema } from "~/utils/types/page";
 
 const getPage = async ({input, db}: {input: string, db: typeof prisma }) => {
 	const page: EventPage | null = await db.page.findUnique({
@@ -35,6 +35,7 @@ const deletePage = async({input, db}: {input: string, db: typeof prisma}) => {
 const createPage = async ({input, db}: {input: EventPage, db: typeof prisma}) => {
 	const page: EventPage = await db.page.create({
 		data: {
+			id: input.id || undefined,
 			title: input.title,
 			description: input.description,
 			url: input.url,
@@ -78,6 +79,7 @@ export const pageRouter = createTRPCRouter({
 	createPage: publicProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
+			input.id = ''; //autogenerate an id
 			return await createPage({input, db: ctx.prisma})
 		}),
 	deletePage: publicProcedure

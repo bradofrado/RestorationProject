@@ -2,7 +2,7 @@ import React from 'react'
 import Editable, { type ButtonIcon } from './Editable'
 import CondensedTimeline from './Timeline/CondensedTimeline'
 import { useService } from '../react-service-container'
-import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from './icons/icons'
+import { AddIcon, AdjustIcon, DeleteIcon, EditIcon, PlusSmall } from './icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from './Dropdown'
 import Header from './base/baseComponents'
 import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
@@ -187,7 +187,7 @@ export const CustomComponent = (props: EditableComponentType | DataComponentType
 export default function AddComponent({onAdd}: {onAdd: (component: ComponentType) => void}) {
   const items: DropdownItem[] = components.map(comp => ({label: comp.label, handler: () => onAdd(comp.label)}))
 	return (
-		<Dropdown items={items}>
+		<Dropdown items={items} chevron={false}>
 			+
 		</Dropdown>
   )

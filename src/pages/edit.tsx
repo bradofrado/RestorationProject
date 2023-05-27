@@ -1,22 +1,36 @@
 import { type NextPage } from "next";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/AddComponent";
 import Dropdown, { type DropdownItem } from "~/utils/components/Dropdown";
 import Editable from "~/utils/components/Editable";
-import { useService } from "~/utils/react-service-container";
 import useEventPages from "~/utils/services/EventPageService";
-import usePageService, { useEventPagesMutation } from "~/utils/services/EventPageService";
-import EventPageService from "~/utils/services/EventPageService";
+import  { useEventPagesMutation } from "~/utils/services/EventPageService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
 
 const Edit_page: NextPage = () => {
+	const router = useRouter();
 	const [currPage, setCurrPage] = useState<EventPage>();
 	const [isNew, setIsNew] = useState(true);
 	const {create, update, deletem} = useEventPagesMutation();
 	const query = useEventPages();
 
-	if (query.isLoading) {
+	const {id} = router.query;
+	let pages: EventPage[] | null = null;
+
+	useEffect(() => {
+		if (query.data && typeof id == 'string') {
+			const page = query.data.find(x => x.id == id);
+			console.log(page);
+			page && setCurrPage(page);
+			setIsNew(false);
+		}
+		console.log(id);
+		console.log(query.data)
+	}, [id, query.data])
+
+	if (query.isLoading || !router.isReady) {
 		return <div>Loading...</div>
 	}
 
@@ -24,9 +38,14 @@ const Edit_page: NextPage = () => {
 		return <div>Error: {query.error.message}</div>
 	}
 
-	const pages: EventPage[] = query.data;
+	const setRoute = (id: string | undefined) => {
+		id ? void router.push(`${router.basePath}?id=${id}`) : void router.push(`${router.basePath}`);
+	}
+
+	pages = query.data;
 	const items: DropdownItem[] = pages.map(page => ({label: page.url, handler: i => {
-		setCurrPage(pages[i]);
+		setRoute(page.id);
+		setCurrPage(pages && pages[i] || undefined);
 		setIsNew(false);
 	}}));
 
@@ -38,8 +57,9 @@ const Edit_page: NextPage = () => {
 	const onSave = () => {
 		if (currPage) {
 			isNew ? create(currPage) : update(currPage)
-			alert("Page saved!")
 			setIsNew(false);
+			setRoute(currPage.id);
+			alert("Page saved!")
 		}
 	}
 
@@ -47,6 +67,7 @@ const Edit_page: NextPage = () => {
 		if (currPage && !isNew) {
 			deletem(currPage.id);
 			setCurrPage(undefined);
+			setRoute(undefined);
 		}
 	}
 

@@ -1,6 +1,6 @@
 import { Menu, Transition } from "@headlessui/react"
 import { Fragment, type PropsWithChildren } from "react"
-import { CheckIcon, type IconComponent } from "./icons/icons"
+import { CheckIcon, ChevronDown, type IconComponent } from "./icons/icons"
 
 export interface DropdownItem {
 	handler: (index: number) => void,
@@ -8,15 +8,19 @@ export interface DropdownItem {
 }
 interface DropdownProps extends PropsWithChildren {
 	items: DropdownItem[],
-	className?: string
+	className?: string,
+	chevron?: boolean
 }
 
-const Dropdown = ({children, items, className = "inline-flex w-full justify-center rounded-md bg-black bg-opacity-20 px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps) => {
+const Dropdown = ({children, items, chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-black bg-opacity-20 px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps) => {
 	return <>
 		<Menu as="div" className="relative inline-block text-left">
 			<div>
 				<Menu.Button className={className}>
-					{children}
+					{children} {chevron && <ChevronDown
+              className="ml-2 -mr-1 h-4 w-4"
+              aria-hidden="true"
+            />}
 				</Menu.Button>
 			</div>
 			<Transition
@@ -28,7 +32,7 @@ const Dropdown = ({children, items, className = "inline-flex w-full justify-cent
 				leaveFrom="transform opacity-100 scale-100"
 				leaveTo="transform opacity-0 scale-95"
 			>
-				<Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+				<Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
 					<div className="px-1 py-1 ">
 						{items.map((item, i) => 
 						<Menu.Item key={i}>
@@ -82,7 +86,7 @@ export const DropdownIcon = ({items, icon, className}: DropdownItemProps) => {
 	const Icon = icon;
 	return <>
 		<Dropdown className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className}`} 
-				items={items}>
+				items={items} chevron={false}>
 			<Icon className="h-5 w-5"/>
 		</Dropdown>
 	</>
