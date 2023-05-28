@@ -34,21 +34,21 @@ const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, classNam
 	</>
 }
 const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
-	const dropdownItems: DropdownItem[] = [
+	const dropdownItems: DropdownItem<string>[] = [
 		{
-			label: 'Book of Mormon',
-			handler: () => onEdit({content: 'Book of Mormon', properties: null})
+			name: 'Book of Mormon',
+			id: 'Book of Mormon',
 		},
 		{
-			label: 'Book of Mormon Translation',
-			handler: () => onEdit({content: 'Book of Mormon Translation', properties: null})
+			name: 'Book of Mormon Translation',
+			id: 'Book of Mormon Translation',
 		}
 	]
 	
 	return <>
 	 				<Editable as={DataCondensedTimeline} data={data}
 						icons={[{icon: DeleteIcon, handler: onDelete}, 
-											<DropdownIcon className="ml-1" 
+											<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
 													key={1} items={dropdownItems} icon={EditIcon}/>]}
 						>
 						Text
@@ -57,7 +57,7 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 }
 
 const DataList: React.ElementType<DataComponent> = ({data}) => {
-	const type: TimelineCategory | 'custom' = data != null ? data.content as TimelineCategory : 'custom';
+	const type: TimelineCategory | 'custom' = data != null ? data.content : 'custom';
 	const timelineService = useService(TimelineService);
 	const items = type != 'custom' ? timelineService.getItems(type) : null;
 	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
@@ -72,21 +72,21 @@ const DataList: React.ElementType<DataComponent> = ({data}) => {
 }
 
 const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
-	const type: TimelineCategory | 'custom' = data != null ? data.content as TimelineCategory : 'custom';
+	const type: TimelineCategory | 'custom' = data != null ? data.content : 'custom';
 	const timelineService = useService(TimelineService);
 	const items = type != 'custom' ? timelineService.getItems(type) : null;
-	const dropdownItems: DropdownItem[] = [
+	const dropdownItems: DropdownItem<string>[] = [
 		{
-			label: 'Custom',
-			handler: () => onEdit({content: 'custom', properties: null})
+			name: 'Custom',
+			id: 'custom',
 		},
 		{
-			label: 'Book of Mormon',
-			handler: () => onEdit({content: 'Book of Mormon', properties: null})
+			name: 'Book of Mormon',
+			id: 'Book of Mormon',
 		},
 		{
-			label: 'Book of Mormon Translation',
-			handler: () => onEdit({content: 'Book of Mormon Translation', properties: null})
+			name: 'Book of Mormon Translation',
+			id: 'Book of Mormon Translation',
 		},
 	];
 
@@ -103,7 +103,7 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 
 	const editIcons: ButtonIcon[] = [
 		{icon: DeleteIcon, handler: onDelete},
-		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1}/>,
+		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: null})}/>,
 	];
 
 	if (type != 'custom') {
@@ -185,9 +185,9 @@ export const CustomComponent = (props: EditableComponentType | DataComponentType
 }
 
 export default function AddComponent({onAdd}: {onAdd: (component: ComponentType) => void}) {
-  const items: DropdownItem[] = components.map(comp => ({label: comp.label, handler: () => onAdd(comp.label)}))
+  const items: DropdownItem<ComponentType>[] = components.map(comp => ({name: comp.label, id: comp.label}))
 	return (
-		<Dropdown items={items} chevron={false}>
+		<Dropdown items={items} chevron={false} onChange={item => onAdd(item.id)} staticValue={true}>
 			+
 		</Dropdown>
   )

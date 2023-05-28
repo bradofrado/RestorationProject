@@ -1,23 +1,38 @@
 import { Menu, Transition } from "@headlessui/react"
-import { Fragment, type PropsWithChildren } from "react"
+import { Fragment, useState, type PropsWithChildren, useEffect } from "react"
 import { CheckIcon, ChevronDown, type IconComponent } from "./icons/icons"
 
-export interface DropdownItem {
-	handler: (index: number) => void,
-	label: React.ReactNode
+export interface DropdownItem<T> {
+	name: React.ReactNode,
+	id: T
 }
-interface DropdownProps extends PropsWithChildren {
-	items: DropdownItem[],
+export type ItemAction<T> = (item: DropdownItem<T>, index: number) => void
+interface DropdownProps<T> extends PropsWithChildren {
+	items: DropdownItem<T>[],
+	initialValue?: React.ReactNode,
 	className?: string,
-	chevron?: boolean
+	chevron?: boolean,
+	onChange?: ItemAction<T>,
+	staticValue?: boolean
 }
 
-const Dropdown = ({children, items, chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-black bg-opacity-20 px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps) => {
+const Dropdown = <T,>({children, initialValue, onChange, items, staticValue = false,
+		chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-black bg-opacity-20 px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps<T>) => {
+	const [value, setValue] = useState<React.ReactNode | undefined>(initialValue);
+	useEffect(() => {
+		setValue(initialValue);
+	}, [initialValue])
+	
+	const onClick = (item: DropdownItem<T>, index: number) => {
+		setValue(item.name);
+		onChange && onChange(item, index)
+	}
+	
 	return <>
 		<Menu as="div" className="relative inline-block text-left">
 			<div>
 				<Menu.Button className={className}>
-					{children} {chevron && <ChevronDown
+					{value && !staticValue ? value : children} {chevron && <ChevronDown
               className="ml-2 -mr-1 h-4 w-4"
               aria-hidden="true"
             />}
@@ -41,9 +56,9 @@ const Dropdown = ({children, items, chevron = true, className = "inline-flex ite
 									className={`${
 										active ? 'bg-violet-500 text-white' : 'text-gray-900'
 									} group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-									onClick={() => item.handler(i)}
+									onClick={() => onClick(item, i)}
 								>
-									{item.label}
+									{item.name}
 								</button>
 							)}
 						</Menu.Item>
@@ -60,33 +75,31 @@ export interface ListItem {
 	value: boolean
 }
 
-interface ListItemProps extends Omit<DropdownItemProps, 'items'>{
+interface ListItemProps<T> extends Omit<DropdownIconProps<T>, 'items'>{
 	items: ListItem[],
 	setItems: (items: ListItem[]) => void
 }
 
-export const DropdownList = ({items, setItems, ...rest}: ListItemProps) => {
+export const DropdownList = <T,>({items, setItems, ...rest}: ListItemProps<T>) => {
 	const copy = items.slice();
 	const onSelect = (item: ListItem) => {
 		item.value = !item.value;
 		setItems(copy);
 	}
-	const dropdownItems = copy.map(item => ({label: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, handler: () => onSelect(item)}))
+	const dropdownItems = copy.map(item => ({ name: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, id: undefined }))
 	return <>
-		<DropdownIcon items={dropdownItems} {...rest}/>
+		<DropdownIcon items={dropdownItems} {...rest} onChange={(item, index) => onSelect(items[index] as ListItem)}/>
 	</>
 }
 
-interface DropdownItemProps {
-	items: DropdownItem[],
+type DropdownIconProps<T> = Omit<DropdownProps<T>, "chevron"> & {
 	icon: IconComponent,
-	className: string
 }
-export const DropdownIcon = ({items, icon, className}: DropdownItemProps) => {
+export const DropdownIcon = <T,>({icon, className, ...rest}: DropdownIconProps<T>) => {
 	const Icon = icon;
 	return <>
-		<Dropdown className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className}`} 
-				items={items} chevron={false}>
+		<Dropdown className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className || ''}`} 
+				{...rest} chevron={false} staticValue={true}>
 			<Icon className="h-5 w-5"/>
 		</Dropdown>
 	</>
