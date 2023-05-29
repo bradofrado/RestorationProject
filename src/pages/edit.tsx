@@ -12,10 +12,10 @@ import { DeleteIcon } from "~/utils/components/icons/icons";
 import { useService } from "~/utils/react-service-container";
 import useEventPages from "~/utils/services/EventPageService";
 import  { useEventPagesMutation } from "~/utils/services/EventPageService";
-import { TimelineService } from "~/utils/services/TimelineService";
+import { TimelineService, useCategoryMutations } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
-import { RestorationTimelineItem, TimelineCategory } from "~/utils/types/timeline";
-import { groupBy } from "~/utils/utils";
+import { RestorationTimelineItem, TimelineCategory, TimelineCategoryName } from "~/utils/types/timeline";
+import {groupBy, groupByDistinct} from '~/utils/utils';
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -149,48 +149,68 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 }
 
 type InputProps = Omit<React.ComponentPropsWithoutRef<'input'>, 'onChange'> & React.PropsWithChildren & {
-	onChange: (value: string) => void
+	onChange?: (value: string) => void
 }
 const Input = ({children, onChange, className, ...rest}: InputProps) => {
 	return <>
 		<label>{children}</label>
 		<input className={`${className || ''} bg-black bg-opacity-20 inline-flex justify-center rounded-md px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
-			{...rest} onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+			{...rest} onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(e.target.value)}
 		/>
 	</>
 }
 
 const EditTimelineItems = () => {
 	const [category, setCategory] = useState<string>();
+	const [page, setPage] = useState<string>();
 	const [currItems, setCurrItems] = useState<RestorationTimelineItem[]>([]);
 	const timelineService = useService(TimelineService);
-	const groupedItems = groupBy(timelineService.getItems(), "category");
-	const categories: DropdownItem<TimelineCategory>[] = Object.keys(groupedItems).map(x => ({name: x, id: x}))
+	const categories = timelineService.getCategories();
+	const {update, create, deletem} = useCategoryMutations();
+	const categoriesGroup = groupByDistinct(categories, "name");
+	const categoryNames: DropdownItem<TimelineCategoryName>[] = Object.keys(categories).map(x => ({name: x, id: x}))
 
-	const pages: DropdownItem<string>[] = categories.map(x => {
-		const item = groupedItems[x.id];
-		const page = item ? item[0]?.page || "" : "";
+	const pages: DropdownItem<string>[] = [...new Set(categories.map(item => {
+		const page = item.page;
 		return {name: page, id: page}
-	});
+	}))];
 	const onAdd = () => {
 		setCategory('New Category');
+		setPage(pages[0]?.id);
 	}
 
-	const onSave = () => {
-
+	const onSave = (isNew: boolean) => {
+		if (!category || !page) {
+			return;
+		}
+		
+		const newCategory: TimelineCategory = {
+			name: category,
+			page: page,
+			color: '#111',
+			items: currItems
+		}
+		isNew ? create(newCategory) : update(newCategory);
 	}
 
 	const onClear = () => {
-
+		setCategory(undefined);
 	}
 
-	const onDelete = () => {
-
+	const onDelete = (isNew: boolean) => {
+		if (category && !isNew)
+			deletem(category);
 	}
 
-	const onChange: ItemAction<TimelineCategory> = (item) => {
-		setCurrItems(groupedItems[item.id]);
+	const onChange: ItemAction<TimelineCategoryName> = (item) => {
+		const category = categoriesGroup[item.id];
+		setCurrItems(category ? category.items : []);
 		setCategory(item.id);
+		setPage(category?.page);
+	}
+
+	const onPageChange: ItemAction<string> = (value) => {
+		setPage(value.id);
 	}
 
 	const onItemDelete = (i: number) => {
@@ -201,13 +221,20 @@ const EditTimelineItems = () => {
 
 	const onItemAdd = () => {
 		const copy = currItems.slice();
-		copy.push({text: "new text", date: new Date(), category: category as string, links: [], page: "" });
+		copy.push({text: "new text", date: new Date(), links: []});
 		setCurrItems(copy);
+	}
+
+	const saveItem = (item: RestorationTimelineItem, i: number) => {
+		const copy = currItems.slice();
+		copy[i] = item;
+		setCurrItems(copy);
+		//TODO: save item
 	}
 	
 	return <>
 		<div>
-			<EditItemsButtons items={categories} value={category} onChange={onChange}
+			<EditItemsButtons items={categoryNames} value={category} onChange={onChange}
 				onAdd={onAdd} onSave={onSave} onClear={onClear} onDelete={onDelete}/>
 			{category && <>
 			<div className="my-2">
@@ -215,40 +242,85 @@ const EditTimelineItems = () => {
 					Name:
 				</Input>
 				<div>
-					<span>Page:</span><Dropdown items={pages} initialValue={currItems[0].page}></Dropdown>
+					<span>Page:</span><Dropdown items={pages} initialValue={page} onChange={onPageChange}></Dropdown>
 				</div>
 			</div>
-			{currItems.map((item, i) => <EditRestorationItem key={i} item={item} onDelete={() => onItemDelete(i)}/>)}
-			<div>
-				<Button mode="secondary" onClick={onItemAdd} className="my-1">
-					+
-				</Button>
-			</div></>}
+			<AddRemove items={currItems.map((item, i) => <EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)}/>)}
+				onAdd={onItemAdd} onDelete={onItemDelete}
+			/>
+			</>}
 		</div>
 	</>
 }
 
 type EditRestorationItemProps = {
 	item: RestorationTimelineItem,
-	onDelete: () => void
+	onSave: (item: RestorationTimelineItem) => void
 }
-const EditRestorationItem = ({item, onDelete}: EditRestorationItemProps) => {
-	const icons: ButtonIcon[] = [
-		{
-			icon: DeleteIcon,
-			handler: onDelete
-		}
-	]
+const EditRestorationItem = ({item: propItem, onSave}: EditRestorationItemProps) => {
+	const [item, setItem] = useState<RestorationTimelineItem>(propItem);
+	useEffect(() => {
+		setItem(propItem);
+	}, [propItem])
+	const changeProperty = <K extends keyof RestorationTimelineItem>(key: K, value: RestorationTimelineItem[K]) => {
+		const copy = {...item};
+		copy[key] = value;
+		setItem(copy);
+	}
+	const onLinkChange = (value: string, i: number) => {
+		const links = item.links.slice();
+		links[i] = value;
+		changeProperty("links", links);
+	}
+
+	const onAddLink = () => {
+		const links = item.links.slice();
+		links.push("new link");
+		changeProperty("links", links);
+	}
+
+	const onDeleteLink = (i: number) => {
+		const links = item.links.slice();
+		links.splice(i, 1);
+		changeProperty("links", links);
+	}
 	return <>
-		<Editable as={Panel} className="my-1" editable="false" icons={icons}>
-			<Input value={item.text} className="w-full">
+		<Panel className="my-1">
+			<Input value={item.text} className="w-full" onChange={value => changeProperty("text", value)}>
 				Text:
 			</Input>
 			<div>
-				<span>Start:</span><DatePicker value={dayjs(item.date)}/>
-				<span>End:</span><DatePicker value={item.endDate && dayjs(item.endDate)}/>
+				<span>Start:</span><DatePicker value={dayjs(item.date)} onChange={value => changeProperty("date", value?.toDate() || new Date())}/>
+				<span>End:</span><DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changeProperty("date", value?.toDate() || new Date())}/>
 			</div>
-		</Editable>
+			<Button mode="primary" onClick={() => onSave(item)}>Save</Button>
+			<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} className="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
+				onAdd={onAddLink} onDelete={onDeleteLink}/>
+		</Panel>
+	</>
+}
+
+type AddRemoveProps = {
+	items: React.ReactNode[],
+	onDelete: (i: number) => void,
+	onAdd: () => void
+}
+const AddRemove = ({items, onDelete, onAdd}: AddRemoveProps) => {
+	return <>
+		{items.map((item, i) => {
+			const icons: ButtonIcon[] = [
+				{
+					icon: DeleteIcon,
+					handler: () => onDelete(i)
+				}
+			]
+			return <Editable icons={icons} key={i} editable="false">{item}</Editable>
+		})}
+		<div>
+			<Button mode="secondary" className="my-1" onClick={onAdd}>
+				+
+			</Button>
+		</div>
 	</>
 }
 

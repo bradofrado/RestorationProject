@@ -7,7 +7,7 @@ import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem 
 import Header from './base/baseComponents'
 import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
 import { TimelineService } from '../services/TimelineService'
-import { type TimelineCategory } from '../types/timeline'
+import { type TimelineCategoryName } from '../types/timeline'
 import { type EditableData } from '../types/page'
 import { z } from 'zod'
 
@@ -27,7 +27,7 @@ interface Component {
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
 	const timelineService = useService(TimelineService);
-	const items = timelineService.getItems(data?.content as TimelineCategory || 'Book of Mormon');
+	const items = timelineService.getItems(data?.content as TimelineCategoryName || 'Book of Mormon');
 
 	return <>
 		<CondensedTimeline items={items} className={className}/>
@@ -57,7 +57,7 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 }
 
 const DataList: React.ElementType<DataComponent> = ({data}) => {
-	const type: TimelineCategory | 'custom' = data != null ? data.content : 'custom';
+	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
 	const timelineService = useService(TimelineService);
 	const items = type != 'custom' ? timelineService.getItems(type) : null;
 	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
@@ -72,7 +72,7 @@ const DataList: React.ElementType<DataComponent> = ({data}) => {
 }
 
 const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
-	const type: TimelineCategory | 'custom' = data != null ? data.content : 'custom';
+	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
 	const timelineService = useService(TimelineService);
 	const items = type != 'custom' ? timelineService.getItems(type) : null;
 	const dropdownItems: DropdownItem<string>[] = [

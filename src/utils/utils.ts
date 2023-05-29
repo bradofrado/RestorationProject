@@ -18,3 +18,15 @@ export const groupBy = function<T extends Pick<T, K>, K extends keyof T>(arr: T[
 		return prev;
 	}, {})
 }
+
+export const groupByDistinct = function<T extends Pick<T, K>, K extends keyof T>(arr: T[], key: K) {
+	return arr.reduce<Record<T[K], T>>((prev, curr) => {
+		if (prev[curr[key]]) {
+			throw new DOMException("Each key value in the list must be unique");
+		}
+
+		prev[curr[key]] = curr;
+
+		return prev;
+	}, {})
+}

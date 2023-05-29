@@ -3,9 +3,9 @@ import { type PolymorphicComponentProps } from "../types/polymorphic";
 import { type IconComponent } from "./icons/icons";
 
 interface EditableProps extends PropsWithChildren {
-	className?: string,
 	icons?: ButtonIcon[],
 	editable?: 'true' | 'false' | boolean,
+	wrapped?: boolean
 }
 
 type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
@@ -18,13 +18,16 @@ export type ButtonIcon = {
 	handler: () => void,
 } | JSX.Element
 
-function Editable<T extends React.ElementType>({children, as, className, icons, editable = 'true', ...rest}: TextProps<T>) {
+function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: TextProps<T>) {
 	const Component = as || 'span';
-
-	const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer ' + (className || '');
+	
+	//const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer ' + (className || '');
+	const render = wrapped ? children : <Component {...rest} contentEditable={editable}>{children}</Component>
 	return <div className="relative"> 
 		
-		<Component {...rest} contentEditable={editable} className={classAll}>{children}</Component>
+		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">
+			{render}
+		</div>
 		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 ">
 			{icons?.map((icon, i) => {
 				if ("icon" in icon) {
