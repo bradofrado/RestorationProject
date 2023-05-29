@@ -10,6 +10,7 @@ import "~/styles/globals.css";
 import { TimelineService } from "~/utils/services/TimelineService";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import EventPageService from "~/utils/services/EventPageService";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -17,7 +18,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-			<ServiceContainer providers={[TimelineService]}>
+			<ServiceContainer providers={[TimelineService, EventPageService]}>
 				<LocalizationProvider dateAdapter={AdapterDayjs}>
 					<Head>
 						<title>Witnesses of the Restoration</title>

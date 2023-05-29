@@ -2,12 +2,19 @@ import { api } from "~/utils/api";
 import { type RestorationTimelineItem } from "../types/timeline";
 import { useQueryClient } from "@tanstack/react-query";
 
-const useEventPages = () => {
-	return api.page.getPages.useQuery();
-}
+class EventPageService {
+	getPages() {
+		return api.page.getPages.useQuery();
+	}
 
-export const useEventPage = (eventId: string) => {
-	return api.page.getPage.useQuery(eventId);
+	getPage(eventId: string) {
+		return api.page.getPage.useQuery(eventId);
+	}
+
+	getPageNames() {
+		const query = api.page.getPageNames.useQuery();
+		return query.data || [];
+	}
 }
 
 export const useEventPagesMutation = () => {
@@ -38,4 +45,4 @@ export type EventPageComponent = React.FC<{
 	linkCount: number
 }>
 
-export default useEventPages;
+export default EventPageService;

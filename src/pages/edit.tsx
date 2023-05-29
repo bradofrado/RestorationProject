@@ -11,11 +11,11 @@ import TabControl, { TabItem } from "~/utils/components/Tab";
 import { DeleteIcon } from "~/utils/components/icons/icons";
 import { useService } from "~/utils/react-service-container";
 import useEventPages from "~/utils/services/EventPageService";
-import  { useEventPagesMutation } from "~/utils/services/EventPageService";
+import  EventPageService, { useEventPagesMutation } from "~/utils/services/EventPageService";
 import { TimelineService, useCategoryMutations } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
 import { RestorationTimelineItem, TimelineCategory, TimelineCategoryName } from "~/utils/types/timeline";
-import {groupBy, groupByDistinct} from '~/utils/utils';
+import {useChangeProperty, groupBy, groupByDistinct} from '~/utils/utils';
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -70,7 +70,8 @@ type EditPagesProps = {
 const EditPages = ({id, setId}: EditPagesProps) => {
 	const [currPage, setCurrPage] = useState<EventPage>();
 	const {create, update, deletem} = useEventPagesMutation();
-	const query = useEventPages();
+	const pageService = useService(EventPageService);
+	const query = pageService.getPages();
 
 	let pages: EventPage[] | null = null;
 
@@ -161,36 +162,32 @@ const Input = ({children, onChange, className, ...rest}: InputProps) => {
 }
 
 const EditTimelineItems = () => {
-	const [category, setCategory] = useState<string>();
-	const [page, setPage] = useState<string>();
-	const [currItems, setCurrItems] = useState<RestorationTimelineItem[]>([]);
+	const [category, setCategory] = useState<TimelineCategory>();
 	const timelineService = useService(TimelineService);
-	const categories = timelineService.getCategories();
+	const pageService = useService(EventPageService);
+	const changeProperty = useChangeProperty<TimelineCategory>(setCategory);
 	const {update, create, deletem} = useCategoryMutations();
+	const pages = pageService.getPageNames();
+	const categories = timelineService.getCategories();
 	const categoriesGroup = groupByDistinct(categories, "name");
-	const categoryNames: DropdownItem<TimelineCategoryName>[] = Object.keys(categories).map(x => ({name: x, id: x}))
+	const categoryNames: DropdownItem<TimelineCategoryName>[] = categories.map(x => ({name: x.name, id: x.name}))
 
-	const pages: DropdownItem<string>[] = [...new Set(categories.map(item => {
-		const page = item.page;
-		return {name: page, id: page}
-	}))];
 	const onAdd = () => {
-		setCategory('New Category');
-		setPage(pages[0]?.id);
+		const newCategory: TimelineCategory = {
+			name: 'New Category',
+			page: pages[0] || 'book-of-mormon',
+			items: [],
+			color: '#fff'
+		}
+		setCategory(newCategory);
 	}
 
 	const onSave = (isNew: boolean) => {
-		if (!category || !page) {
+		if (!category) {
 			return;
 		}
 		
-		const newCategory: TimelineCategory = {
-			name: category,
-			page: page,
-			color: '#111',
-			items: currItems
-		}
-		isNew ? create(newCategory) : update(newCategory);
+		isNew ? create(category) : update(category);
 	}
 
 	const onClear = () => {
@@ -199,53 +196,58 @@ const EditTimelineItems = () => {
 
 	const onDelete = (isNew: boolean) => {
 		if (category && !isNew)
-			deletem(category);
+			deletem(category.name);
 	}
 
 	const onChange: ItemAction<TimelineCategoryName> = (item) => {
 		const category = categoriesGroup[item.id];
-		setCurrItems(category ? category.items : []);
-		setCategory(item.id);
-		setPage(category?.page);
+		//setCurrItems(category ? category.items : []);
+		setCategory(category);
+		//setPage(category?.page);
 	}
 
 	const onPageChange: ItemAction<string> = (value) => {
-		setPage(value.id);
+		if (!category) return;
+		changeProperty(category, "page", value.id);
 	}
 
 	const onItemDelete = (i: number) => {
-		const copy = currItems.slice();
+		if (!category) return;
+
+		const copy = category.items.slice();
 		copy.splice(i, 1);
-		setCurrItems(copy);
+		changeProperty(category, "items", copy);
 	}
 
 	const onItemAdd = () => {
-		const copy = currItems.slice();
+		if (!category) return;
+		const copy = category.items.slice();
 		copy.push({text: "new text", date: new Date(), links: []});
-		setCurrItems(copy);
+		changeProperty(category, "items", copy);
 	}
 
 	const saveItem = (item: RestorationTimelineItem, i: number) => {
-		const copy = currItems.slice();
+		if (!category) return;
+		const copy = category.items.slice();
 		copy[i] = item;
-		setCurrItems(copy);
+		changeProperty(category, "items", copy);
 		//TODO: save item
 	}
 	
 	return <>
 		<div>
-			<EditItemsButtons items={categoryNames} value={category} onChange={onChange}
+			<EditItemsButtons items={categoryNames} value={category?.name} onChange={onChange}
 				onAdd={onAdd} onSave={onSave} onClear={onClear} onDelete={onDelete}/>
 			{category && <>
 			<div className="my-2">
-				<Input value={category} onChange={value => setCategory(value)}>
+				<Input value={category.name} onChange={value => changeProperty(category, "name", value)}>
 					Name:
 				</Input>
 				<div>
-					<span>Page:</span><Dropdown items={pages} initialValue={page} onChange={onPageChange}></Dropdown>
+					<span>Page:</span><Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
 				</div>
 			</div>
-			<AddRemove items={currItems.map((item, i) => <EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)}/>)}
+			<AddRemove items={category.items.map((item, i) => <EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)}/>)}
 				onAdd={onItemAdd} onDelete={onItemDelete}
 			/>
 			</>}
@@ -259,39 +261,36 @@ type EditRestorationItemProps = {
 }
 const EditRestorationItem = ({item: propItem, onSave}: EditRestorationItemProps) => {
 	const [item, setItem] = useState<RestorationTimelineItem>(propItem);
+	const changePropertyItem = useChangeProperty<RestorationTimelineItem>(setItem);
 	useEffect(() => {
 		setItem(propItem);
 	}, [propItem])
-	const changeProperty = <K extends keyof RestorationTimelineItem>(key: K, value: RestorationTimelineItem[K]) => {
-		const copy = {...item};
-		copy[key] = value;
-		setItem(copy);
-	}
+	
 	const onLinkChange = (value: string, i: number) => {
 		const links = item.links.slice();
 		links[i] = value;
-		changeProperty("links", links);
+		changePropertyItem(item, "links", links);
 	}
 
 	const onAddLink = () => {
 		const links = item.links.slice();
 		links.push("new link");
-		changeProperty("links", links);
+		changePropertyItem(item, "links", links);
 	}
 
 	const onDeleteLink = (i: number) => {
 		const links = item.links.slice();
 		links.splice(i, 1);
-		changeProperty("links", links);
+		changePropertyItem(item, "links", links);
 	}
 	return <>
 		<Panel className="my-1">
-			<Input value={item.text} className="w-full" onChange={value => changeProperty("text", value)}>
+			<Input value={item.text} className="w-full" onChange={value => changePropertyItem(item, "text", value)}>
 				Text:
 			</Input>
 			<div>
-				<span>Start:</span><DatePicker value={dayjs(item.date)} onChange={value => changeProperty("date", value?.toDate() || new Date())}/>
-				<span>End:</span><DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changeProperty("date", value?.toDate() || new Date())}/>
+				<span>Start:</span><DatePicker value={dayjs(item.date)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
+				<span>End:</span><DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
 			</div>
 			<Button mode="primary" onClick={() => onSave(item)}>Save</Button>
 			<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} className="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}

@@ -76,6 +76,14 @@ export const pageRouter = createTRPCRouter({
 		.query(async ({ input, ctx }) => {
 			return await getPage({input, db: ctx.prisma})
 		}),
+	getPageNames: publicProcedure
+		.query(async ({ctx}) => {
+			const pages = await ctx.prisma.page.findMany({
+				select: {url: true}
+			});
+
+			return pages.map(x => x.url);
+		}),
 	createPage: publicProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
