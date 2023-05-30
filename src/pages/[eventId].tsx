@@ -1,8 +1,9 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEventPage } from "~/utils/services/EventPageService";
+import EventPageService from "~/utils/services/EventPageService";
 import { CustomComponent } from "~/utils/components/AddComponent";
+import { useService } from "~/utils/react-service-container";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
@@ -17,7 +18,8 @@ const Event_page : NextPage= () => {
 }
 
 const EventPage = ({eventId} : {eventId: string}) => {
-	const query = useEventPage(eventId);
+	const pageService = useService(EventPageService);
+	const query = pageService.getPage(eventId);
 
 	if (query.isLoading) {
 		return <div>Loading...</div>

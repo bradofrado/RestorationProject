@@ -4,10 +4,10 @@ import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
-import { type RestorationTimelineItem } from '~/utils/types/timeline';
+import {type TimelineItemStandalone} from '~/utils/types/timeline';
 
 interface TimelineProps {
-	items: RestorationTimelineItem[]
+	items: TimelineItemStandalone[]
 }
 export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 	if (items.length == 0) {
@@ -67,7 +67,9 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 		let currDateCount = 0;
 		const timeItems: TimelineItem[] = [];
 		for (let i = 0; i < sorted.length; i++) {
-			const item = sorted[i] as RestorationTimelineItem;
+			const item = sorted[i];
+			if (!item) continue;
+
 			if (!currDate || (item.date.getFullYear() != currDate.getFullYear() || (item.date.getMonth() - currDate.getMonth()) > 1)) {
 				currDate = item.date;
 				currDateCount = 0;
@@ -76,7 +78,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 			}
 
 			if (item.color == undefined) {
-				throw new Error(`item ${item.category} does not have color`);
+				throw new Error(`item ${item.date.toDateString()} does not have color`);
 			}
 
 			timeItems.push({

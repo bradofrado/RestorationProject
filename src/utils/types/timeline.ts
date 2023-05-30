@@ -7,6 +7,11 @@ export type TimelineCategoryName = string//typeof timelineCategories[number];
 export type TimelineSubcategory = "Seer stone in a hat" | "Two spectacles";
 export const isTimelineCategory = (value: string): value is TimelineCategoryName => (timelineCategories as ReadonlyArray<string>).includes(value)
 
+interface TimelineAttributes {
+	page: string,
+	color?: HexColor
+}
+
 export interface RestorationTimelineItem {
 	date: Date,
 	endDate?: Date,
@@ -14,6 +19,7 @@ export interface RestorationTimelineItem {
 	text: string,
 	links: string[],
 }
+export type TimelineItemStandalone =  RestorationTimelineItem & TimelineAttributes;
 
 export const RestorationTimelineItemSchema = z.object({
 	date: z.date(),
@@ -23,10 +29,8 @@ export const RestorationTimelineItemSchema = z.object({
 	links: z.array(z.string())
 })
 
-export interface TimelineCategory {
+export interface TimelineCategory extends TimelineAttributes {
 	name: TimelineCategoryName,
-	page: string,
-	color?: HexColor,
 	items: RestorationTimelineItem[]
 }
 
