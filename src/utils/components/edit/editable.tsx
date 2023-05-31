@@ -1,6 +1,6 @@
 import React, { type PropsWithChildren } from "react";
-import { type PolymorphicComponentProps } from "../types/polymorphic";
-import { type IconComponent } from "./icons/icons";
+import { type PolymorphicComponentProps } from "../../types/polymorphic";
+import { type IconComponent } from "../icons/icons";
 
 interface EditableProps extends PropsWithChildren {
 	icons?: ButtonIcon[],

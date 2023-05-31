@@ -1,6 +1,6 @@
 import { type Prisma } from "@prisma/client"
 import { z } from "zod"
-import { ComponentTypeSchema } from "../components/AddComponent"
+import { ComponentTypeSchema } from "../components/edit/add-component"
 
 const data = {
 	select: {content: true, properties: true}

@@ -4,18 +4,20 @@ import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/AddComponent";
-import Dropdown, { ItemAction, type DropdownItem } from "~/utils/components/Dropdown";
-import Editable, { ButtonIcon } from "~/utils/components/Editable";
-import TabControl, { TabItem } from "~/utils/components/Tab";
-import { DeleteIcon } from "~/utils/components/icons/icons";
-import { useService } from "~/utils/react-service-container";
-import useEventPages from "~/utils/services/EventPageService";
-import  EventPageService, { useEventPagesMutation } from "~/utils/services/EventPageService";
-import { TimelineService, useCategoryMutations } from "~/utils/services/TimelineService";
+import Dropdown, { type ItemAction, type DropdownItem } from "~/utils/components/base/dropdown";
+import Button from "~/utils/components/base/button";
+import { useEventPagesMutation, useGetPageNames, useGetPages } from "~/utils/services/EventPageService";
+import { useCategoryMutations, useGetCategories } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
-import { RestorationTimelineItem, TimelineCategory, TimelineCategoryName } from "~/utils/types/timeline";
-import {useChangeProperty, groupBy, groupByDistinct} from '~/utils/utils';
+import { type RestorationTimelineItem, type TimelineCategory, type TimelineCategoryName } from "~/utils/types/timeline";
+import {useChangeProperty, groupByDistinct} from '~/utils/utils';
+import Panel from "~/utils/components/base/panel";
+import AddRemove from "~/utils/components/base/addremove";
+import Input from "~/utils/components/base/input";
+import TabControl, { type TabItem } from "~/utils/components/base/tab";
+import EditItemsButtons from "~/utils/components/edit/edit-items-buttons";
+import Editable from "~/utils/components/edit/editable";
+import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -48,20 +50,6 @@ const Edit_page: NextPage = () => {
 	</>
 }
 
-type ButtonType = 'primary' | 'secondary'
-type ButtonProps = React.ComponentPropsWithoutRef<'button'> & {mode?: ButtonType}
-const Button = ({children, mode = 'primary', className, ...rest}: ButtonProps) => {
-	const buttonClasses: {[key in ButtonType]: string} = {
-		'primary': 'bg-primary',
-		'secondary': 'bg-black bg-opacity-20'
-	}
-	const _class = `${className || ''} ${buttonClasses[mode]} inline-flex justify-center rounded-md px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`;
-	return <>
-		<button className={_class}
-			{...rest}
-		>{children}</button>
-	</>
-}
 
 type EditPagesProps = {
 	id: string | undefined,
@@ -70,8 +58,7 @@ type EditPagesProps = {
 const EditPages = ({id, setId}: EditPagesProps) => {
 	const [currPage, setCurrPage] = useState<EventPage>();
 	const {create, update, deletem} = useEventPagesMutation();
-	const pageService = useService(EventPageService);
-	const query = pageService.getPages();
+	const query = useGetPages();
 
 	let pages: EventPage[] | null = null;
 
@@ -149,26 +136,17 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 	</>
 }
 
-type InputProps = Omit<React.ComponentPropsWithoutRef<'input'>, 'onChange'> & React.PropsWithChildren & {
-	onChange?: (value: string) => void
-}
-const Input = ({children, onChange, className, ...rest}: InputProps) => {
-	return <>
-		<label>{children}</label>
-		<input className={`${className || ''} bg-black bg-opacity-20 inline-flex justify-center rounded-md px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
-			{...rest} onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(e.target.value)}
-		/>
-	</>
-}
-
 const EditTimelineItems = () => {
 	const [category, setCategory] = useState<TimelineCategory>();
-	const timelineService = useService(TimelineService);
-	const pageService = useService(EventPageService);
 	const changeProperty = useChangeProperty<TimelineCategory>(setCategory);
 	const {update, create, deletem} = useCategoryMutations();
-	const pages = pageService.getPageNames();
-	const categories = timelineService.getCategories();
+	const pageQuery = useGetPageNames();
+	const categoryQuery = useGetCategories();
+	if (pageQuery.isLoading || pageQuery.isError || categoryQuery.isLoading || categoryQuery.isError) {
+		return <></>
+	}
+	const pages = pageQuery.data;
+	const categories = categoryQuery.data;
 	const categoriesGroup = groupByDistinct(categories, "name");
 	const categoryNames: DropdownItem<TimelineCategoryName>[] = categories.map(x => ({name: x.name, id: x.name}))
 
@@ -299,78 +277,7 @@ const EditRestorationItem = ({item: propItem, onSave}: EditRestorationItemProps)
 	</>
 }
 
-type AddRemoveProps = {
-	items: React.ReactNode[],
-	onDelete: (i: number) => void,
-	onAdd: () => void
-}
-const AddRemove = ({items, onDelete, onAdd}: AddRemoveProps) => {
-	return <>
-		{items.map((item, i) => {
-			const icons: ButtonIcon[] = [
-				{
-					icon: DeleteIcon,
-					handler: () => onDelete(i)
-				}
-			]
-			return <Editable icons={icons} key={i} editable="false">{item}</Editable>
-		})}
-		<div>
-			<Button mode="secondary" className="my-1" onClick={onAdd}>
-				+
-			</Button>
-		</div>
-	</>
-}
 
-type PanelProps = {
-	className?: string
-} & React.PropsWithChildren
-const Panel = ({children, className}: PanelProps) => {
-	return <>
-		<div className={`${className || ''} bg-white rounded-xl p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2`}>
-			{children}
-		</div>
-	</>
-}
-
-type EditItemsAction = (isNew: boolean) => void
-type EditItemsButtonsProps<T> = {
-	items: DropdownItem<T>[],
-	value?: string | undefined
-	onAdd: EditItemsAction,
-	onSave: EditItemsAction,
-	onClear: EditItemsAction,
-	onDelete: EditItemsAction,
-	onChange: ItemAction<T>
-}	
-const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, onChange}: EditItemsButtonsProps<T>) => {
-	const [isNew, setIsNew] = useState(true);
-
-	const onAction = (action: EditItemsAction, newIsNew: boolean) => {
-		return () => {
-			action(isNew);
-			setIsNew(newIsNew);
-		}
-	}
-
-	const onDropdownChange: ItemAction<T> = (item, index) => {
-		onChange(item, index);
-		setIsNew(false);
-	}
-	return <>
-		<Dropdown items={items} onChange={onDropdownChange} initialValue={value}>select</Dropdown>
-		<span className="mx-1">
-			{value == undefined ? 
-				<Button onClick={onAction(onAdd, true)} mode="secondary">Add</Button> : 
-				(<>
-					<Button className="mr-1" onClick={onAction(onSave, false)}>Save</Button>
-					{!isNew && <Button className="mr-1" onClick={onAction(onDelete, false)} mode="secondary">Delete</Button>}
-					<Button onClick={onAction(onClear, false)} mode="secondary">Clear</Button>
-				</>)}
-		</span>
-	</>
-}
 
 const EditablePage = ({page, setPage}: {page: EventPage, setPage: (page: EventPage) => void}) => {
 	const editSettings = (f: (settings: ComponentSettings[]) => void) => {

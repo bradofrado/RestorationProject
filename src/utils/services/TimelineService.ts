@@ -1,25 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../api";
-import { type RestorationTimelineItem, type TimelineCategoryName } from "../types/timeline";
+import { type TimelineCategoryName } from "../types/timeline";
 
-export class TimelineService {
-	getItems(): RestorationTimelineItem[] {
-		const query = api.timeline.getItems.useQuery();
+export const useGetItems = () => {
+	return api.timeline.getItems.useQuery();
+}
 
-		return query.data || [];
-	}
+export const useGetCategory = (category: TimelineCategoryName) => {
+	return api.timeline.getCategory.useQuery(category);
+}
 
-	getCategory(category: TimelineCategoryName) {
-		const query = api.timeline.getCategory.useQuery(category);
-
-		return query;
-	}
-
-	getCategories() {
-		const query = api.timeline.getCategories.useQuery();
-
-		return query.data || [];
-	}
+export const useGetCategories = () => {
+	return api.timeline.getCategories.useQuery();
 }
 
 export const useCategoryMutations = () => {
@@ -42,22 +34,22 @@ export const useCategoryMutations = () => {
 	}
 }
 
-export const useTimelineMutations = () => {
-	const queryClient = useQueryClient();
-	const createMutation = api.timeline.createTimeline.useMutation();
-	const updateMutation = api.timeline.updateTimeline.useMutation();
+// export const useTimelineMutations = () => {
+// 	const queryClient = useQueryClient();
+// 	const createMutation = api.timeline.createTimeline.useMutation();
+// 	const updateMutation = api.timeline.updateTimeline.useMutation();
 
-	const invalidate = <T>(func: (page: T) => void) => {
-		return (page: T) => {
-			func(page);
-			void queryClient.invalidateQueries();
-		}
-	}
+// 	const invalidate = <T>(func: (page: T) => void) => {
+// 		return (page: T) => {
+// 			func(page);
+// 			void queryClient.invalidateQueries();
+// 		}
+// 	}
 
-	return {
-		create: invalidate(createMutation.mutate), 
-		update: invalidate(updateMutation.mutate)
-	}
-}
+// 	return {
+// 		create: invalidate(createMutation.mutate), 
+// 		update: invalidate(updateMutation.mutate)
+// 	}
+// }
 
 

@@ -1,12 +1,14 @@
 import { type NextPage } from "next";
 import { Timeline as TimelineContainer } from "~/utils/components/Timeline/Timeline";
-import { TimelineService } from "~/utils/services/TimelineService";
-import { useService } from "~/utils/react-service-container";
+import { useGetCategories } from "~/utils/services/TimelineService";
 import { type TimelineItemStandalone } from "~/utils/types/timeline";
 
 const Timeline: NextPage = () => {
-	const timelineService = useService(TimelineService);
-	const categories = timelineService.getCategories();
+	const query = useGetCategories();
+	if (query.isLoading || query.isError) {
+		return <></>
+	}
+	const categories = query.data;
 	const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
 		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, page: curr.page}));
 		prev = prev.concat(items);

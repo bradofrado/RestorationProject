@@ -1,15 +1,14 @@
 import React from 'react'
-import Editable, { type ButtonIcon } from './Editable'
-import CondensedTimeline from './Timeline/CondensedTimeline'
-import { useService } from '../react-service-container'
-import { AddIcon, AdjustIcon, DeleteIcon, EditIcon, PlusSmall } from './icons/icons'
-import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from './Dropdown'
-import Header from './base/baseComponents'
-import { TranslationMethodsContainer } from './event-page/book-of-mormon-translation'
-import { TimelineService } from '../services/TimelineService'
-import { type TimelineCategoryName } from '../types/timeline'
-import { type EditableData } from '../types/page'
+import Editable, { type ButtonIcon } from './editable'
+import CondensedTimeline from '../Timeline/CondensedTimeline'
+import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
+import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
+import Header from '../base/header'
+import { TranslationMethodsContainer } from '../event-page/book-of-mormon-translation'
+import { type TimelineCategoryName } from '../../types/timeline'
+import { type EditableData } from '../../types/page'
 import { z } from 'zod'
+import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,
@@ -26,8 +25,12 @@ interface Component {
 }
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
-	const timelineService = useService(TimelineService);
-	const items = timelineService.getItems(data?.content as TimelineCategoryName || 'Book of Mormon');
+	const query = useGetCategory(data?.content as TimelineCategoryName || 'Book of Mormon');
+	if (query.isLoading || query.isError) {
+		return <></>
+	}
+	
+	const items = query.data.items;
 
 	return <>
 		<CondensedTimeline items={items} className={className}/>
@@ -46,35 +49,40 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 	]
 	
 	return <>
-	 				<Editable as={DataCondensedTimeline} data={data}
-						icons={[{icon: DeleteIcon, handler: onDelete}, 
-											<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
-													key={1} items={dropdownItems} icon={EditIcon}/>]}
-						>
-						Text
-					</Editable>
-				</>
+			<Editable as={DataCondensedTimeline} data={data}
+				icons={[{icon: DeleteIcon, handler: onDelete}, 
+									<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
+											key={1} items={dropdownItems} icon={EditIcon}/>]}
+				>
+				Text
+			</Editable>
+		</>
 }
 
-const DataList: React.ElementType<DataComponent> = ({data}) => {
+interface DataListProps extends DataComponent {
+	onBlur?: (value: string, index: number) => void,
+	contentEditable?: boolean | "true" | "false"
+}
+const DataList: React.ElementType<DataListProps> = ({data, onBlur, contentEditable}) => {
+	const query = useGetCategories();
+	if (query.isLoading || query.isError) {
+		return <></>
+	}
 	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
-	const timelineService = useService(TimelineService);
-	const items = type != 'custom' ? timelineService.getItems(type) : null;
+	const items = type != 'custom' ? query.data.find(x => x.name == type)?.items : undefined;
 	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
 	
 	return <>
 		{(!data?.properties || type == 'custom') && <ul className="list-disc px-10">
-			{type == 'custom' && liItems.map((x, i) => <li key={i}>{x}</li>)}
-			{items != null && items.map((item, i) => <li key={i}>{item.text}</li>) }
+			{type == 'custom' && liItems.map((x, i) => <li key={i} onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, i)} contentEditable={contentEditable}>{x}</li>)}
+			{items != undefined && items.map((item, i) => <li key={i}>{item.text}</li>) }
 		</ul>}
-		{data?.properties && items != null && <TranslationMethodsContainer items={items} annotationCount={0}/>}
+		{data?.properties && <TranslationMethodsContainer items={items || []} annotationCount={0}/>}
 	</>
 }
 
 const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
 	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
-	const timelineService = useService(TimelineService);
-	const items = type != 'custom' ? timelineService.getItems(type) : null;
 	const dropdownItems: DropdownItem<string>[] = [
 		{
 			name: 'Custom',
@@ -117,16 +125,9 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 		vals[index] = value;
 		onEdit({content: data?.content || 'custom', properties: vals.join('|')})
 	}
-
-	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
 	
 	return <>
-		{(!listItems[0]?.value || type == 'custom') && <Editable as="ul" className="list-disc px-10" editable={false}
-			icons={editIcons}>
-			{type == 'custom' && liItems.map((x, i) => <li key={i} contentEditable="true" onBlur={(e: React.FocusEvent<HTMLLIElement>) => editLiItem(e.target.innerHTML, i)}>{x}</li>)}
-			{items != null && items.map((item, i) => <li key={i}>{item.text}</li>) }
-		</Editable>}
-		{listItems[0]?.value && items != null && <Editable as={TranslationMethodsContainer} icons={editIcons} items={items} annotationCount={0}/>}
+		<Editable as={DataList} icons={editIcons} data={data} onBlur={editLiItem}/>
 	</>
 }
 
@@ -176,11 +177,11 @@ type DataComponentType = {type: ComponentType, editable?: false} & DataComponent
 export const CustomComponent = (props: EditableComponentType | DataComponentType) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
-		const {type, editable, ...rest} = props;
+		const {type: _, editable: _a, ...rest} = props;
 		return <Component.editable {...rest}></Component.editable>
 	}
 	
-	const {type, editable, ...rest} = props;
+	const {type: _, editable: _a, ...rest} = props;
 	return <Component.component {...rest}></Component.component>
 }
 

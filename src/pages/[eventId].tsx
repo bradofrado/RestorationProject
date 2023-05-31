@@ -1,9 +1,8 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import EventPageService from "~/utils/services/EventPageService";
-import { CustomComponent } from "~/utils/components/AddComponent";
-import { useService } from "~/utils/react-service-container";
+import { CustomComponent } from "~/utils/components/edit/add-component";
+import { useGetPage } from "~/utils/services/EventPageService";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
@@ -18,8 +17,7 @@ const Event_page : NextPage= () => {
 }
 
 const EventPage = ({eventId} : {eventId: string}) => {
-	const pageService = useService(EventPageService);
-	const query = pageService.getPage(eventId);
+	const query = useGetPage(eventId);
 
 	if (query.isLoading) {
 		return <div>Loading...</div>
@@ -42,11 +40,6 @@ const EventPage = ({eventId} : {eventId: string}) => {
 					{description}
 				</p>
 			</div>
-			{/* <div className="py-10">
-				<h2 className="text-xl font-bold">Timeline of Events</h2>
-				<CondensedTimeline items={items} />
-			</div>
-			<Component linkCount={annotationCount}/> */}
 			{settings.map((setting, i) => <CustomComponent key={i} type={setting.component} data={setting.data}/>)}
 		</div>
 	</>

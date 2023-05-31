@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import ScrollDrag from '../ScrollDrag';
+import ScrollDrag from '../base/scroll-drag';
 import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';

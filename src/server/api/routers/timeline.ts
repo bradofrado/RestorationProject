@@ -1,7 +1,6 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { type RestorationTimelineItem, type TimelineCategoryName, isTimelineCategory, TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema } from "~/utils/types/timeline";
-import { type HexColor } from "~/utils/types/colors";
+import { type RestorationTimelineItem, type TimelineCategoryName, isTimelineCategory, type TimelineCategory, TimelineCategorySchema } from "~/utils/types/timeline";
 import { z } from "zod";
 
 const getCategory = (categoryName: TimelineCategoryName) => {
@@ -51,7 +50,7 @@ export const timelineRouter = createTRPCRouter({
 	createCategory: publicProcedure
 		.input(TimelineCategorySchema)
 		.mutation(({input}) => {
-			categories.push(input);
+			categories.push(input as TimelineCategory);
 		}),
 	updateCategory: publicProcedure
 		.input(TimelineCategorySchema)
@@ -60,7 +59,7 @@ export const timelineRouter = createTRPCRouter({
 			if (index < 0) {
 				throw new TRPCError({code: "BAD_REQUEST", message: `Invalid category ${input.name}`})
 			}
-			categories[index] = input;
+			categories[index] = input as TimelineCategory;
 		}),
 	deleteCategory: publicProcedure
 		.input(z.string())
@@ -71,16 +70,16 @@ export const timelineRouter = createTRPCRouter({
 			}
 			categories.splice(index, 1); 
 		}),
-	createTimeline: publicProcedure
-		.input(RestorationTimelineItemSchema)
-		.mutation(({input}) => {
+	// createTimeline: publicProcedure
+	// 	.input(RestorationTimelineItemSchema)
+	// 	.mutation(({input}) => {
 
-		}),
-	updateTimeline: publicProcedure
-		.input(RestorationTimelineItemSchema)
-		.mutation(({input}) => {
+	// 	}),
+	// updateTimeline: publicProcedure
+	// 	.input(RestorationTimelineItemSchema)
+	// 	.mutation(({input}) => {
 
-		})
+	// 	})
 })
 
 const colors = {
