@@ -16,8 +16,9 @@ const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, o
 	const [isNew, setIsNew] = useState(value == undefined);
 
 	useEffect(() => {
-		setIsNew(value == undefined);
-	}, [value]);
+		const item = items.find(x => x.name == value);
+		setIsNew(item == undefined);
+	}, [items, value]);
 
 	const onAction = (action: EditItemsAction, newIsNew: boolean) => {
 		return () => {

@@ -39,4 +39,10 @@ export type InheritableElementProps<
 export type PolymorphicComponentProps<
   C extends React.ElementType,
   Props
-> = InheritableElementProps<C, Props & AsProp<C>>
+> = PolymorphicCustomProps<C, Props, AsProp<C>>//InheritableElementProps<C, Props & AsProp<C>>
+
+export type PolymorphicCustomProps<
+  C extends React.ElementType,
+  Props,
+  PolymorphicProps
+> = InheritableElementProps<C, Props & PolymorphicProps>

@@ -1,14 +1,23 @@
 import React from 'react';
-type InputProps = Omit<React.ComponentPropsWithoutRef<'input'>, 'onChange'> & React.PropsWithChildren & {
-	onChange?: (value: string) => void
+import { type PolymorphicCustomProps } from '~/utils/types/polymorphic';
+type InputProps = React.PropsWithChildren & {
+	onChange?: (value: string) => void,
+    value?: string | number | readonly string[] | undefined,
+    inputClass?: string,
+    type?: "input" | "textarea"
 }
-const Input = ({children, onChange, className, ...rest}: InputProps) => {
-	return <>
-		<label>{children}</label>
-		<input className={`${className || ''} bg-black bg-opacity-20 inline-flex justify-center rounded-md px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
-			{...rest} onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(e.target.value)}
-		/>
-	</>
+type TextProps<C extends React.ElementType> = PolymorphicCustomProps<C, InputProps, {include?: C}>
+const Input = <T extends React.ElementType>({children, onChange, value, include, inputClass, type="input", ...rest}: TextProps<T>) => {
+    const Component = include || 'div';
+    const props = {
+        className: `${inputClass || ''} bg-white border shadow-sm rounded-md px-3 py-1.5 text-sm text-gray-900 focus:border-blue-400 focus-visible:outline-none `,
+        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange && onChange(e.target.value)
+    }
+    const input = type == "input" ? <input {...props} value={value}/> : <textarea {...props} value={value}></textarea>
+    if (include) {
+        return <Component {...rest}>{input}{children}</Component>
+    }
+	return input;
 }
 
 export default Input;

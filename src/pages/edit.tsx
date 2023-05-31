@@ -18,6 +18,7 @@ import TabControl, { type TabItem } from "~/utils/components/base/tab";
 import EditItemsButtons from "~/utils/components/edit/edit-items-buttons";
 import Editable from "~/utils/components/edit/editable";
 import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
+import Label from "~/utils/components/base/label";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -45,7 +46,7 @@ const Edit_page: NextPage = () => {
 	return <>
 		<div className="max-w-4xl px-4 mx-auto sm:px-24 my-10 w-full">
 			<Link href="/timeline" className="text-xs italic font-bold text-gray-600 no-underline uppercase hover:text-gray-800">&lt; Back to timeline</Link>
-			<TabControl items={tabItems}/>
+			<TabControl items={tabItems} className="w-full px-2 py-6 sm:px-0"/>
 		</div>
 	</>
 }
@@ -89,7 +90,7 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 	}
 
 	const onAddPage = () => {
-		setCurrPage({id: '', url: "book-of-mormon", title: "Book of Mormon Translation", description: "Text", settings: []});
+		setCurrPage({id: '', url: "new-url", title: "Book of Mormon Translation", description: "Text", settings: []});
 	}
 
 	const onSave = (isNew: boolean) => {
@@ -125,10 +126,8 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 				onAdd={onAddPage} onSave={onSave} onDelete={onDelete} onClear={onClear}/>
 			{currPage && <>
 			<div className="py-1">
-				<Input value={currPage.url} onChange={onNameChange} className="ml-1">
-					Url:
-				</Input>
-				<Link href={`/${currPage.url}`} className="ml-1 bg-black bg-opacity-20 inline-flex justify-center rounded-md px-2 py-1 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">Go</Link>
+				<Input include={Label} label="Url" value={currPage.url} onChange={onNameChange} className="ml-1 my-1"/>
+				<Button as={Link} href={`/${currPage.url}`} className="ml-1">Go</Button>
 			</div>
 			<EditablePage page={currPage} setPage={setCurrPage} />
 			</>}
@@ -179,9 +178,7 @@ const EditTimelineItems = () => {
 
 	const onChange: ItemAction<TimelineCategoryName> = (item) => {
 		const category = categoriesGroup[item.id];
-		//setCurrItems(category ? category.items : []);
 		setCategory(category);
-		//setPage(category?.page);
 	}
 
 	const onPageChange: ItemAction<string> = (value) => {
@@ -218,12 +215,10 @@ const EditTimelineItems = () => {
 				onAdd={onAdd} onSave={onSave} onClear={onClear} onDelete={onDelete}/>
 			{category && <>
 			<div className="my-2">
-				<Input value={category.name} onChange={value => changeProperty(category, "name", value)}>
-					Name:
-				</Input>
-				<div>
-					<span>Page:</span><Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
-				</div>
+				<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
+				<Label label="Page" className="my-2">
+					<Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
+				</Label>
 			</div>
 			<AddRemove items={category.items.map((item, i) => <EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)}/>)}
 				onAdd={onItemAdd} onDelete={onItemDelete}
@@ -237,9 +232,13 @@ type EditRestorationItemProps = {
 	item: RestorationTimelineItem,
 	onSave: (item: RestorationTimelineItem) => void
 }
-const EditRestorationItem = ({item: propItem, onSave}: EditRestorationItemProps) => {
+const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorationItemProps) => {
 	const [item, setItem] = useState<RestorationTimelineItem>(propItem);
-	const changePropertyItem = useChangeProperty<RestorationTimelineItem>(setItem);
+	const [isDirty, setIsDirty] = useState(false);
+	const changePropertyItem = useChangeProperty<RestorationTimelineItem>((item: RestorationTimelineItem) => {
+		setIsDirty(true);
+		setItem(item);
+	});
 	useEffect(() => {
 		setItem(propItem);
 	}, [propItem])
@@ -261,18 +260,34 @@ const EditRestorationItem = ({item: propItem, onSave}: EditRestorationItemProps)
 		links.splice(i, 1);
 		changePropertyItem(item, "links", links);
 	}
+
+	const onCancel = () => {
+		console.log(propItem);
+		setItem(propItem);
+		setIsDirty(false);
+	}
+
+	const onSave = () => {
+		setIsDirty(false);
+		onSaveProp(item);
+	}
 	return <>
 		<Panel className="my-1">
-			<Input value={item.text} className="w-full" onChange={value => changePropertyItem(item, "text", value)}>
-				Text:
-			</Input>
-			<div>
-				<span>Start:</span><DatePicker value={dayjs(item.date)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
-				<span>End:</span><DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
-			</div>
-			<Button mode="primary" onClick={() => onSave(item)}>Save</Button>
-			<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} className="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
-				onAdd={onAddLink} onDelete={onDeleteLink}/>
+			<Input include={Label} label="Text" type="textarea" value={item.text} inputClass="w-full" onChange={value => changePropertyItem(item, "text", value)}/>
+			<Label label="Start" className="inline-block my-1 mr-1">
+				<DatePicker value={dayjs(item.date)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
+			</Label>
+			<Label label="End" className="inline-block my-1 mx-1">
+				<DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
+			</Label>
+			<Label label="Links" className="my-1">
+				<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} inputClass="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
+					onAdd={onAddLink} onDelete={onDeleteLink}/>
+			</Label>
+			{isDirty && <div className="my-1 text-right mx-4">
+				<Button className="mx-1" mode="secondary" onClick={onCancel}>Cancel</Button>
+				<Button mode="primary" onClick={onSave}>Save</Button>
+			</div>}
 		</Panel>
 	</>
 }

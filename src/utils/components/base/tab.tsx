@@ -11,12 +11,13 @@ export interface TabItem {
 }
 
 type TabControlProps = {
-	items: TabItem[]
+	items: TabItem[],
+  className?: string
 }
 
-export default function TabControl({items}: TabControlProps) {
+export default function TabControl({items, className}: TabControlProps) {
   return (
-    <div className="w-full px-2 py-16 sm:px-0">
+    <div className={className}>
       <Tab.Group>
         <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
           {items.map((item, i) => (
