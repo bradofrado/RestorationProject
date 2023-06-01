@@ -9,7 +9,7 @@ import Button from "~/utils/components/base/button";
 import { useEventPagesMutation, useGetPageNames, useGetPages } from "~/utils/services/EventPageService";
 import { useCategoryMutations, useGetCategories, useTimelineMutations } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
-import { type RestorationTimelineItem, type TimelineCategory, type TimelineCategoryName } from "~/utils/types/timeline";
+import { type RestorationTimelineItem, type TimelineCategory } from "~/utils/types/timeline";
 import {useChangeProperty, groupByDistinct} from '~/utils/utils';
 import Panel from "~/utils/components/base/panel";
 import AddRemove from "~/utils/components/base/addremove";
@@ -69,9 +69,15 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 			console.log(page);
 			page && setCurrPage(page);
 		}
-		console.log(id);
-		console.log(query.data)
 	}, [query.data, id])
+
+	useEffect(() => {
+		const data = create.data || update.data;
+		if (data) {
+			setId(data.id);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [create.data, update.data])
 
 	if (query.isLoading) {
 		return <div>Loading...</div>
@@ -95,7 +101,7 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 
 	const onSave = (isNew: boolean) => {
 		if (currPage) {
-			isNew ? create(currPage) : update(currPage)
+			isNew ? create.mutate(currPage) : update.mutate(currPage)
 			setId(currPage.id);
 			alert("Page saved!")
 		}
@@ -103,7 +109,7 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 
 	const onDelete = (isNew: boolean) => {
 		if (currPage && !isNew) {
-			deletem(currPage.id);
+			deletem.mutate(currPage.id);
 			setCurrPage(undefined);
 			setId(undefined);
 		}
@@ -122,7 +128,7 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 
 	return <>
 		<div>
-			<EditItemsButtons items={items} value={currPage?.url} onChange={onChange}
+			<EditItemsButtons items={items} value={currPage?.id} onChange={onChange}
 				onAdd={onAddPage} onSave={onSave} onDelete={onDelete} onClear={onClear}/>
 			{currPage && <>
 			<div className="py-1">
@@ -143,13 +149,28 @@ const EditTimelineItems = () => {
 	const {update: updateItem, create: createItem, deletem: deleteItem} = useTimelineMutations();
 	const pageQuery = useGetPageNames();
 	const categoryQuery = useGetCategories();
+	useEffect(() => {
+		if (create.data != undefined) {
+			setCategory(create.data);
+		} else if (update.data != undefined) {
+			setCategory(update.data);
+		}
+	}, [create.data, update.data])
+	useEffect(() => {
+		const data = createItem.data || updateItem.data;
+		if (data) {
+			const item = categoryQuery.data?.find(x => x.id == data.categoryId);
+			item && setCategory(item);
+		}
+	}, [categoryQuery.data, createItem.data, updateItem.data])
+
 	if (pageQuery.isLoading || pageQuery.isError || categoryQuery.isLoading || categoryQuery.isError) {
 		return <></>
 	}
 	const pages = pageQuery.data;
 	const categories = categoryQuery.data;
-	const categoriesGroup = groupByDistinct(categories, "name");
-	const categoryNames: DropdownItem<TimelineCategoryName>[] = categories.map(x => ({name: x.name, id: x.name}))
+	const categoriesGroup = groupByDistinct(categories, "id");
+	const categoryNames: DropdownItem<number>[] = categories.map(x => ({name: x.name, id: x.id}))
 
 	const onAdd = () => {
 		const newCategory: TimelineCategory = {
@@ -167,7 +188,7 @@ const EditTimelineItems = () => {
 			return;
 		}
 		
-		isNew ? create(category) : update(category);
+		isNew ? create.mutate(category) : update.mutate(category);
 	}
 
 	const onClear = () => {
@@ -175,11 +196,13 @@ const EditTimelineItems = () => {
 	}
 
 	const onDelete = (isNew: boolean) => {
-		if (category && !isNew)
-			deletem(category.id);
+		if (category && !isNew) {
+			deletem.mutate(category.id);
+			setCategory(undefined);
+		}
 	}
 
-	const onChange: ItemAction<TimelineCategoryName> = (item) => {
+	const onChange: ItemAction<number> = (item) => {
 		const category = categoriesGroup[item.id];
 		setCategory(category);
 	}
@@ -226,12 +249,12 @@ const EditTimelineItems = () => {
 		const copy = category.items.slice();
 		if (markedForDelete[item.id]) {
 			copy.splice(i, 1);
-			item.id > 0 && deleteItem(item.id);
+			item.id > 0 && deleteItem.mutate(item.id);
 			
 			deleteMarkedForDelete(item.id);
 		} else {
 			copy[i] = item;
-			item.id < 0 ? createItem(item) : updateItem(item);
+			item.id < 0 ? createItem.mutate(item) : updateItem.mutate(item);
 		}
 		changeProperty(category, "items", copy);
 	}
@@ -244,20 +267,25 @@ const EditTimelineItems = () => {
 	
 	return <>
 		<div>
-			<EditItemsButtons items={categoryNames} value={category?.name} onChange={onChange}
-				onAdd={onAdd} onSave={onSave} onClear={onClear} onDelete={onDelete}/>
-			{category && <>
-			<div className="my-2">
-				<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
-				<Label label="Page" className="my-2">
-					<Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
-				</Label>
-			</div>
-			<AddRemove items={category.items.map((item, i) => 
-				<EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)} disabled={markedForDelete[item.id]} cancelDisabled={deleteMarkedForDelete}/>)}
-				onAdd={onItemAdd} onDelete={onItemDelete}
-			/>
-			</>}
+			<EditItemsButtons items={categoryNames} value={category?.id} onChange={onChange}
+				onAdd={onAdd} onSave={onSave} onClear={onClear} onDelete={onDelete}>
+				{({isNew}) => (<>
+					{category && <>
+					<div className="my-2">
+						<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
+						<Label label="Page" className="my-2">
+							<Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
+						</Label>
+					</div>
+					<AddRemove items={category.items.map((item, i) => 
+						<EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)} 
+							disabled={markedForDelete[item.id]} cancelDisabled={deleteMarkedForDelete} isNew={isNew}
+						/>)}
+						onAdd={onItemAdd} onDelete={onItemDelete}
+					/>
+					</>}
+				</>)}
+			</EditItemsButtons>
 		</div>
 	</>
 }
@@ -266,14 +294,18 @@ type EditRestorationItemProps = {
 	item: RestorationTimelineItem,
 	onSave: (item: RestorationTimelineItem) => void,
 	disabled?: boolean,
-	cancelDisabled: (id: number) => void
+	cancelDisabled: (id: number) => void,
+	isNew: boolean
 }
-const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp, cancelDisabled}: EditRestorationItemProps) => {
+const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp, cancelDisabled, isNew}: EditRestorationItemProps) => {
 	const [item, setItem] = useState<RestorationTimelineItem>(propItem);
 	const [isDirty, setIsDirty] = useState(false);
 	const changePropertyItem = useChangeProperty<RestorationTimelineItem>((item: RestorationTimelineItem) => {
 		setIsDirty(true);
 		setItem(item);
+		if (isNew) {
+			onSaveProp(item);
+		}
 	});
 	useEffect(() => {
 		if (propItem.id < 0) {
@@ -283,10 +315,6 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 		
 	}, [propItem])
 
-	// useEffect(() => {
-	// 	setIsDirty(isDirty || disabled);
-	// }, [disabled, isDirty]);
-	
 	const onLinkChange = (value: string, i: number) => {
 		const links = item.links;
 		links[i] = value;
@@ -329,8 +357,8 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 				<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} inputClass="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
 					onAdd={onAddLink} onDelete={onDeleteLink}/>
 			</Label>
-			{(isDirty || disabled) && <div className="my-1 text-right mx-4 z-20 relative">
-				<Button className="mx-1" mode="secondary" onClick={onCancel}>Cancel</Button>
+			{!isNew && (isDirty || disabled) && <div className="my-1 text-right mx-4 z-20 relative">
+				{item.id > 0 && <Button className="mx-1" mode="secondary" onClick={onCancel}>Cancel</Button>}
 				<Button mode="primary" onClick={onSave}>Save</Button>
 			</div>}
 		</Panel>

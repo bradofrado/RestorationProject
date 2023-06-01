@@ -102,7 +102,7 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 
 	const editIcons: ButtonIcon[] = [
 		{icon: DeleteIcon, handler: onDelete},
-		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: null})}/>,
+		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: data?.properties || null})}/>,
 	];
 
 	if (type != 'custom') {
@@ -179,7 +179,7 @@ export const CustomComponent = (props: EditableComponentType | DataComponentType
 export default function AddComponent({onAdd}: {onAdd: (component: ComponentType) => void}) {
   const items: DropdownItem<ComponentType>[] = components.map(comp => ({name: comp.label, id: comp.label}))
 	return (
-		<Dropdown items={items} chevron={false} onChange={item => onAdd(item.id)} staticValue={true}>
+		<Dropdown items={items} chevron={false} onChange={item => onAdd(item.id)}>
 			+
 		</Dropdown>
   )

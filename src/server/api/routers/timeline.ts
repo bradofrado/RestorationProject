@@ -26,7 +26,7 @@ const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryI
 }
 
 const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTimelineItem => {
-	return {...item, links: item.links.split(',')}
+	return {...item, links: item.links.split(',').filter(x => x != '')}
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
@@ -98,6 +98,9 @@ export const timelineRouter = createTRPCRouter({
 					name: input.name,
 					page: input.page,
 					color: input.color,
+					items: {
+						create: input.items.map(x => translateTimelineItemToPrisma(x))
+					}
 				},
 				include: TimelineCategoryArgs.include
 			});

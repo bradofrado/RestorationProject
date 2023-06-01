@@ -9,22 +9,21 @@ export interface DropdownItem<T> {
 export type ItemAction<T> = (item: DropdownItem<T>, index: number) => void
 interface DropdownProps<T> extends PropsWithChildren {
 	items: DropdownItem<T>[],
-	initialValue?: React.ReactNode,
+	initialValue?: T,
 	className?: string,
 	chevron?: boolean,
 	onChange?: ItemAction<T>,
-	staticValue?: boolean
 }
 
-const Dropdown = <T,>({children, initialValue, onChange, items, staticValue = false,
+const Dropdown = <T,>({children, initialValue, onChange, items,
 		chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-white shadow-sm px-3 py-1.5 border text-sm text-gray-900 focus:border-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps<T>) => {
-	const [value, setValue] = useState<React.ReactNode | undefined>(initialValue);
+	const [value, setValue] = useState<DropdownItem<T> | undefined>(items.find(x => x.id == initialValue));
 	useEffect(() => {
-		setValue(initialValue);
-	}, [initialValue])
+		setValue(items.find(x => x.id == initialValue));
+	}, [initialValue, items])
 	
 	const onClick = (item: DropdownItem<T>, index: number) => {
-		setValue(item.name);
+		setValue(item);
 		onChange && onChange(item, index)
 	}
 	
@@ -32,7 +31,7 @@ const Dropdown = <T,>({children, initialValue, onChange, items, staticValue = fa
 		<Menu as="div" className="relative inline-block text-left">
 			<div>
 				<Menu.Button className={className}>
-					{value && !staticValue ? value : children} {chevron && <ChevronDown
+					{initialValue && value ? value?.name : children} {chevron && <ChevronDown
               className="ml-2 -mr-1 h-4 w-4"
               aria-hidden="true"
             />}
@@ -99,7 +98,7 @@ export const DropdownIcon = <T,>({icon, className, ...rest}: DropdownIconProps<T
 	const Icon = icon;
 	return <>
 		<Dropdown className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className || ''}`} 
-				{...rest} chevron={false} staticValue={true}>
+				{...rest} chevron={false}>
 			<Icon className="h-5 w-5"/>
 		</Dropdown>
 	</>

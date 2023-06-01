@@ -5,18 +5,19 @@ import Button from "../base/button";
 type EditItemsAction = (isNew: boolean) => void;
 type EditItemsButtonsProps<T> = {
 	items: DropdownItem<T>[],
-	value?: string | undefined
+	value?: T | undefined
 	onAdd: EditItemsAction,
 	onSave: EditItemsAction,
 	onClear: EditItemsAction,
 	onDelete: EditItemsAction,
-	onChange: ItemAction<T>
-}	
-const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, onChange}: EditItemsButtonsProps<T>) => {
+	onChange: ItemAction<T>,
+	children?: React.ReactNode | ((props: {isNew: boolean}) => JSX.Element)
+}
+const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, onChange, children}: EditItemsButtonsProps<T>) => {
 	const [isNew, setIsNew] = useState(value == undefined);
 
 	useEffect(() => {
-		const item = items.find(x => x.name == value);
+		const item = items.find(x => x.id == value);
 		setIsNew(item == undefined);
 	}, [items, value]);
 
@@ -42,6 +43,7 @@ const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, o
 					<Button onClick={onAction(onClear, false)} mode="secondary">Clear</Button>
 				</>)}
 		</span>
+		{(typeof children == 'function' ? children({isNew}): children)}
 	</>
 }
 
