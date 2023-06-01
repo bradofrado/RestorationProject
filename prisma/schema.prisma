@@ -83,3 +83,22 @@ model EditableData {
   settings ComponentSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 	settingsId 				Int @unique
 }
+
+model TimelineCategory {
+  id                Int     @id @default(autoincrement())
+  name              String  @unique
+  page              String
+  color             String?
+  items             TimelineItem[]
+}
+
+model TimelineItem {
+  id          Int @id @default(autoincrement())
+  date        DateTime
+  endDate     DateTime?
+  subcategory String?
+  text        String
+  links       String
+  category    TimelineCategory? @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+}

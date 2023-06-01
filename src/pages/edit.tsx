@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import Dropdown, { type ItemAction, type DropdownItem } from "~/utils/components/base/dropdown";
 import Button from "~/utils/components/base/button";
 import { useEventPagesMutation, useGetPageNames, useGetPages } from "~/utils/services/EventPageService";
-import { useCategoryMutations, useGetCategories } from "~/utils/services/TimelineService";
+import { useCategoryMutations, useGetCategories, useTimelineMutations } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
 import { type RestorationTimelineItem, type TimelineCategory, type TimelineCategoryName } from "~/utils/types/timeline";
 import {useChangeProperty, groupByDistinct} from '~/utils/utils';
@@ -137,8 +137,10 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 
 const EditTimelineItems = () => {
 	const [category, setCategory] = useState<TimelineCategory>();
+	const [markedForDelete, setMarkedForDelete] = useState<Record<number, boolean>>({});
 	const changeProperty = useChangeProperty<TimelineCategory>(setCategory);
 	const {update, create, deletem} = useCategoryMutations();
+	const {update: updateItem, create: createItem, deletem: deleteItem} = useTimelineMutations();
 	const pageQuery = useGetPageNames();
 	const categoryQuery = useGetCategories();
 	if (pageQuery.isLoading || pageQuery.isError || categoryQuery.isLoading || categoryQuery.isError) {
@@ -151,6 +153,7 @@ const EditTimelineItems = () => {
 
 	const onAdd = () => {
 		const newCategory: TimelineCategory = {
+			id: -1,
 			name: 'New Category',
 			page: pages[0] || 'book-of-mormon',
 			items: [],
@@ -173,7 +176,7 @@ const EditTimelineItems = () => {
 
 	const onDelete = (isNew: boolean) => {
 		if (category && !isNew)
-			deletem(category.name);
+			deletem(category.id);
 	}
 
 	const onChange: ItemAction<TimelineCategoryName> = (item) => {
@@ -189,24 +192,54 @@ const EditTimelineItems = () => {
 	const onItemDelete = (i: number) => {
 		if (!category) return;
 
-		const copy = category.items.slice();
-		copy.splice(i, 1);
-		changeProperty(category, "items", copy);
+		const item = category.items[i];
+		if (!item) return;
+
+		if (item.id > 0) {
+			const markCopy = {...markedForDelete};
+			markCopy[item.id] = true;
+			setMarkedForDelete(markCopy);
+		} else {
+			const copy = category.items.slice();
+			copy.splice(i, 1);
+			changeProperty(category, "items", copy);
+		}
 	}
 
 	const onItemAdd = () => {
 		if (!category) return;
 		const copy = category.items.slice();
-		copy.push({text: "new text", date: new Date(), links: []});
+		copy.push({
+			id: -1,
+			text: "new text", 
+			date: new Date(), 
+			endDate: null, 
+			links: [], 
+			subcategory: null, 
+			categoryId: category.id
+		});
 		changeProperty(category, "items", copy);
 	}
 
 	const saveItem = (item: RestorationTimelineItem, i: number) => {
 		if (!category) return;
 		const copy = category.items.slice();
-		copy[i] = item;
+		if (markedForDelete[item.id]) {
+			copy.splice(i, 1);
+			item.id > 0 && deleteItem(item.id);
+			
+			deleteMarkedForDelete(item.id);
+		} else {
+			copy[i] = item;
+			item.id < 0 ? createItem(item) : updateItem(item);
+		}
 		changeProperty(category, "items", copy);
-		//TODO: save item
+	}
+
+	const deleteMarkedForDelete = (id: number) => {
+		const markCopy = {...markedForDelete};
+		markCopy[id] = false;
+		setMarkedForDelete(markCopy);
 	}
 	
 	return <>
@@ -220,7 +253,8 @@ const EditTimelineItems = () => {
 					<Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
 				</Label>
 			</div>
-			<AddRemove items={category.items.map((item, i) => <EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)}/>)}
+			<AddRemove items={category.items.map((item, i) => 
+				<EditRestorationItem key={i} item={item} onSave={(item: RestorationTimelineItem) => saveItem(item, i)} disabled={markedForDelete[item.id]} cancelDisabled={deleteMarkedForDelete}/>)}
 				onAdd={onItemAdd} onDelete={onItemDelete}
 			/>
 			</>}
@@ -230,9 +264,11 @@ const EditTimelineItems = () => {
 
 type EditRestorationItemProps = {
 	item: RestorationTimelineItem,
-	onSave: (item: RestorationTimelineItem) => void
+	onSave: (item: RestorationTimelineItem) => void,
+	disabled?: boolean,
+	cancelDisabled: (id: number) => void
 }
-const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorationItemProps) => {
+const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp, cancelDisabled}: EditRestorationItemProps) => {
 	const [item, setItem] = useState<RestorationTimelineItem>(propItem);
 	const [isDirty, setIsDirty] = useState(false);
 	const changePropertyItem = useChangeProperty<RestorationTimelineItem>((item: RestorationTimelineItem) => {
@@ -240,11 +276,19 @@ const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorati
 		setItem(item);
 	});
 	useEffect(() => {
+		if (propItem.id < 0) {
+			setIsDirty(true);
+		}
 		setItem(propItem);
+		
 	}, [propItem])
+
+	// useEffect(() => {
+	// 	setIsDirty(isDirty || disabled);
+	// }, [disabled, isDirty]);
 	
 	const onLinkChange = (value: string, i: number) => {
-		const links = item.links.slice();
+		const links = item.links;
 		links[i] = value;
 		changePropertyItem(item, "links", links);
 	}
@@ -265,6 +309,7 @@ const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorati
 		console.log(propItem);
 		setItem(propItem);
 		setIsDirty(false);
+		disabled && cancelDisabled(propItem.id);
 	}
 
 	const onSave = () => {
@@ -272,7 +317,7 @@ const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorati
 		onSaveProp(item);
 	}
 	return <>
-		<Panel className="my-1">
+		<Panel className="my-1" disabled={disabled}>
 			<Input include={Label} label="Text" type="textarea" value={item.text} inputClass="w-full" onChange={value => changePropertyItem(item, "text", value)}/>
 			<Label label="Start" className="inline-block my-1 mr-1">
 				<DatePicker value={dayjs(item.date)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
@@ -284,7 +329,7 @@ const EditRestorationItem = ({item: propItem, onSave: onSaveProp}: EditRestorati
 				<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} inputClass="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
 					onAdd={onAddLink} onDelete={onDeleteLink}/>
 			</Label>
-			{isDirty && <div className="my-1 text-right mx-4">
+			{(isDirty || disabled) && <div className="my-1 text-right mx-4 z-20 relative">
 				<Button className="mx-1" mode="secondary" onClick={onCancel}>Cancel</Button>
 				<Button mode="primary" onClick={onSave}>Save</Button>
 			</div>}

@@ -4,4 +4,4 @@ export type HexColor = `#${string}`
 
 export const PrimaryColor: HexColor = `#FFF`;
 
-export const HexColorSchema = z.string().startsWith("#")
+export const HexColorSchema = z.custom<HexColor>((val) => typeof val == 'string' && val.startsWith('#'))
