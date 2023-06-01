@@ -25,7 +25,7 @@ interface Component {
 }
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
-	const query = useGetCategory(data?.content as TimelineCategoryName || 'Book of Mormon');
+	const query = useGetCategory(data?.content || 'Book of Mormon');
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
@@ -37,16 +37,11 @@ const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, classNam
 	</>
 }
 const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
-	const dropdownItems: DropdownItem<string>[] = [
-		{
-			name: 'Book of Mormon',
-			id: 'Book of Mormon',
-		},
-		{
-			name: 'Book of Mormon Translation',
-			id: 'Book of Mormon Translation',
-		}
-	]
+	const query = useGetCategories();
+	if (query.isLoading || query.isError) {
+		return <></>
+	}
+	const dropdownItems: DropdownItem<string>[] = query.data.map(x => ({id: x.name, name: x.name}))
 	
 	return <>
 			<Editable as={DataCondensedTimeline} data={data}
@@ -82,21 +77,17 @@ const DataList: React.ElementType<DataListProps> = ({data, onBlur, contentEditab
 }
 
 const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
+	const query = useGetCategories();
+	if (query.isLoading || query.isError) {
+		return <></>
+	}
 	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
 	const dropdownItems: DropdownItem<string>[] = [
 		{
 			name: 'Custom',
 			id: 'custom',
 		},
-		{
-			name: 'Book of Mormon',
-			id: 'Book of Mormon',
-		},
-		{
-			name: 'Book of Mormon Translation',
-			id: 'Book of Mormon Translation',
-		},
-	];
+	].concat(query.data.map(x => ({id: x.name, name: x.name})));
 
 	const listItems: ListItem[] = [
 		{

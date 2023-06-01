@@ -1,12 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../api";
-import { type TimelineCategoryName } from "../types/timeline";
 
 export const useGetItems = () => {
 	return api.timeline.getItems.useQuery();
 }
 
-export const useGetCategory = (category: number) => {
+export const useGetCategory = (category: string) => {
 	return api.timeline.getCategory.useQuery(category);
 }
 

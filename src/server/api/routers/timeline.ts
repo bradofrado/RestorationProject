@@ -41,15 +41,15 @@ const getCategories = async (db: Db): Promise<TimelineCategory[]> => {
 	return dbCategories.map(category => translatePrismaToTimelineCategory(category));
 }
 
-const getCategory = async ({db, input}: {db: Db, input: number}) => {
+const getCategory = async ({db, name}: {db: Db, name: string}) => {
 	const dbCategory: PrismaTimelineCategory | null = await db.timelineCategory.findUnique({
 		where: {
-			id: input
+			name: name
 		},
 		include: TimelineCategoryArgs.include
 	});
 	if (dbCategory == null) {
-		throw new TRPCError({code: "BAD_REQUEST", message: `Invalid input ${input}`});
+		throw new TRPCError({code: "BAD_REQUEST", message: `Invalid input ${name}`});
 	}
 
 	return translatePrismaToTimelineCategory(dbCategory);
@@ -82,9 +82,9 @@ export const timelineRouter = createTRPCRouter({
 			}
 		}),
 	getCategory: publicProcedure
-		.input(z.number())
+		.input(z.string())
 		.query(async ({input, ctx}) => {
-			return await getCategory({input, db: ctx.prisma});
+			return await getCategory({name: input, db: ctx.prisma});
 		}),
 	getCategories: publicProcedure
 		.query(async ({ctx}) => {
