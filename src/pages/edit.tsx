@@ -19,6 +19,7 @@ import EditItemsButtons from "~/utils/components/edit/edit-items-buttons";
 import Editable from "~/utils/components/edit/editable";
 import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
 import Label from "~/utils/components/base/label";
+import ColorPicker from "~/utils/components/base/color-picker";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -178,7 +179,7 @@ const EditTimelineItems = () => {
 			name: 'New Category',
 			pageId: pages[0]?.id || '',
 			items: [],
-			color: '#fff'
+			color: '#f1635c'
 		}
 		setCategory(newCategory);
 	}
@@ -275,6 +276,9 @@ const EditTimelineItems = () => {
 						<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
 						<Label label="Page" className="my-2">
 							<Dropdown items={pages.map(x => ({name: x.url, id: x.id}))} initialValue={category?.pageId} onChange={onPageChange}></Dropdown>
+						</Label>
+						<Label label="Color" className="my-2">
+							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
 						</Label>
 					</div>
 					<AddRemove items={category.items.map((item, i) => 
