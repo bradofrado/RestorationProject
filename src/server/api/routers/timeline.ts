@@ -96,7 +96,7 @@ export const timelineRouter = createTRPCRouter({
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.create({
 				data: {
 					name: input.name,
-					page: input.page,
+					pageId: input.pageId,
 					color: input.color,
 					items: {
 						create: input.items.map(x => translateTimelineItemToPrisma(x))
@@ -113,7 +113,7 @@ export const timelineRouter = createTRPCRouter({
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.update({
 				data: {
 					name: input.name,
-					page: input.page,
+					pageId: input.pageId,
 					color: input.color,
 				},
 				include: TimelineCategoryArgs.include,
@@ -174,7 +174,7 @@ const categories: TimelineCategory[] = [
 	{
 		id: 1,
 		name: "Book of Mormon",
-		page: "book-of-mormon",
+		pageId: "book-of-mormon",
 		color: colors["Book of Mormon"],
 		items: [
 			{
@@ -254,7 +254,7 @@ const categories: TimelineCategory[] = [
 	{
 		id: 2,
 		name: "Book of Mormon Translation",
-		page: "book-of-mormon",
+		pageId: "book-of-mormon",
 		color: colors["Book of Mormon Translation"],
 		items: [
 			{

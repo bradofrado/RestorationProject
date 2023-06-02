@@ -10,7 +10,7 @@ export type TimelineSubcategory = "Seer stone in a hat" | "Two spectacles";
 export const isTimelineCategory = (value: string): value is TimelineCategoryName => (timelineCategories as ReadonlyArray<string>).includes(value)
 
 interface TimelineAttributes {
-	page: string,
+	pageId: string,
 	color?: HexColor
 }
 
@@ -41,7 +41,7 @@ export type PrismaTimelineCategory = Prisma.TimelineCategoryGetPayload<typeof Ti
 export const TimelineCategorySchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	page: z.string(),
+	pageId: z.string(),
 	color: HexColorSchema,
 	items: z.array(RestorationTimelineItemSchema)
 }) satisfies z.Schema<Replace<PrismaTimelineCategory, "items", RestorationTimelineItem[]> & TimelineAttributes>

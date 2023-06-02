@@ -10,7 +10,7 @@ const Timeline: NextPage = () => {
 	}
 	const categories = query.data;
 	const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
-		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, page: curr.page}));
+		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, pageId: curr.pageId}));
 		prev = prev.concat(items);
 
 		return prev;

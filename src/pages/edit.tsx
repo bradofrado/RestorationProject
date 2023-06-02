@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Dropdown, { type ItemAction, type DropdownItem } from "~/utils/components/base/dropdown";
 import Button from "~/utils/components/base/button";
-import { useEventPagesMutation, useGetPageNames, useGetPages } from "~/utils/services/EventPageService";
+import { useEventPagesMutation, useGetPages } from "~/utils/services/EventPageService";
 import { useCategoryMutations, useGetCategories, useTimelineMutations } from "~/utils/services/TimelineService";
 import { type EventPage, type ComponentSettings, type EditableData } from "~/utils/types/page";
 import { type RestorationTimelineItem, type TimelineCategory } from "~/utils/types/timeline";
@@ -147,7 +147,7 @@ const EditTimelineItems = () => {
 	const changeProperty = useChangeProperty<TimelineCategory>(setCategory);
 	const {update, create, deletem} = useCategoryMutations();
 	const {update: updateItem, create: createItem, deletem: deleteItem} = useTimelineMutations();
-	const pageQuery = useGetPageNames();
+	const pageQuery = useGetPages();
 	const categoryQuery = useGetCategories();
 	useEffect(() => {
 		if (create.data != undefined) {
@@ -176,7 +176,7 @@ const EditTimelineItems = () => {
 		const newCategory: TimelineCategory = {
 			id: -1,
 			name: 'New Category',
-			page: pages[0] || 'book-of-mormon',
+			pageId: pages[0]?.id || '',
 			items: [],
 			color: '#fff'
 		}
@@ -209,7 +209,7 @@ const EditTimelineItems = () => {
 
 	const onPageChange: ItemAction<string> = (value) => {
 		if (!category) return;
-		changeProperty(category, "page", value.id);
+		changeProperty(category, "pageId", value.id);
 	}
 
 	const onItemDelete = (i: number) => {
@@ -274,7 +274,7 @@ const EditTimelineItems = () => {
 					<div className="my-2">
 						<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
 						<Label label="Page" className="my-2">
-							<Dropdown items={pages.map(x => ({name: x, id: x}))} initialValue={category?.page} onChange={onPageChange}></Dropdown>
+							<Dropdown items={pages.map(x => ({name: x.url, id: x.id}))} initialValue={category?.pageId} onChange={onPageChange}></Dropdown>
 						</Label>
 					</div>
 					<AddRemove items={category.items.map((item, i) => 

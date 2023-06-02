@@ -5,14 +5,18 @@ import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
 import {type TimelineItemStandalone} from '~/utils/types/timeline';
+import { useGetPageUrl } from '~/utils/services/EventPageService';
 
 interface TimelineProps {
 	items: TimelineItemStandalone[]
 }
 export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
-	if (items.length == 0) {
+	const query = useGetPageUrl();
+	if (query.isLoading || query.isError || items.length == 0) {
 		return <>Loading</>
 	}
+	const getUrl = query.data;
+
 	const sorted = items.slice().sort((a, b) => {
 		if (a.date < b.date) {
 			return -1;
@@ -85,7 +89,7 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				date: dayjs(item.date).format("MMM, D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <Link className="restoration-item timeline-item-connector" href={`/${item.page}`} title={item.text}>
+				content: <Link className="restoration-item timeline-item-connector" href={`/${getUrl(item.pageId)}`} title={item.text}>
 										<p className="text-sm md:text-base">{item.text}</p>
 								</Link>,
 				color: item.color

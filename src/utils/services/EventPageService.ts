@@ -9,10 +9,6 @@ export const useGetPage = (eventId: string) => {
 	return api.page.getPage.useQuery(eventId);
 }
 
-export const useGetPageNames = () => {
-	return api.page.getPageNames.useQuery();
-}
-
 export const useEventPagesMutation = () => {
 	const createMutation = api.page.createPage.useMutation();
 	const updateMutation = api.page.updatePage.useMutation();
@@ -24,6 +20,52 @@ export const useEventPagesMutation = () => {
 		deletem: deleteMutation
 	};
 }
+
+type GetPageUrl = {
+	data: undefined,
+	isLoading: true,
+	isError: false
+} | {
+	data: undefined,
+	isLoading: false,
+	isError: true,
+	error: ReturnType<typeof useGetPages>["error"]
+} | {
+	data: (pageId: string) => string
+	isLoading: false,
+	isError: false
+}
+export const useGetPageUrl = (): GetPageUrl => {
+	const query = useGetPages();
+	const throwError = (pageId: string) => {
+		throw new DOMException(`Invalid pageId ${pageId}`);
+	}
+	if (query.isLoading) {
+		return {
+			data: undefined,
+			isLoading: true,
+			isError: false
+		}
+	}
+
+	if (query.isError) {
+		return {
+			data: undefined,
+			isLoading: false,
+			isError: true,
+			error: query.error
+		}
+	}
+
+	const pages = query.data;
+
+	return {
+		data: (pageId: string) => pages.find(x => x.id == pageId)?.url || throwError(pageId),
+		isLoading: false,
+		isError: false
+	}
+}
+
 
 export const countLinks = (items: RestorationTimelineItem[]) => {
 	return items.reduce((prev, curr) => prev + curr.links.length, 0);
