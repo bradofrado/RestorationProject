@@ -1,5 +1,3 @@
-import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -20,6 +18,7 @@ import Editable from "~/utils/components/edit/editable";
 import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
 import Label from "~/utils/components/base/label";
 import ColorPicker from "~/utils/components/base/color-picker";
+import { DatePicker, DateRangePicker } from "~/utils/components/base/calendar/date-picker";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -337,6 +336,11 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 		changePropertyItem(item, "links", links);
 	}
 
+	const onDateChange = (start: Date, end?: Date) => {
+		changePropertyItem(item, "date", start);
+		end && changePropertyItem(item, "endDate", end);
+	}
+
 	const onCancel = () => {
 		console.log(propItem);
 		setItem(propItem);
@@ -351,11 +355,8 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 	return <>
 		<Panel className="my-1" disabled={disabled}>
 			<Input include={Label} label="Text" type="textarea" value={item.text} inputClass="w-full" onChange={value => changePropertyItem(item, "text", value)}/>
-			<Label label="Start" className="inline-block my-1 mr-1">
-				<DatePicker value={dayjs(item.date)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
-			</Label>
-			<Label label="End" className="inline-block my-1 mx-1">
-				<DatePicker value={item.endDate && dayjs(item.endDate)} onChange={value => changePropertyItem(item, "date", value?.toDate() || new Date())}/>
+			<Label label="Date" className="inline-block my-1 mr-1">
+				<DateRangePicker start={item.date} end={item.endDate || item.date} onChange={onDateChange} />
 			</Label>
 			<Label label="Links" className="my-1">
 				<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} inputClass="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
