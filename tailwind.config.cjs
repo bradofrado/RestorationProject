@@ -5,7 +5,12 @@ const config = {
     extend: {
 			colors: {
 				'bom': '#F1635C',
-				'primary': '#28d5e6',
+				'primary': {
+          'light': '#92b3fd',
+          DEFAULT: '#296cff',
+          'dark': '#0954f9'
+        }
+        
 			},
 		},
   },

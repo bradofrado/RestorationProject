@@ -16,7 +16,7 @@ interface DropdownProps<T> extends PropsWithChildren {
 }
 
 const Dropdown = <T,>({children, initialValue, onChange, items,
-		chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-white shadow-sm px-3 py-1.5 border text-sm text-gray-900 focus:border-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps<T>) => {
+		chevron = true, className = "inline-flex items-center w-full justify-center rounded-md bg-white shadow-sm px-3 py-1.5 border text-sm text-gray-900 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}: DropdownProps<T>) => {
 	const [value, setValue] = useState<DropdownItem<T> | undefined>(items.find(x => x.id == initialValue));
 	useEffect(() => {
 		setValue(items.find(x => x.id == initialValue));
@@ -53,7 +53,7 @@ const Dropdown = <T,>({children, initialValue, onChange, items,
 							{({ active }) => (
 								<button
 									className={`${
-										active ? 'bg-violet-500 text-white' : 'text-gray-900'
+										active ? 'bg-primary text-white' : 'text-gray-900'
 									} group flex w-full items-center rounded-md px-2 py-2 text-sm`}
 									onClick={() => onClick(item, i)}
 								>

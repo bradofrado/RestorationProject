@@ -337,8 +337,8 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 	}
 
 	const onDateChange = (start: Date, end?: Date) => {
-		changePropertyItem(item, "date", start);
-		end && changePropertyItem(item, "endDate", end);
+		const newItem = changePropertyItem(item, "date", start);
+		end && changePropertyItem(newItem, "endDate", end);
 	}
 
 	const onCancel = () => {

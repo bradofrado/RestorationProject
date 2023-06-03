@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useRangeCalendarState } from "@react-stately/calendar";
 import { useRangeCalendar } from "@react-aria/calendar";
 import { useLocale } from "@react-aria/i18n";
-import { CalendarDate, createCalendar, getDayOfWeek, getWeeksInMonth, isSameDay, parseDate } from "@internationalized/date";
+import { CalendarDate, createCalendar, getDayOfWeek, getLocalTimeZone, getWeeksInMonth, isSameDay } from "@internationalized/date";
 import { type CalendarState, type DateFieldState, type DatePickerStateOptions, DateSegment, type OverlayTriggerState, type RangeCalendarState, useCalendarState, useDateFieldState, useDatePickerState, useDateRangePickerState } from "react-stately";
 import { type AriaButtonProps, type AriaCalendarGridProps, type AriaDialogProps, type AriaPopoverProps, type CalendarProps, type DateValue, DismissButton, Overlay, type RangeCalendarProps, mergeProps, useButton, useCalendar, useCalendarCell, useCalendarGrid, useDateField, useDatePicker, useDateRangePicker, useDateSegment, useDialog, useFocusRing, usePopover, type DateRange } from "react-aria";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationIcon } from "@heroicons/react/outline";
@@ -27,14 +27,14 @@ export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>
         {props.label}
       </span>
       <div {...groupProps} ref={ref} className="flex group">
-        <div className="bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-violet-600 group-focus-within:group-hover:border-violet-600 p-1 relative flex items-center">
+        <div className="bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-primary group-focus-within:group-hover:border-primary p-1 relative flex items-center">
           <DateField {...fieldProps} />
           {state.validationState === "invalid" && (
             <ExclamationIcon className="w-6 h-6 text-red-500 absolute right-1" />
           )}
         </div>
         <FieldButton {...buttonProps} isPressed={state.isOpen}>
-          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-violet-700" />
+          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-primary" />
         </FieldButton>
       </div>
       {state.isOpen && (
@@ -54,14 +54,13 @@ type DateRangePicker = {
   onChange: (start: Date, end?: Date) => void
 }
 export const DateRangePicker = (props: DateRangePicker) => {
-  const {locale} = useLocale();
   const options = {
     value: {
-      start: new CalendarDate(props.start.getFullYear(), props.start.getMonth(), props.start.getDay()),
-      end: new CalendarDate(props.end.getFullYear(), props.end.getMonth(), props.end.getDay()),
+      start: new CalendarDate(props.start.getFullYear(), props.start.getMonth() + 1, props.start.getDate()),
+      end: new CalendarDate(props.end.getFullYear(), props.end.getMonth() + 1, props.end.getDate()),
     },
     onChange: ({start, end}: DateRange) => {
-      props.onChange(start.toDate(locale), end.toDate(locale))
+      props.onChange(start.toDate(getLocalTimeZone()), end.toDate(getLocalTimeZone()))
     }
   }
   const state = useDateRangePickerState(options);
@@ -82,7 +81,7 @@ export const DateRangePicker = (props: DateRangePicker) => {
         {props.label}
       </span> */}
       <div {...groupProps} ref={ref} className="flex group">
-        <div className="flex bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-violet-600 group-focus-within:group-hover:border-violet-600 p-1 relative">
+        <div className="flex bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-primary group-focus-within:group-hover:border-primary p-1 relative">
           <DateField {...startFieldProps} />
           <span aria-hidden="true" className="px-2">
             –
@@ -93,7 +92,7 @@ export const DateRangePicker = (props: DateRangePicker) => {
           )}
         </div>
         <FieldButton {...buttonProps} isPressed={state.isOpen}>
-          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-violet-700" />
+          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-primary" />
         </FieldButton>
       </div>
       {state.isOpen && (
@@ -140,7 +139,7 @@ function DateSegment({ segment, state }: {segment: DateSegment, state: DateField
         minWidth:
           segment.maxValue != null ? `${String(segment.maxValue).length}ch` : undefined
       }}
-      className={`px-0.5 box-content tabular-nums text-right outline-none rounded-sm focus:bg-violet-600 focus:text-white group ${
+      className={`px-0.5 box-content tabular-nums text-right outline-none rounded-sm focus:bg-primary focus:text-white group ${
         !segment.isEditable ? "text-gray-500" : "text-gray-800"
       }`}
     >
@@ -317,7 +316,7 @@ export function CalendarCell({ state, date }: CalendarCellProps) {
         className={`w-10 h-10 outline-none group ${
           isRoundedLeft ? "rounded-l-full" : ""
         } ${isRoundedRight ? "rounded-r-full" : ""} ${
-          isSelected ? (isInvalid ? "bg-red-300" : "bg-violet-300") : ""
+          isSelected ? (isInvalid ? "bg-red-300" : "bg-primary bg-opacity-30") : ""
         } ${isDisabled ? "disabled" : ""}`}
       >
         <div
@@ -326,25 +325,25 @@ export function CalendarCell({ state, date }: CalendarCellProps) {
           } ${
             // Focus ring, visible while the cell has keyboard focus.
             isFocusVisible
-              ? "ring-2 group-focus:z-2 ring-violet-600 ring-offset-2"
+              ? "ring-2 group-focus:z-2 ring-primary ring-offset-2"
               : ""
           } ${
             // Darker selection background for the start and end.
             isSelectionStart || isSelectionEnd
               ? isInvalid
                 ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-violet-600 text-white hover:bg-violet-700"
+                : "bg-primary text-white hover:bg-primary hover:bg-opacity-90"
               : ""
           } ${
             // Hover state for cells in the middle of the range.
             isSelected && !isDisabled && !(isSelectionStart || isSelectionEnd)
               ? isInvalid
                 ? "hover:bg-red-400"
-                : "hover:bg-violet-400"
+                : "hover:bg-primary hover:bg-opacity-30"
               : ""
           } ${
             // Hover state for non-selected cells.
-            !isSelected && !isDisabled ? "hover:bg-violet-100" : ""
+            !isSelected && !isDisabled ? "hover:bg-opacity-10 hover:bg-primary" : ""
           } cursor-default`}
         >
           {formattedDate}
@@ -406,9 +405,9 @@ export function CalendarButton(props: AriaButtonProps<'button'>) {
       {...mergeProps(buttonProps, focusProps)}
       ref={ref}
       className={`p-2 rounded-full ${props.isDisabled ? "text-gray-400" : ""} ${
-        !props.isDisabled ? "hover:bg-violet-100 active:bg-violet-200" : ""
+        !props.isDisabled ? "hover:opacity-10 active:opacity-20" : ""
       } outline-none ${
-        isFocusVisible ? "ring-2 ring-offset-2 ring-purple-600" : ""
+        isFocusVisible ? "ring-2 ring-offset-2 ring-primary" : ""
       }`}
     >
       {props.children}
@@ -426,7 +425,7 @@ export function FieldButton(props: FieldProps) {
     <button
       {...buttonProps}
       ref={ref}
-      className={`px-2 -ml-px border transition-colors rounded-r-md group-focus-within:border-violet-600 group-focus-within:group-hover:border-violet-600 outline-none ${
+      className={`px-2 -ml-px border transition-colors rounded-r-md group-focus-within:border-primary group-focus-within:group-hover:border-primary outline-none ${
         isPressed || props.isPressed
           ? "bg-gray-200 border-gray-400"
           : "bg-gray-50 border-gray-300 group-hover:border-gray-400"

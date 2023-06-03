@@ -32,10 +32,12 @@ export const groupByDistinct = function<T extends Pick<T, K>, K extends keyof T>
 }
 
 export const useChangeProperty = <T,>(func: (item: T) => void) => {
-	return <K extends keyof T>(item: T, key: K, value: T[K]) => {
+	return <K extends keyof T>(item: T, key: K, value: T[K]): T => {
 		const copy = {...item};
 		copy[key] = value;
 		func(copy);
+
+		return copy;
 	}
 }
 
