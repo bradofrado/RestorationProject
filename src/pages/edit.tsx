@@ -18,7 +18,7 @@ import Editable from "~/utils/components/edit/editable";
 import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
 import Label from "~/utils/components/base/label";
 import ColorPicker from "~/utils/components/base/color-picker";
-import { DatePicker, DateRangePicker } from "~/utils/components/base/calendar/date-picker";
+import { DateRangePicker } from "~/utils/components/base/calendar/date-picker";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();

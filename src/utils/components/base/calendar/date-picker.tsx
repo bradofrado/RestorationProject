@@ -48,12 +48,12 @@ export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>
   );
 }
 
-type DateRangePicker = {
+type DateRangePickerProps = {
   start: Date,
   end: Date,
   onChange: (start: Date, end?: Date) => void
 }
-export const DateRangePicker = (props: DateRangePicker) => {
+export const DateRangePicker = (props: DateRangePickerProps) => {
   const options = {
     value: {
       start: new CalendarDate(props.start.getFullYear(), props.start.getMonth() + 1, props.start.getDate()),
