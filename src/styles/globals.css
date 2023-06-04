@@ -5,10 +5,18 @@
 
 :root {
 	--container-size: 500px;
-	--circle-size: calc(var(--container-size) / 14);
+	--circle-size: calc(500px / 14);
 	--item-size: calc(var(--container-size) / 4);
 	 --primary-color: theme('colors.primary.DEFAULT');
 	--secondary-color: theme('colors.secondary.DEFAULT');
+	--restoration-item-size: 200px;
+}
+
+@media (max-width: 600px) {
+	:root {
+		--container-size: 400px;
+		--restoration-item-size: 150px;
+	}
 }
 
 .timeline-container {
@@ -85,9 +93,10 @@
 	padding: 15px;
 	align-self: flex-end;
 	display: flex;
-	max-height: 200px;
+	max-height: var(--restoration-item-size);
 	-ms-overflow-style: none;
   	scrollbar-width: none;
+	width: var(--restoration-item-size);
 }
 
 /* width */

@@ -1,23 +1,36 @@
 import dayjs from 'dayjs';
 import ScrollDrag from '../base/scroll-drag';
-import { type ReactElement, type CSSProperties,  useRef, useEffect } from 'react';
+import { type ReactElement, type CSSProperties,  useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
-import {type TimelineItemStandalone} from '~/utils/types/timeline';
+import {type TimelineCategory, type TimelineItemStandalone} from '~/utils/types/timeline';
 import { useGetPageUrl } from '~/utils/services/EventPageService';
+import Button from '../base/button';
+import Label from '../base/label';
+import Header from '../base/header';
 
 interface TimelineProps {
-	items: TimelineItemStandalone[]
+	categories: TimelineCategory[]
 }
-export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
+export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) => {
 	const query = useGetPageUrl();
+	const [filteredCategories, setFilteredCategories] = useState<TimelineCategory['id'][]>([]);
+	const [scrollIndex, setScrollIndex] = useState<number>(-1);
+
+	const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
+		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, pageId: curr.pageId}));
+		prev = prev.concat(items);
+
+		return prev;
+	}, [])
 	if (query.isLoading || query.isError || items.length == 0) {
 		return <>Loading</>
 	}
+
 	const getUrl = query.data;
 
-	const sorted = items.slice().sort((a, b) => {
+	const unfilteredSorted = items.slice().sort((a, b) => {
 		if (a.date < b.date) {
 			return -1;
 		} else if (a.date > b.date) {
@@ -26,9 +39,11 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 
 		return 0;
 	});
+	const sorted = unfilteredSorted.filter(x => filteredCategories.indexOf(x.categoryId) < 0);
+	
 
-	const lastDate = sorted[sorted.length - 1]?.date as Date;
-	const firstDate = sorted[0]?.date as Date;
+	const lastDate = unfilteredSorted[unfilteredSorted.length - 1]?.date as Date;
+	const firstDate = unfilteredSorted[0]?.date as Date;
 
 	const yearDiff = lastDate.getFullYear() - firstDate.getFullYear() + 1;
 	const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -45,7 +60,8 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 					x: 0,
 					below: false,
 					date: m === 0 ? (firstYear + i).toString() : undefined,
-					color: PrimaryColor
+					color: PrimaryColor,
+					year: firstYear + i
 				};
 
 				return item;
@@ -56,7 +72,9 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 	})();
 
 	const timeItems = (() => {
-		const offset = 125;
+		const style = getComputedStyle(document.body);
+		const containerSize = style.getPropertyValue('--container-size');
+		const offset = Number(containerSize.substring(0, containerSize.length - 2)) / 4;
 		const firstYear = firstDate.getFullYear();
 		const getYearOffset = (year: number) => {
 			return year * months.length * offset;
@@ -85,33 +103,81 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				throw new Error(`item ${item.date.toDateString()} does not have color`);
 			}
 
-			const hoverState = item.text.length > 125 ? 'hover:w-[500px] group' : '';
+			const hoverState = item.text.length > offset ? 'hover:w-[300px] sm:hover:w-[500px] group' : '';
 
 			timeItems.push({
-				date: dayjs(item.date).format("MMM, D"),
+				date: dayjs(item.date).format("MMM D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <Link className={`restoration-item overflow-auto w-[200px] hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`} href={`/${getUrl(item.pageId)}`}>
+				content: <Link className={`restoration-item overflow-auto hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`} href={`/${getUrl(item.pageId)}`}>
 							<p className="text-sm md:text-base mt-3 overflow-hidden group-hover:mt-0 group-hover:overflow-auto">{item.text}</p>
 						</Link>,
-				color: item.color
+				color: item.color,
+				year: item.date.getFullYear()
 			});
 		}
 
 		return timeItems;
 	})();
 
+	const onCategoryClick = (i: TimelineCategory['id']) => {
+		const copy = filteredCategories.slice();
+		const index = copy.indexOf(i);
+		if (index >= 0) {
+			copy.splice(index, 1);
+		} else {
+			copy.push(i);
+		}
+		setScrollIndex(-1);
+		setFilteredCategories(copy);
+	}
+
+	const onNextClick = () => {
+		const newIndex = (scrollIndex + 1) % timeItems.length;
+		setScrollIndex(newIndex);
+	}
+
+	const onPreviousClick = () => {
+		let newIndex = scrollIndex - 1;
+		newIndex = newIndex < 0 ? timeItems.length - 1 : newIndex;
+		setScrollIndex(newIndex);
+	}
 
 	return <>
 		<div className="w-full">
-			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-800 mb-[100px]">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
-			<ScrollDrag rootClass="timeline-container mb-[100px]">
+			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-800 mt-[20px] sm:mb-[100px] sm:mt-0">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
+			<ScrollDrag rootClass="timeline-container mt-[20px] sm:mb-[100px] sm:mt-0" scrollPos={timeItems[scrollIndex]?.x}>
 				<>
 					{monthItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
 					{timeItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
 				</>
 			</ScrollDrag>
+			<div className="flex items-center flex-col-reverse sm:flex-row">
+				<Label label="Categories" className="grow">
+					<TimelineCategoryFilter categories={categories} filtered={filteredCategories} onChange={onCategoryClick} filterKey="id"/>
+				</Label>
+				<div className="grow">
+					<Header className={scrollIndex < 0 ? 'invisible' : ''}>{scrollIndex >= 0 && timeItems[scrollIndex] ? `${timeItems[scrollIndex]?.date || ''}, ${timeItems[scrollIndex]?.year || ''}` : 'Filler'}</Header>
+					<div>
+						<Button onClick={onPreviousClick}>Previous</Button>
+						<Button onClick={onNextClick}>Next</Button>
+					</div>
+				</div>
+			</div>
 		</div>
+	</>
+}
+
+type TimelineCategoryFilterProps<T extends keyof TimelineCategory> = {
+	categories: TimelineCategory[],
+	filtered: TimelineCategory[T][],
+	onChange: (key: TimelineCategory[T]) => void,
+	filterKey: T
+}
+const TimelineCategoryFilter = <T extends keyof TimelineCategory>({categories, filtered, onChange, filterKey}: TimelineCategoryFilterProps<T>) => {
+	
+	return <>
+		{categories.map((category, i) => <Button key={i} mode={filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'} backgroundColor={category.color} onClick={() => onChange(category[filterKey])}>{category.name}</Button>)}
 	</>
 }
 
@@ -133,7 +199,7 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
 	}, [color]);
 
 	return <>
-		<div className={"timeline-item" + belowClass} style={style} ref={ref}>
+		<div className={"timeline-item" + belowClass} style={style} ref={ref} aria-label={`${x}`}>
 				<div className="timeline-item-content">
 					{date && <div className="date-indicator timeline-item-connector">{date}</div>}
 				</div>
@@ -153,5 +219,6 @@ export interface TimelineItem {
 	below: boolean,
 	content?: ReactElement,
 	date?: string,
-	color: HexColor
+	color: HexColor,
+	year: number
 }

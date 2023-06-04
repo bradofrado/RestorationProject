@@ -9,14 +9,8 @@ const Timeline: NextPage = () => {
 		return <></>
 	}
 	const categories = query.data;
-	const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
-		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, pageId: curr.pageId}));
-		prev = prev.concat(items);
-
-		return prev;
-	}, [])
 	return <div className="min-h-screen flex flex-col justify-center align-middle">
-		<TimelineContainer items={items}/>
+		<TimelineContainer categories={categories}/>
 	</div>
 }
 
