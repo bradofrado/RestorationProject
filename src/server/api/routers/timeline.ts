@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import {type RestorationTimelineItem, type TimelineCategoryName, isTimelineCategory, type TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema, type PrismaTimelineItem, type PrismaTimelineCategory, TimelineCategoryArgs} from '~/utils/types/timeline';
 import { z } from "zod";
@@ -90,7 +90,7 @@ export const timelineRouter = createTRPCRouter({
 		.query(async ({ctx}) => {
 			return await getCategories(ctx.prisma);
 		}),
-	createCategory: publicProcedure
+	createCategory: protectedProcedure
 		.input(TimelineCategorySchema)
 		.mutation(async ({input, ctx}) => {
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.create({
@@ -107,7 +107,7 @@ export const timelineRouter = createTRPCRouter({
 			
 			return translatePrismaToTimelineCategory(dbCategory);
 		}),
-	updateCategory: publicProcedure
+	updateCategory: protectedProcedure
 		.input(TimelineCategorySchema)
 		.mutation(async ({input, ctx}) => {
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.update({
@@ -124,7 +124,7 @@ export const timelineRouter = createTRPCRouter({
 			
 			return translatePrismaToTimelineCategory(dbCategory);
 		}),
-	deleteCategory: publicProcedure
+	deleteCategory: protectedProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
 			await ctx.prisma.timelineCategory.delete({
@@ -133,7 +133,7 @@ export const timelineRouter = createTRPCRouter({
 				}
 			})
 		}),
-	createTimeline: publicProcedure
+	createTimeline: protectedProcedure
 		.input(RestorationTimelineItemSchema)
 		.mutation(async ({input, ctx}) => {
 			const dbItem: PrismaTimelineItem = await ctx.prisma.timelineItem.create({
@@ -142,7 +142,7 @@ export const timelineRouter = createTRPCRouter({
 
 			return translatePrismaToTimelineItem(dbItem);
 		}),
-	updateTimeline: publicProcedure
+	updateTimeline: protectedProcedure
 		.input(RestorationTimelineItemSchema)
 		.mutation(async ({input, ctx}) => {
 			const dbItem: PrismaTimelineItem = await ctx.prisma.timelineItem.update({
@@ -154,7 +154,7 @@ export const timelineRouter = createTRPCRouter({
 
 			return translatePrismaToTimelineItem(dbItem);
 		}),
-	deleteTimeline: publicProcedure
+	deleteTimeline: protectedProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
 			await ctx.prisma.timelineItem.delete({
