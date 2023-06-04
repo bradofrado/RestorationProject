@@ -6,7 +6,7 @@ type PopoverProps = React.PropsWithChildren<{
 }>
 const Popover = ({children, button}: PopoverProps) => {
     return <>
-      <ReactPopover  >
+      <ReactPopover className="relative">
         {() => (
           <>
             <ReactPopover.Button>
