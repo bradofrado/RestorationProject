@@ -358,6 +358,7 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 			<Label label="Date" className="inline-block my-1 mr-1">
 				<DateRangePicker start={item.date} end={item.endDate || item.date} onChange={onDateChange} />
 			</Label>
+			<Input include={Label} label="Subcategory" className="my-1" value={item.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(item, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
 				<AddRemove items={item.links.map((link, i) => <Input key={i} value={link} inputClass="w-full" onChange={(value: string) => onLinkChange(value, i)}/>)}
 					onAdd={onAddLink} onDelete={onDeleteLink}/>
