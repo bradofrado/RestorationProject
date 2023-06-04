@@ -85,13 +85,15 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 				throw new Error(`item ${item.date.toDateString()} does not have color`);
 			}
 
+			const hoverState = item.text.length > 125 ? 'hover:w-[500px] group' : '';
+
 			timeItems.push({
 				date: dayjs(item.date).format("MMM, D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <Link className="restoration-item timeline-item-connector" href={`/${getUrl(item.pageId)}`} title={item.text}>
-										<p className="text-sm md:text-base">{item.text}</p>
-								</Link>,
+				content: <Link className={`restoration-item overflow-auto w-[200px] hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`} href={`/${getUrl(item.pageId)}`}>
+							<p className="text-sm md:text-base mt-3 overflow-hidden group-hover:mt-0 group-hover:overflow-auto">{item.text}</p>
+						</Link>,
 				color: item.color
 			});
 		}
@@ -102,8 +104,8 @@ export const Timeline: React.FC<TimelineProps> = ({items}: TimelineProps) => {
 
 	return <>
 		<div className="w-full">
-			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-600">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
-			<ScrollDrag rootClass="timeline-container">
+			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-800 mb-[100px]">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
+			<ScrollDrag rootClass="timeline-container mb-[100px]">
 				<>
 					{monthItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}
 					{timeItems?.map((item, i) => <TimelineItemComponent {...item} key={i}/>)}

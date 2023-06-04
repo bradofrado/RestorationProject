@@ -7,8 +7,8 @@
 	--container-size: 500px;
 	--circle-size: calc(var(--container-size) / 14);
 	--item-size: calc(var(--container-size) / 4);
-	--primary-color: #28d5e6;
-	--secondary-color: #fff;
+	 --primary-color: theme('colors.primary.DEFAULT');
+	--secondary-color: theme('colors.secondary.DEFAULT');
 }
 
 .timeline-container {
@@ -45,7 +45,7 @@
 	/* position: relative; */
 	color: var(--secondary-color);
 	text-align: center;
-	--bom-color: #FFF;
+	--bom-color: var(--secondary-color);
 }
 
 .timeline-item-content {
@@ -71,6 +71,10 @@
 	order: 1;
 }
 
+.timeline-item.below .restoration-item {
+	align-self: flex-start;
+}
+
 .restoration-item {
 	border-radius: 20px;
 	background-color: var(--bom-color);
@@ -79,10 +83,38 @@
 	flex-direction: column;
 	justify-content: center;
 	padding: 15px;
-	/* align-self: flex-start; */
+	align-self: flex-end;
 	display: flex;
 	max-height: 200px;
+	-ms-overflow-style: none;
+  	scrollbar-width: none;
 }
+
+/* width */
+.restoration-item p::-webkit-scrollbar {
+	width: 5px;
+}
+
+/* Track */
+.restoration-item p::-webkit-scrollbar-track {
+	background-color: var(--bom-color);
+	border-radius: 5px;
+}
+
+/* Handle */
+.restoration-item p::-webkit-scrollbar-thumb {
+	background-color: var(--secondary-color);
+	border-radius: 5px;
+}
+
+/* Handle on hover */
+.restoration-item p::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+/* .restoration-item::-webkit-scrollbar {
+	display: none;
+  } */
 
 .timeline-item:hover .restoration-item {
 	display: flex;
@@ -117,6 +149,7 @@
 	align-items: center;
 	text-align: center;
 	justify-content: center;
+	z-index: 10;
 }
 
 .timeline-item.absolute .date-indicator {
@@ -126,14 +159,6 @@
 
 .timeline-item.absolute .timeline-item-connector::before {
 	background-color: var(--bom-color);
-}
-
-.restoration-item p {
-	/* font-size: 16px;
-	line-height: 24px; */
-	margin: 15px 0;
-	max-width: 250px;
-	overflow: hidden;
 }
 
 .timeline-item .circle {

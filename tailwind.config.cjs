@@ -6,12 +6,18 @@ const config = {
 			colors: {
 				'bom': '#F1635C',
 				'primary': {
-          'light': '#92b3fd',
-          DEFAULT: '#296cff',
-          'dark': '#0954f9'
+          'light': '#c59478',
+          DEFAULT: '#ad643a',
+          'dark': '#894219'
+        },
+        'secondary': {
+          DEFAULT: '#faf8f2'
         }
         
 			},
+      transitionProperty: {
+        'width': 'width'
+      }
 		},
   },
   plugins: [],
