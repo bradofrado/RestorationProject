@@ -4,8 +4,8 @@ import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
 import Header from '../base/header'
-import { TranslationMethodsContainer } from '../event-page/book-of-mormon-translation'
-import { type TimelineCategoryName } from '../../types/timeline'
+import { DataGroupbyList, DisplayList, DisplayListComponentPassthrough, DisplayListItem, RestorationQuote } from '../event-page/book-of-mormon-translation'
+import { type RestorationTimelineItem, type TimelineCategoryName } from '../../types/timeline'
 import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
@@ -54,26 +54,62 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 		</>
 }
 
-interface DataListProps extends DataComponent {
-	onBlur?: (value: string, index: number) => void,
+export type ContentEditable = {
 	contentEditable?: boolean | "true" | "false"
 }
+export type ContentEditableBlur = ContentEditable & {
+	onBlur?: (value: string, index: number) => void
+}
+interface DataListProps extends DataComponent, ContentEditableBlur {
+
+}
+
 const DataList: React.ElementType<DataListProps> = ({data, onBlur, contentEditable}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
-	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
-	const items = type != 'custom' ? query.data.find(x => x.name == type)?.items : undefined;
-	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
-	
-	return <>
-		{(!data?.properties || type == 'custom') && <ul className="list-disc px-10">
-			{type == 'custom' && liItems.map((x, i) => <li key={i} onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, i)} contentEditable={contentEditable}>{x}</li>)}
-			{items != undefined && items.map((item, i) => <li key={i}>{item.text}</li>) }
-		</ul>}
-		{data?.properties && <TranslationMethodsContainer items={items || []} annotationCount={0}/>}
-	</>
+	const getListComponentProps = (orig: DataComponent['data']): ({isTimelineItem: false} & DisplayListComponentPassthrough<{text: string}>)
+		 | ({isTimelineItem: true} & DisplayListComponentPassthrough<RestorationTimelineItem>) => {
+		const data = orig ?? {content: 'custom', properties: null};
+		if (data.content == 'custom') {
+			const items = data.properties ? data.properties.split('|') : ['Text'];
+			return {
+				items: items.map(x => ({text: x})),
+				ListComponent: DisplayListItem,
+				contentEditable,
+				onBlur,
+				isTimelineItem: false
+			}
+		}
+
+		const items: RestorationTimelineItem[] = query.data.find(x => x.name == data.content)?.items || [];
+
+		return {
+			items,
+			ListComponent: RestorationQuote,
+			isTimelineItem: true,
+			contentEditable,
+			onBlur
+		}
+	}
+	const componentProps = getListComponentProps(data);
+	// const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
+	// const items: {text: string}[] = type != 'custom' ? query.data.find(x => x.name == type)?.items as RestorationTimelineItem[] : (data?.properties?.split('|') || ['Text']).map(x => ({text: x}));
+
+	// const listDisplayer = type != 'custom' ? RestorationQuote : DisplayListItem;
+	if (data?.properties?.includes('Group') && componentProps.isTimelineItem) {
+		return <DataGroupbyList {...componentProps} groupByKey='subcategory'/>
+	}
+
+	return <DisplayList {...componentProps}/>
+	// return <>
+	// 	{(!data?.properties || type == 'custom') && <ul className="list-disc px-10">
+	// 		{type == 'custom' && liItems.map((x, i) => <li key={i} onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, i)} contentEditable={contentEditable}>{x}</li>)}
+	// 		{items != undefined && items.map((item, i) => <li key={i}>{item.text}</li>) }
+	// 	</ul>}
+	// 	{data?.properties && <TranslationMethodsContainer items={items || []} annotationCount={0}/>}
+	// </>
 }
 
 const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {

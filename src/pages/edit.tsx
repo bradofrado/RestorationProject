@@ -63,13 +63,13 @@ const EditPages = ({id, setId}: EditPagesProps) => {
 
 	let pages: EventPage[] | null = null;
 
-	useEffect(() => {
-		if (query.data) {
-			const page = query.data.find(x => x.id == id);
-			console.log(page);
-			page && setCurrPage(page);
-		}
-	}, [query.data, id])
+	// useEffect(() => {
+	// 	if (query.data) {
+	// 		const page = query.data.find(x => x.id == id);
+	// 		console.log(page);
+	// 		page && setCurrPage(page);
+	// 	}
+	// }, [query.data, id])
 
 	useEffect(() => {
 		const data = create.data || update.data;

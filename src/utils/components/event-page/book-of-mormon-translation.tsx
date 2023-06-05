@@ -2,55 +2,83 @@ import { DateFormat, groupBy } from "~/utils/utils";
 import { countLinks } from "../../services/EventPageService";
 import { Annotation } from "../Timeline/CondensedTimeline";
 import { type RestorationTimelineItem, type TimelineSubcategory } from "~/utils/types/timeline";
+import { useEffect, useState } from "react";
+import { ContentEditableBlur } from "../edit/add-component";
+import React from 'react';
 
-interface TranslationMethodsContainerProps {
-	items: RestorationTimelineItem[],
-	annotationCount: number,
-	className?: string
-}
-export const TranslationMethodsContainer = ({items, annotationCount, className}: TranslationMethodsContainerProps) => {
+type DataGroupbyListProps<T extends ListItem> = {
+	className?: string,
+	groupByKey: keyof T
+} & DisplayListComponentPassthrough<T>
+export const DataGroupbyList = <T extends ListItem>({className, groupByKey, items, ...rest}: DataGroupbyListProps<T>) => {
 	return <div className={className || ''}>
-		{Object.entries(groupBy(items, "subcategory")).map(([title, items], i) => {
-				const content = <TranslationMethods items={items} title={title as TimelineSubcategory} key={i} linkNumber={annotationCount}/>;
-				annotationCount += countLinks(items);
-				return content;
-			})}
+		{Object.entries(groupBy(items, groupByKey))
+			.map(([title, items], i) => <DisplayGroup items={items} title={title} key={i} {...rest}/>)}
 	</div>
 }
 
-interface TranslationMethodsProps {
-	items: RestorationTimelineItem[],
-	title: TimelineSubcategory,
-	linkNumber: number
-}
+type DisplayGroup<T extends ListItem> = {
+	title: string
+} & DisplayListComponentPassthrough<T>
 
-const TranslationMethods: React.FC<TranslationMethodsProps> = (props: TranslationMethodsProps) => {
-	const {items, title, linkNumber} = props;
-	let linkNum = linkNumber;
+const DisplayGroup = <T extends ListItem>(props: DisplayGroup<T>) => {
+	const {title, ...rest} = props;
 	return <>
 		<ul>
 			<li>
 				<h3 className="text-xl">{title}</h3>
-				<ul className="list-disc px-10 py-2">
-					{items.map((item) => {
-					const content = <RestorationQuote item={item} linkNum={linkNum}/>
-					linkNum += item.links.length;
-					return content;
-					})}
-				</ul>
+				<DisplayList {...rest} />
 			</li>
 		</ul>
 	</>
 }
 
-export const RestorationQuote = ({item, linkNum}: {item: RestorationTimelineItem, linkNum: number}) => {
+type DisplayListProps<T extends ListItem> = DisplayListComponentPassthrough<T>
+export const DisplayList = <T extends ListItem>({items, ListComponent, contentEditable}: DisplayListProps<T>) => {
+	const setNextIndex = () => {
+
+	}
+	return <>
+		<ul className="list-disc px-10 py-2">
+			{items.map((item, i) => {
+				return <ListComponent key={i} index={0} setNextIndex={setNextIndex} item={item} contentEditable={contentEditable}/>
+			})}
+		</ul>
+	</>
+}
+
+type IndexType = {
+	index: number,
+	setNextIndex: (index: number) => void
+}
+
+type ListItem = {
+	text: string
+}
+
+export type DisplayListComponentPassthrough<T extends ListItem> = {
+	ListComponent: DisplayListItemComponent<T>,
+	items: T[]
+} & ContentEditableBlur
+
+type DisplayListItemComponent<T extends ListItem> = (props: IndexType & {item: T} & ContentEditableBlur) => JSX.Element
+
+export const DisplayListItem: DisplayListItemComponent<{text: string}> = function({item, index, setNextIndex, contentEditable, onBlur}) {
+	useEffect(() => setNextIndex(index + 1), []);
+	return <li onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, i)} contentEditable={contentEditable}>{item.text}</li>
+}
+
+export const RestorationQuote: DisplayListItemComponent<RestorationTimelineItem> = ({item, index, setNextIndex}) => {
+	useEffect(() => setNextIndex(index + item.links.length), [])
 	const [quote, name] = item.text.split('-');
 	return (
 		<li>
 			<span className="italic" >{quote}</span>
-			<span className="font-medium">-{name} </span>
-			<span className="">{DateFormat.fullText(item.date)}</span>
-			<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNum + i + 1}/>)}</span>
+			{name && <>
+				<span className="font-medium">-{name}</span>
+				<span className=""> {DateFormat.fullText(item.date)}</span>
+			</>}
+			<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={index}/>)}</span>
 		</li>
 	)
 }
