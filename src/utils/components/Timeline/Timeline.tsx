@@ -9,6 +9,7 @@ import { useGetPageUrl } from '~/utils/services/EventPageService';
 import Button from '../base/button';
 import Label from '../base/label';
 import Header from '../base/header';
+import { Annotation } from './CondensedTimeline';
 
 interface TimelineProps {
 	categories: TimelineCategory[]
@@ -53,10 +54,8 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 		
 		for (let i = 0; i < yearDiff; i++) {
 			timeItems = timeItems.concat(months.map(m => {
-				//const content = m === 0 ? <div className="date-indicator timeline-item-connector">{firstYear + i}</div> : null;
 				const item: TimelineItem = {
 					graphDate: dayjs(new Date(firstYear + i, m, 1)).format("MMM"), 
-					//x: getMonthOffset(inx) + getYearOffset(i),
 					x: 0,
 					below: false,
 					date: m === 0 ? (firstYear + i).toString() : undefined,
@@ -103,15 +102,21 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 				throw new Error(`item ${item.date.toDateString()} does not have color`);
 			}
 
-			const hoverState = item.text.length > offset ? 'hover:w-[300px] sm:hover:w-[500px] group' : '';
+			const hoverState = item.text.length > offset ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow' : '';
 
 			timeItems.push({
 				date: dayjs(item.date).format("MMM D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <Link className={`restoration-item overflow-auto hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`} href={`/${getUrl(item.pageId)}`}>
-							<p className="text-sm md:text-base mt-3 overflow-hidden group-hover:mt-0 group-hover:overflow-auto">{item.text}</p>
-						</Link>,
+				content: <div className={`restoration-item overflow-hidden group focus:z-20 hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`}>
+							<div className="h-full flex justify-center flex-col">
+								<p className="text-sm md:text-base mt-3 group-hover:pb-1 overflow-hidden group-hover/overflow:overflow-auto">{item.text} {item.links.map((link, i) => <Annotation key={i} link={link} id={i + 1}/>)}</p>
+							</div>
+							<div className="group-hover:visible flex justify-around invisible">
+								<Link className="text-gray-800 hover:text-gray-700 text-sm font-medium" href={`/${getUrl(item.pageId)}`}>More</Link>
+							</div>
+
+						</div>,
 				color: item.color,
 				year: item.date.getFullYear()
 			});
