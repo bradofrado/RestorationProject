@@ -1,19 +1,19 @@
 import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
+import { IndexType } from "../edit/add-component";
 
-export interface CondensedTimelineProps {
+export interface CondensedTimelineProps extends IndexType {
 	items: RestorationTimelineItem[],
 	className?: string
 }
 
 const CondensedTimeline : React.FC<CondensedTimelineProps> = (props: CondensedTimelineProps) => {
 	const {items, className} = props;
-	let linkCounts = 0;
 	return <>
 		<div className={`condensed-timeline-container pt-5 ${className || ''}`}>
 			{items.map((item, i) => {
-				const content = <TimelineRow item={item} key={i} linkNumber={linkCounts}/>
-				linkCounts += item.links.length;
+				const content = <TimelineRow item={item} key={i} linkNumber={props.index}/>
+				props.setIndex(props.index + item.links.length);
 				return content;
 			})}
 		</div>

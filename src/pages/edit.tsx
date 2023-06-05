@@ -15,7 +15,7 @@ import Input from "~/utils/components/base/input";
 import TabControl, { type TabItem } from "~/utils/components/base/tab";
 import EditItemsButtons from "~/utils/components/edit/edit-items-buttons";
 import Editable from "~/utils/components/edit/editable";
-import AddComponent, { type ComponentType, CustomComponent } from "~/utils/components/edit/add-component";
+import AddComponent, { type ComponentType, CustomComponent, CustomComponents } from "~/utils/components/edit/add-component";
 import Label from "~/utils/components/base/label";
 import ColorPicker from "~/utils/components/base/color-picker";
 import { DateRangePicker } from "~/utils/components/base/calendar/date-picker";
@@ -400,7 +400,7 @@ const EditablePage = ({page, setPage}: {page: EventPage, setPage: (page: EventPa
 			<Editable as="p" onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => setPage({...page, description: e.target.innerHTML})}>
 				{page.description}
 			</Editable>
-			{page.settings.map((editable: ComponentSettings, i: number) => <CustomComponent editable={true} type={editable.component} key={i} onDelete={() => deleteComponent(i)} onEdit={(data: EditableData) => onEdit(data, i)} data={editable.data}/>)}
+			<CustomComponents items={page.settings.map((editable: ComponentSettings, i: number) => ({editable: true, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, i), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }

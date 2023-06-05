@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { CustomComponent } from "~/utils/components/edit/add-component";
+import { CustomComponent, CustomComponents } from "~/utils/components/edit/add-component";
 import { useGetPage } from "~/utils/services/EventPageService";
 
 const Event_page : NextPage= () => {
@@ -40,7 +40,7 @@ const EventPage = ({eventId} : {eventId: string}) => {
 					{description}
 				</p>
 			</div>
-			{settings.map((setting, i) => <CustomComponent key={i} type={setting.component} data={setting.data}/>)}
+			<CustomComponents items={settings.map((setting) => ({type: setting.component, data: setting.data}))}/>
 		</div>
 	</>
 }
