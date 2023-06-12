@@ -173,20 +173,35 @@ export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
 type EditableComponentType = {type: ComponentType, editable: true} & EditableComponent;
 type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;
 
-const AnnotationLinkContext = React.createContext<{index: number, update: (index: number) => void}>({index: 0, update: () => {return undefined}});
+const AnnotationLinkContext = React.createContext<Record<string, number>>({});
 
 const AnnotationLinkProvider = ({children}: React.PropsWithChildren) => {
-	const [index, setIndex] = useState(0);
+	const annotationLinks = {};
 
-	return <AnnotationLinkContext.Provider value={{index, update: setIndex}}>
+	return <AnnotationLinkContext.Provider value={annotationLinks}>
 		{children}
 	</AnnotationLinkContext.Provider>
 }
 
-export const useAnnotationLink = (): [number, (index: number) => void] => {
-	const {index, update} = useContext(AnnotationLinkContext);
+export const useAnnotationLink = () => {
+	const annotationLinks = useContext(AnnotationLinkContext);
+	const max = (vals: number[]) => {
+		const sorted = vals.slice().sort((a, b) => b - a);
+		return sorted[0] || 0;
+	}
+	const annotate = (link: string): number => {
+		const curr = annotationLinks[link];
+		if (curr) {
+			return curr;
+		}
 
-	return [index, update];
+		const nextVal: number = max(Object.values(annotationLinks)) + 1;
+		annotationLinks[link] = nextVal;
+
+		return nextVal
+	}
+
+	return {annotate};
 }
 
 export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
@@ -194,9 +209,9 @@ export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
 	const setIndex = (newIndex: number) => {
 		index += newIndex;
 	}
-	return <>
+	return <AnnotationLinkProvider>
 		{items.map((item, i) => <CustomComponent key={i} {...item} index={index} setIndex={setIndex}/>)}
-	</>
+	</AnnotationLinkProvider>
 }
 
 export type IndexType = {
