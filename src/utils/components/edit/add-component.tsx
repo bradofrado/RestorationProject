@@ -75,7 +75,7 @@ const DataList: React.ElementType<DataListProps> = ({data: orig, ...rest}) => {
 	}
 	const data = orig ?? {content: 'custom', properties: null};
 
-	if (!data.properties) {
+	if (data.content == 'custom' && !data.properties) {
 		return <Placeholder>List is empty</Placeholder>
 	}
 	if (data.content == 'custom') {

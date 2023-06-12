@@ -22,7 +22,7 @@ export type PrismaTimelineItem = Prisma.TimelineItemGetPayload<typeof TimelineIt
 type PrismaTimelineItemWithLinksArray = Replace<PrismaTimelineItem, "links", string[]>
 export const RestorationTimelineItemSchema = z.object({
 	id: z.number(),
-	date: z.date(),
+	date: z.date().nullable(),
 	endDate: z.date().nullable(),
 	subcategory: z.string().nullable(),
 	text: z.string(),
@@ -30,7 +30,9 @@ export const RestorationTimelineItemSchema = z.object({
 	categoryId: z.number().nullable()
 }) satisfies z.Schema<PrismaTimelineItemWithLinksArray>
 export type RestorationTimelineItem = z.infer<typeof RestorationTimelineItemSchema>
-export type TimelineItemStandalone =  RestorationTimelineItem & TimelineAttributes;
+export type TimelineItemStandalone =  Omit<RestorationTimelineItem & TimelineAttributes, "date"> & {
+	date: Date
+};
 
 export const TimelineCategoryArgs = {
 	include: {items: TimelineItemArgs}

@@ -96,7 +96,7 @@ model TimelineCategory {
 
 model TimelineItem {
   id          Int @id @default(autoincrement())
-  date        DateTime
+  date        DateTime?
   endDate     DateTime?
   subcategory String?
   text        String

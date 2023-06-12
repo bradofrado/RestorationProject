@@ -272,12 +272,9 @@ const EditTimelineItems = () => {
 					<div className="my-2">
 						<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
 						<Label label="Page" className="my-2">
-							<div className="flex items-center">
+							<RemoveField onRemove={onPageRemove} value={!!category?.pageId}>
 								<Dropdown items={pages.map(x => ({name: x.url, id: x.id}))} initialValue={category?.pageId} onChange={onPageChange}>No page</Dropdown>
-								{category?.pageId && <Button className="ml-1 py-2" mode="secondary" title="Remove" onClick={onPageRemove}>
-									<RemoveIcon className="h-4 w-4"></RemoveIcon>
-								</Button>}
-							</div>
+							</RemoveField>
 						</Label>
 						<Label label="Color" className="my-2">
 							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
@@ -344,6 +341,11 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 		end && changePropertyItem(newItem, "endDate", end);
 	}
 
+	const onDateRemove = () => {
+		const newItem = changePropertyItem(item, "date", null);
+		changePropertyItem(newItem, "endDate", null);
+	}
+
 	const onCancel = () => {
 		console.log(propItem);
 		setItem(propItem);
@@ -359,7 +361,9 @@ const EditRestorationItem = ({item: propItem, disabled=false, onSave: onSaveProp
 		<Panel className="my-1" disabled={disabled}>
 			<Input include={Label} label="Text" type="textarea" value={item.text} inputClass="w-full" onChange={value => changePropertyItem(item, "text", value)}/>
 			<Label label="Date" className="inline-block my-1 mr-1">
-				<DateRangePicker start={item.date} end={item.endDate || item.date} onChange={onDateChange} />
+				<RemoveField onRemove={onDateRemove} value={!!item.date}>
+					<DateRangePicker start={item.date} end={item.endDate || item.date} onChange={onDateChange} />
+				</RemoveField>
 			</Label>
 			<Input include={Label} label="Subcategory" className="my-1" value={item.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(item, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
@@ -408,6 +412,19 @@ const EditablePage = ({page, setPage}: {page: EventPage, setPage: (page: EventPa
 	</>
 }
 
-
+type RemoveFieldProps = {
+	value: boolean,
+	onRemove: () => void
+} & React.PropsWithChildren
+const RemoveField = ({value, onRemove, children}: RemoveFieldProps) => {
+	return <>
+		<div className="flex items-center">
+			{children}
+			{value && <Button className="ml-1 py-2" mode="secondary" title="Remove" onClick={onRemove}>
+				<RemoveIcon className="h-4 w-4"></RemoveIcon>
+			</Button>}
+		</div>
+	</>
+}
 
 export default Edit_page;
