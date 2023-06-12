@@ -1,31 +1,25 @@
 import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
+import { useAnnotationLink } from "../edit/add-component";
 
 export interface CondensedTimelineProps {
 	items: RestorationTimelineItem[],
 	className?: string
 }
 
-const CondensedTimeline : React.FC<CondensedTimelineProps> = (props: CondensedTimelineProps) => {
-	const {items, className} = props;
-	let linkCounts = 0;
+const CondensedTimeline : React.FC<CondensedTimelineProps> = ({items, className}: CondensedTimelineProps) => {
 	return <>
 		<div className={`condensed-timeline-container pt-5 ${className || ''}`}>
-			{items.map((item, i) => {
-				const content = <TimelineRow item={item} key={i} linkNumber={linkCounts}/>
-				linkCounts += item.links.length;
-				return content;
-			})}
+			{items.map((item, i) => <TimelineRow item={item} key={i} />)}
 		</div>
 	</>
 }
 
 interface TimelineRowProps {
-	item: RestorationTimelineItem,
-	linkNumber: number
+	item: RestorationTimelineItem
 }
-const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
-	const {item, linkNumber} = props;
+const TimelineRow : React.FC<TimelineRowProps> = ({item}: TimelineRowProps) => {
+	const {annotate} = useAnnotationLink();
 	const date = item.endDate ? `${DateFormat.fullText(item.date)} to ${DateFormat.fullText(item.endDate)}` : DateFormat.fullText(item.date);
 	return <>
 		<div className="condensed-timeline-row">
@@ -35,7 +29,7 @@ const TimelineRow : React.FC<TimelineRowProps> = (props: TimelineRowProps) => {
 			<div className="condensed-timeline-row-content">
 				<p className="md:text-xl">
 					<span>{item.text}</span>
-					<span contentEditable="false">{item.links.map((link, i) => <Annotation link={link} key={i} id={linkNumber + i + 1}/>)}</span>
+					<span contentEditable="false">{item.links.map((link, i) => <Annotation link={link} key={i} id={annotate(link)}/>)}</span>
 				</p>
 			</div>
 		</div>

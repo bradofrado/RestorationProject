@@ -8,9 +8,10 @@ export const DateFormat = {
 
 export const groupBy = function<T extends Pick<T, K>, K extends keyof T>(arr: T[], key: K) {
 	return arr.reduce<Record<T[K], T[]>>((prev, curr) => {
-		let a: T[] | undefined = [];
-		if (prev[curr[key]]) {
-			a = prev[curr[key]];
+		let a: T[] = [];
+		const val = prev[curr[key]];
+		if (val) {
+			a = val;
 		}
 		a?.push(curr);
 		prev[curr[key]] = a;

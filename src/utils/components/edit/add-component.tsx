@@ -1,14 +1,18 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Editable, { type ButtonIcon } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
 import Header from '../base/header'
-import { TranslationMethodsContainer } from '../event-page/book-of-mormon-translation'
-import { type TimelineCategoryName } from '../../types/timeline'
+import { DataGroupbyList, DisplayList, DisplayListItem, RestorationQuote } from '../event-page/book-of-mormon-translation'
+import { type RestorationTimelineItem, type TimelineCategoryName } from '../../types/timeline'
 import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
+
+const Placeholder = ({children}: React.PropsWithChildren) => {
+	return <div className="text-gray-400">{children}</div>
+}
 
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,
@@ -24,19 +28,19 @@ interface Component {
 	component: React.ElementType<DataComponent>
 }
 
-const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className}) => {
+const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className, ...rest}) => {
 	const query = useGetCategory(data?.content || 'Book of Mormon');
 	if (query.isLoading || query.isError) {
-		return <></>
+		return <Placeholder>Pick Timeline items</Placeholder>
 	}
-	
+
 	const items = query.data.items;
 
 	return <>
-		<CondensedTimeline items={items} className={className}/>
+		<CondensedTimeline items={items} className={className} {...rest}/>
 	</>
 }
-const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
+const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
@@ -44,7 +48,7 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 	const dropdownItems: DropdownItem<string>[] = query.data.map(x => ({id: x.name, name: x.name}))
 	
 	return <>
-			<Editable as={DataCondensedTimeline} data={data}
+			<Editable as={DataCondensedTimeline} data={data} {...rest}
 				icons={[{icon: DeleteIcon, handler: onDelete}, 
 									<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
 											key={1} items={dropdownItems} icon={EditIcon}/>]}
@@ -54,29 +58,41 @@ const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDele
 		</>
 }
 
-interface DataListProps extends DataComponent {
-	onBlur?: (value: string, index: number) => void,
+export type ContentEditable = {
 	contentEditable?: boolean | "true" | "false"
 }
-const DataList: React.ElementType<DataListProps> = ({data, onBlur, contentEditable}) => {
+export type ContentEditableBlur = ContentEditable & {
+	onBlur?: (value: string, index: number) => void
+}
+interface DataListProps extends DataComponent, ContentEditableBlur {
+
+}
+
+const DataList: React.ElementType<DataListProps> = ({data: orig, ...rest}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
-	const type: TimelineCategoryName | 'custom' = data != null ? data.content : 'custom';
-	const items = type != 'custom' ? query.data.find(x => x.name == type)?.items : undefined;
-	const liItems = type == 'custom' && data?.properties ? data?.properties?.split('|') : ['Text']
-	
-	return <>
-		{(!data?.properties || type == 'custom') && <ul className="list-disc px-10">
-			{type == 'custom' && liItems.map((x, i) => <li key={i} onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, i)} contentEditable={contentEditable}>{x}</li>)}
-			{items != undefined && items.map((item, i) => <li key={i}>{item.text}</li>) }
-		</ul>}
-		{data?.properties && <TranslationMethodsContainer items={items || []} annotationCount={0}/>}
-	</>
+	const data = orig ?? {content: 'custom', properties: null};
+
+	if (!data.properties) {
+		return <Placeholder>List is empty</Placeholder>
+	}
+	if (data.content == 'custom') {
+		const items = data.properties ? data.properties.split('|') : [];
+		return <DisplayList items={items.map(x => ({text: x}))} ListComponent={DisplayListItem} {...rest}/>
+	}
+
+	const items: RestorationTimelineItem[] = query.data.find(x => x.name == data.content)?.items || [];
+
+	if (data?.properties?.includes('Group')) {
+		return <DataGroupbyList items={items} ListComponent={RestorationQuote} groupByKey='subcategory' {...rest}/>
+	}
+
+	return <DisplayList items={items} ListComponent={RestorationQuote} {...rest}/>
 }
 
-const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data}) => {
+const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
@@ -118,7 +134,7 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 	}
 	
 	return <>
-		<Editable as={DataList} icons={editIcons} data={data} onBlur={editLiItem}/>
+		<Editable as={DataList} icons={editIcons} data={data} onBlur={editLiItem} {...rest}/>
 	</>
 }
 
@@ -165,7 +181,45 @@ export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
 type EditableComponentType = {type: ComponentType, editable: true} & EditableComponent;
 type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;
 
-export const CustomComponent = (props: EditableComponentType | DataComponentType) => {
+const AnnotationLinkContext = React.createContext<Record<string, number>>({});
+
+const AnnotationLinkProvider = ({children}: React.PropsWithChildren) => {
+	const annotationLinks = {};
+
+	return <AnnotationLinkContext.Provider value={annotationLinks}>
+		{children}
+	</AnnotationLinkContext.Provider>
+}
+
+export const useAnnotationLink = () => {
+	const annotationLinks = useContext(AnnotationLinkContext);
+	const max = (vals: number[]) => {
+		const sorted = vals.slice().sort((a, b) => b - a);
+		return sorted[0] || 0;
+	}
+	const annotate = (link: string): number => {
+		const curr = annotationLinks[link];
+		if (curr) {
+			return curr;
+		}
+
+		const nextVal: number = max(Object.values(annotationLinks)) + 1;
+		annotationLinks[link] = nextVal;
+
+		return nextVal
+	}
+
+	return {annotate};
+}
+
+export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
+	return <AnnotationLinkProvider>
+		{items.map((item, i) => <CustomComponent key={i} {...item} />)}
+	</AnnotationLinkProvider>
+}
+
+type CustomComponentType = (EditableComponentType | DataComponentType);
+export const CustomComponent = (props: CustomComponentType) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
 		const {type: _, editable: _a, ...rest} = props;
