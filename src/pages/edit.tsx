@@ -19,6 +19,7 @@ import AddComponent, { type ComponentType, CustomComponents } from "~/utils/comp
 import Label from "~/utils/components/base/label";
 import ColorPicker from "~/utils/components/base/color-picker";
 import { DateRangePicker } from "~/utils/components/base/calendar/date-picker";
+import { RemoveIcon } from "~/utils/components/icons/icons";
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
@@ -204,6 +205,11 @@ const EditTimelineItems = () => {
 		changeProperty(category, "pageId", value.id);
 	}
 
+	const onPageRemove = () => {
+		if (!category) return;
+		changeProperty(category, "pageId", null);
+	}
+
 	const onItemDelete = (i: number) => {
 		if (!category) return;
 
@@ -266,7 +272,12 @@ const EditTimelineItems = () => {
 					<div className="my-2">
 						<Input include={Label} label="Name" className="my-1" value={category.name} onChange={value => changeProperty(category, "name", value)}/>
 						<Label label="Page" className="my-2">
-							<Dropdown items={pages.map(x => ({name: x.url, id: x.id}))} initialValue={category?.pageId} onChange={onPageChange}></Dropdown>
+							<div className="flex items-center">
+								<Dropdown items={pages.map(x => ({name: x.url, id: x.id}))} initialValue={category?.pageId} onChange={onPageChange}>No page</Dropdown>
+								{category?.pageId && <Button className="ml-1 py-2" mode="secondary" title="Remove" onClick={onPageRemove}>
+									<RemoveIcon className="h-4 w-4"></RemoveIcon>
+								</Button>}
+							</div>
 						</Label>
 						<Label label="Color" className="my-2">
 							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
