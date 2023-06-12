@@ -10,7 +10,7 @@ export type TimelineSubcategory = "Seer stone in a hat" | "Two spectacles";
 export const isTimelineCategory = (value: string): value is TimelineCategoryName => (timelineCategories as ReadonlyArray<string>).includes(value)
 
 interface TimelineAttributes {
-	pageId: string,
+	pageId: string | null,
 	color?: HexColor
 }
 
@@ -22,7 +22,7 @@ export type PrismaTimelineItem = Prisma.TimelineItemGetPayload<typeof TimelineIt
 type PrismaTimelineItemWithLinksArray = Replace<PrismaTimelineItem, "links", string[]>
 export const RestorationTimelineItemSchema = z.object({
 	id: z.number(),
-	date: z.date(),
+	date: z.date().nullable(),
 	endDate: z.date().nullable(),
 	subcategory: z.string().nullable(),
 	text: z.string(),
@@ -30,7 +30,9 @@ export const RestorationTimelineItemSchema = z.object({
 	categoryId: z.number().nullable()
 }) satisfies z.Schema<PrismaTimelineItemWithLinksArray>
 export type RestorationTimelineItem = z.infer<typeof RestorationTimelineItemSchema>
-export type TimelineItemStandalone =  RestorationTimelineItem & TimelineAttributes;
+export type TimelineItemStandalone =  Omit<RestorationTimelineItem & TimelineAttributes, "date"> & {
+	date: Date
+};
 
 export const TimelineCategoryArgs = {
 	include: {items: TimelineItemArgs}
@@ -41,7 +43,7 @@ export type PrismaTimelineCategory = Prisma.TimelineCategoryGetPayload<typeof Ti
 export const TimelineCategorySchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	pageId: z.string(),
+	pageId: z.string().nullable(),
 	color: HexColorSchema,
 	items: z.array(RestorationTimelineItemSchema)
 }) satisfies z.Schema<Replace<PrismaTimelineCategory, "items", RestorationTimelineItem[]> & TimelineAttributes>

@@ -88,15 +88,15 @@ model EditableData {
 model TimelineCategory {
   id                Int     @id @default(autoincrement())
   name              String  @unique
-  page              Page    @relation(fields: [pageId], references: [id])
-  pageId            String
+  page              Page?    @relation(fields: [pageId], references: [id])
+  pageId            String?
   color             String?
   items             TimelineItem[]
 }
 
 model TimelineItem {
   id          Int @id @default(autoincrement())
-  date        DateTime
+  date        DateTime?
   endDate     DateTime?
   subcategory String?
   text        String

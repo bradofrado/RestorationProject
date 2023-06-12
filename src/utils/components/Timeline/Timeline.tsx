@@ -20,7 +20,7 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 	const [scrollIndex, setScrollIndex] = useState<number>(-1);
 
 	const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
-		const items: TimelineItemStandalone[] = curr.items.map(item => ({...item, color: curr.color, pageId: curr.pageId}));
+		const items: TimelineItemStandalone[] = curr.items.filter(item => !!item.date).map(item => ({...item, color: curr.color, pageId: curr.pageId, date: item.date || new Date()}));
 		prev = prev.concat(items);
 
 		return prev;
@@ -103,7 +103,7 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 			}
 
 			const hoverState = item.text.length > offset ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow' : '';
-
+			
 			timeItems.push({
 				date: dayjs(item.date).format("MMM D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
@@ -112,9 +112,9 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 							<div className="h-full flex justify-center flex-col">
 								<p className="text-sm md:text-base mt-3 group-hover:pb-1 overflow-hidden group-hover/overflow:overflow-auto">{item.text} {item.links.map((link, i) => <Annotation key={i} link={link} id={i + 1}/>)}</p>
 							</div>
-							<div className="group-hover:visible flex justify-around invisible">
+							{item.pageId && <div className="group-hover:visible flex justify-around invisible">
 								<Link className="text-gray-800 hover:text-gray-700 text-sm font-medium" href={`/${getUrl(item.pageId)}`}>More</Link>
-							</div>
+							</div>}
 
 						</div>,
 				color: item.color,
@@ -148,6 +148,7 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 		setScrollIndex(newIndex);
 	}
 
+	const categoriesWithDateItems = categories.filter(x => x.items.filter(item => item.date).length > 0);
 	return <>
 		<div className="w-full">
 			<h1 className="text-4xl font-bold tracking-tight text-center pb-5 text-gray-800 mt-[20px] sm:mb-[100px] sm:mt-0">Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}</h1>
@@ -159,10 +160,10 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 			</ScrollDrag>
 			<div className="flex items-center flex-col-reverse sm:flex-row">
 				<Label label="Categories" className="grow">
-					<TimelineCategoryFilter categories={categories} filtered={filteredCategories} onChange={onCategoryClick} filterKey="id"/>
+					<TimelineCategoryFilter categories={categoriesWithDateItems} filtered={filteredCategories} onChange={onCategoryClick} filterKey="id"/>
 				</Label>
 				<div className="grow">
-					<Header className={scrollIndex < 0 ? 'invisible' : ''}>{scrollIndex >= 0 && timeItems[scrollIndex] ? `${timeItems[scrollIndex]?.date || ''}, ${timeItems[scrollIndex]?.year || ''}` : 'Filler'}</Header>
+					<Header className={scrollIndex < 0 || !timeItems[scrollIndex] ? 'invisible' : ''}>{scrollIndex >= 0 && timeItems[scrollIndex] ? `${timeItems[scrollIndex]?.date || ''}, ${timeItems[scrollIndex]?.year || ''}` : 'Filler'}</Header>
 					<div>
 						<Button onClick={onPreviousClick}>Previous</Button>
 						<Button onClick={onNextClick}>Next</Button>

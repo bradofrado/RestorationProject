@@ -20,6 +20,8 @@ interface TimelineRowProps {
 }
 const TimelineRow : React.FC<TimelineRowProps> = ({item}: TimelineRowProps) => {
 	const {annotate} = useAnnotationLink();
+	if (!item.date) return <></>
+	
 	const date = item.endDate ? `${DateFormat.fullText(item.date)} to ${DateFormat.fullText(item.endDate)}` : DateFormat.fullText(item.date);
 	return <>
 		<div className="condensed-timeline-row">
