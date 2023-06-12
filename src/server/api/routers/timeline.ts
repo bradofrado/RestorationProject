@@ -113,7 +113,10 @@ export const timelineRouter = createTRPCRouter({
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.update({
 				data: {
 					name: input.name,
-					pageId: input.pageId,
+					page: {
+						connect: input.pageId ? {id: input.pageId} : undefined,
+						disconnect: input.pageId == null ? true : undefined
+					},
 					color: input.color,
 				},
 				include: TimelineCategoryArgs.include,

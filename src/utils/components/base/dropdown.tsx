@@ -9,7 +9,7 @@ export interface DropdownItem<T> {
 export type ItemAction<T> = (item: DropdownItem<T>, index: number) => void
 interface DropdownProps<T> extends PropsWithChildren {
 	items: DropdownItem<T>[],
-	initialValue?: T,
+	initialValue?: T | null,
 	className?: string,
 	chevron?: boolean,
 	onChange?: ItemAction<T>,
