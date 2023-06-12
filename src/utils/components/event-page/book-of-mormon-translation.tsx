@@ -1,8 +1,7 @@
 import { DateFormat, groupBy } from "~/utils/utils";
 import { Annotation } from "../Timeline/CondensedTimeline";
 import { type RestorationTimelineItem } from "~/utils/types/timeline";
-import { useEffect, useState } from "react";
-import { ContentEditableBlur, IndexType } from "../edit/add-component";
+import { type ContentEditableBlur } from "../edit/add-component";
 import React from 'react';
 import {useAnnotationLink} from '~/utils/components/edit/add-component';
 

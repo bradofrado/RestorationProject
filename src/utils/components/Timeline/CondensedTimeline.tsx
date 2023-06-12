@@ -1,6 +1,6 @@
 import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
-import { IndexType, useAnnotationLink } from "../edit/add-component";
+import { useAnnotationLink } from "../edit/add-component";
 
 export interface CondensedTimelineProps {
 	items: RestorationTimelineItem[],

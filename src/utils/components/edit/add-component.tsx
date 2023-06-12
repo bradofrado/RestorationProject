@@ -1,4 +1,4 @@
-import React, { use, useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import Editable, { type ButtonIcon } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
@@ -10,11 +10,15 @@ import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 
+const Placeholder = ({children}: React.PropsWithChildren) => {
+	return <div className="text-gray-400">{children}</div>
+}
+
 export interface EditableComponent extends DataComponent {
 	onDelete: () => void,
 	onEdit: (data: EditableData) => void,
 }
-interface DataComponent extends IndexType {
+interface DataComponent {
 	data: EditableData | null,
 	className?: string
 }
@@ -27,9 +31,9 @@ interface Component {
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className, ...rest}) => {
 	const query = useGetCategory(data?.content || 'Book of Mormon');
 	if (query.isLoading || query.isError) {
-		return <></>
+		return <Placeholder>Pick Timeline items</Placeholder>
 	}
-	
+
 	const items = query.data.items;
 
 	return <>
@@ -70,8 +74,12 @@ const DataList: React.ElementType<DataListProps> = ({data: orig, ...rest}) => {
 		return <></>
 	}
 	const data = orig ?? {content: 'custom', properties: null};
+
+	if (!data.properties) {
+		return <Placeholder>List is empty</Placeholder>
+	}
 	if (data.content == 'custom') {
-		const items = data.properties ? data.properties.split('|') : ['Text'];
+		const items = data.properties ? data.properties.split('|') : [];
 		return <DisplayList items={items.map(x => ({text: x}))} ListComponent={DisplayListItem} {...rest}/>
 	}
 
@@ -205,20 +213,12 @@ export const useAnnotationLink = () => {
 }
 
 export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
-	let index = 0;
-	const setIndex = (newIndex: number) => {
-		index += newIndex;
-	}
 	return <AnnotationLinkProvider>
-		{items.map((item, i) => <CustomComponent key={i} {...item} index={index} setIndex={setIndex}/>)}
+		{items.map((item, i) => <CustomComponent key={i} {...item} />)}
 	</AnnotationLinkProvider>
 }
 
-export type IndexType = {
-	index: number,
-	setIndex: (index: number) => void
-}
-type CustomComponentType = (EditableComponentType | DataComponentType) & IndexType;
+type CustomComponentType = (EditableComponentType | DataComponentType);
 export const CustomComponent = (props: CustomComponentType) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {

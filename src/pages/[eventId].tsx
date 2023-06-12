@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { CustomComponent, CustomComponents } from "~/utils/components/edit/add-component";
+import { CustomComponents } from "~/utils/components/edit/add-component";
 import { useGetPage } from "~/utils/services/EventPageService";
 
 const Event_page : NextPage= () => {
