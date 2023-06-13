@@ -18,5 +18,8 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  experimental: {
+    forceSwcTransforms: true,
+  },
 };
 export default config;

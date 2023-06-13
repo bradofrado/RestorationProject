@@ -11,7 +11,7 @@ import Label from '../base/label';
 import Header from '../base/header';
 import { Annotation } from './CondensedTimeline';
 
-interface TimelineProps {
+export interface TimelineProps {
 	categories: TimelineCategory[]
 }
 export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) => {
@@ -40,7 +40,7 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 
 		return 0;
 	});
-	const sorted = unfilteredSorted.filter(x => filteredCategories.indexOf(x.categoryId) < 0);
+	const sorted = unfilteredSorted.filter(x => x.categoryId && filteredCategories.indexOf(x.categoryId) < 0);
 	
 
 	const lastDate = unfilteredSorted[unfilteredSorted.length - 1]?.date as Date;
@@ -103,17 +103,17 @@ export const Timeline: React.FC<TimelineProps> = ({categories}: TimelineProps) =
 			}
 
 			const hoverState = item.text.length > offset ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow' : '';
-			
+
 			timeItems.push({
 				date: dayjs(item.date).format("MMM D"),
 				x: getYearOffset(item.date.getFullYear() - firstYear) + getMonthOffset(item.date.getMonth()) + getDayOffset(item.date.getDate()),
 				below: currDateCount % 2 === 0,
-				content: <div className={`restoration-item overflow-hidden group focus:z-20 hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`}>
+				content: <div data-testid="timeline-item" className={`restoration-item overflow-hidden group focus:z-20 hover:z-20 ${hoverState} h-[200px] absolute transition-width ease-in-out`}>
 							<div className="h-full flex justify-center flex-col">
 								<p className="text-sm md:text-base mt-3 group-hover:pb-1 overflow-hidden group-hover/overflow:overflow-auto">{item.text} {item.links.map((link, i) => <Annotation key={i} link={link} id={i + 1}/>)}</p>
 							</div>
-							{item.pageId && <div className="group-hover:visible flex justify-around invisible">
-								<Link className="text-gray-800 hover:text-gray-700 text-sm font-medium" href={`/${getUrl(item.pageId)}`}>More</Link>
+							{item.pageId && <div className="justify-around flex h-5">
+								<Link className="text-gray-800 hover:text-gray-700 text-sm font-medium group-hover:inline-block hidden" href={`/${getUrl(item.pageId)}`}>More</Link>
 							</div>}
 
 						</div>,
