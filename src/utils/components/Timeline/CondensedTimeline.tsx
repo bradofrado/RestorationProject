@@ -45,7 +45,7 @@ interface AnnotationProps {
 export const Annotation : React.FC<AnnotationProps> = (props: AnnotationProps) => {
 	const {link, id} = props;
 	return <>
-		<span className="relative font-normal">
+		<span className="relative font-normal" role="annotation">
 			<a className="no-underline" href={link} target="_blank">
 				<span className="text-[0.75em] relative top-[-7px]">
 					[<span className="underline">{id}</span>]

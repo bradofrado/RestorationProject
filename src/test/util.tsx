@@ -21,45 +21,6 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
 export * from '@testing-library/react';
 export { customRender as render };
 
-const getUrl = (pageId: string) => {
-  return pageId;
-}
-
-export const mockPageService = () => ({
-  useEventPagesMutation: () => ({
-    create: {
-        mutate: (page: EventPage) => {return undefined},
-        data: null
-    },
-    update: {
-        mutate: (page: EventPage) => {return undefined},
-        data: null
-    },
-    deletem: {
-        mutate: (pageId: string) => {return undefined},
-        data: null
-    }
-  }),
-  useGetPages: () => ({
-    data: pages,
-    isLoading: false,
-    isError: false
-  }),
-  useGetPageUrl: () => ({
-    isLoading: false,
-    isError: false,
-    data: getUrl
-  })
-})
-
-export const mockTimelineService = () => ({
-  useGetCategories: () => ({
-      isLoading: false,
-      isError: false,
-      data: categories
-  })
-});
-
 
 const colors = {
 	'Book of Mormon': '#F1635C',

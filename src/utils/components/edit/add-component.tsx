@@ -105,14 +105,15 @@ const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, d
 		},
 	].concat(query.data.map(x => ({id: x.name, name: x.name})));
 
-	const listItems: ListItem[] = [
+	const listItems: ListItem<string>[] = [
 		{
 			label: 'Group',
-			value: !!data?.properties?.includes('Group')
+			value: !!data?.properties?.includes('Group'),
+			id: 'group',
 		}
 	]
 
-	const setListItems: (items: ListItem[]) => void = (items) => {
+	const setListItems: (items: ListItem<string>[]) => void = (items) => {
 		onEdit({content: data?.content || 'custom', properties: items.reduce((prev, curr) => prev + (curr.value ? `|${curr.label as string}` : ''), '') });
 	}
 

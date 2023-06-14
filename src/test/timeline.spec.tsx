@@ -1,4 +1,4 @@
-import { render, getAllByRole, itemsSorted, categories, mockPageService, mockTimelineService } from "./util";
+import { render, getAllByRole, itemsSorted, categories } from "./util";
 import userEvent from '@testing-library/user-event';
 import { Timeline, type TimelineProps } from '../utils/components/Timeline/Timeline';
 import { type TimelineCategory } from 'src/utils/types/timeline';

@@ -11,8 +11,10 @@ type DataGroupbyListProps<T extends ListItem> = {
 } & DisplayListComponentPassthrough<T>
 export const DataGroupbyList = <T extends ListItem>({className, groupByKey, items, ...rest}: DataGroupbyListProps<T>) => {
 	return <div className={className || ''}>
-		{Object.entries<T[]>(groupBy(items, groupByKey))
-			.map(([title, items], i) => <DisplayGroup items={items} title={title} key={i} {...rest}/>)}
+		<ul>
+			{Object.entries<T[]>(groupBy(items, groupByKey))
+				.map(([title, items], i) => <DisplayGroup items={items} title={title} key={i} {...rest}/>)}
+		</ul>
 	</div>
 }
 
@@ -23,12 +25,10 @@ type DisplayGroup<T extends ListItem> = {
 const DisplayGroup = <T extends ListItem>(props: DisplayGroup<T>) => {
 	const {title, ...rest} = props;
 	return <>
-		<ul>
-			<li>
-				<h3 className="text-xl">{title}</h3>
-				<DisplayList {...rest} />
-			</li>
-		</ul>
+		<li>
+			<h3 className="text-xl">{title}</h3>
+			<DisplayList {...rest} />
+		</li>
 	</>
 }
 

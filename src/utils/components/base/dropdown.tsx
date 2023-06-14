@@ -70,25 +70,26 @@ const Dropdown = <T,>({children, initialValue, onChange, items,
 	</>
 }
 
-export interface ListItem {
+export interface ListItem<T> {
 	label: React.ReactNode,
+	id: T,
 	value: boolean
 }
 
 interface ListItemProps<T> extends Omit<DropdownIconProps<T>, 'items'>{
-	items: ListItem[],
-	setItems: (items: ListItem[]) => void
+	items: ListItem<T>[],
+	setItems: (items: ListItem<T>[]) => void
 }
 
 export const DropdownList = <T,>({items, setItems, ...rest}: ListItemProps<T>) => {
 	const copy = items.slice();
-	const onSelect = (item: ListItem) => {
+	const onSelect = (item: ListItem<T>) => {
 		item.value = !item.value;
 		setItems(copy);
 	}
-	const dropdownItems = copy.map(item => ({ name: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, id: undefined }))
+	const dropdownItems = copy.map(item => ({ name: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, id: item.id }))
 	return <>
-		<DropdownIcon items={dropdownItems} {...rest} onChange={(item, index) => onSelect(items[index] as ListItem)}/>
+		<DropdownIcon items={dropdownItems} {...rest} onChange={(item, index) => onSelect(items[index] as ListItem<T>)}/>
 	</>
 }
 
