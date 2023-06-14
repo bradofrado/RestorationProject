@@ -153,7 +153,7 @@ const components = createComponents(
 	},
 	{
 		label: 'Paragraph',
-		editable: (({onDelete, onEdit, data}) => <Editable as="p" icons={[{icon: DeleteIcon, handler: onDelete}]} 
+		editable: (({onDelete, onEdit, data}) => <Editable as="p" role="paragraph" icons={[{icon: DeleteIcon, handler: onDelete}]} 
 				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
 										</Editable>) as React.ElementType<EditableComponent>,
@@ -214,20 +214,24 @@ export const useAnnotationLink = () => {
 
 export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
 	return <AnnotationLinkProvider>
-		{items.map((item, i) => <CustomComponent key={i} {...item} />)}
+		{items.map((item, i) => <CustomComponent key={i} {...item} id={i}/>)}
 	</AnnotationLinkProvider>
 }
 
 type CustomComponentType = (EditableComponentType | DataComponentType);
-export const CustomComponent = (props: CustomComponentType) => {
+export const CustomComponent = (props: CustomComponentType & {id: number}) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
-		const {type: _, editable: _a, ...rest} = props;
-		return <Component.editable {...rest}></Component.editable>
+		const {type: _, editable: _a, id, ...rest} = props;
+		return <div data-testid={`custom-component-editable-${id}`} role="custom-component-editable">
+			<Component.editable {...rest}></Component.editable>
+		</div>
 	}
 	
-	const {type: _, editable: _a, ...rest} = props;
-	return <Component.component {...rest}></Component.component>
+	const {type: _, editable: _a, id, ...rest} = props;
+	return <div data-testid={`custom-component-${id}`} role="custom-component">
+		<Component.component {...rest}></Component.component>
+	</div>
 }
 
 export default function AddComponent({onAdd}: {onAdd: (component: ComponentType) => void}) {

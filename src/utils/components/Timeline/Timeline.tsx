@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
 import {type TimelineCategory, type TimelineItemStandalone} from '~/utils/types/timeline';
-import { useGetPageUrl } from '~/utils/services/EventPageService';
+import { useGetPageUrl } from 'src/utils/services/EventPageService';
 import Button from '../base/button';
 import Label from '../base/label';
 import Header from '../base/header';
