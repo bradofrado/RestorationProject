@@ -356,7 +356,7 @@ describe('Edit page', () => {
 
         it('should be able to add and delete new timeline to page', async () => {
             const page = pages[0] as EventPage;
-            await addAndDeleteItemToPage({type: 'Timeline', page, callback: async ({newComponent, user, getByTestId}) => {
+            await addAndDeleteItemToPage({type: 'Timeline', page, callback: async ({newComponent, user}) => {
                 //Starts out with placeholder
                 const placeholder = getByText(newComponent, 'Pick Timeline items');
                 expect(placeholder).toBeInTheDocument();

@@ -1,8 +1,8 @@
-import { render, RenderOptions } from '@testing-library/react';
-import React, { FC, ReactElement } from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
+import React, { type ReactElement } from 'react';
 import fs from 'fs';
-import { EventPage } from '~/utils/types/page';
-import { TimelineCategory, TimelineItemStandalone } from '~/utils/types/timeline';
+import { type EventPage } from '~/utils/types/page';
+import { type TimelineCategory, type TimelineItemStandalone } from '~/utils/types/timeline';
 
 const wrapper = ({ children }: React.PropsWithChildren) => {
   return <>{children}</>;
