@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { CustomComponents } from "~/utils/components/edit/add-component";
 import { useGetPage } from "~/utils/services/EventPageService";
+import { EventPage } from "~/utils/types/page";
 
 const Event_page : NextPage= () => {
 	const router = useRouter();
@@ -27,21 +28,27 @@ const EventPage = ({eventId} : {eventId: string}) => {
 		return <div>Error: {query.error.message}</div>
 	}
 	
-	const {title, description, settings} = query.data;
-
-	//TODO: make this so we are not calculating the anotation count in two places (CondensedTimeline also)
-	//const annotationCount = countLinks(items);
 	return <>
 		<div className="max-w-4xl px-4 mx-auto sm:px-24 my-10">
 			<Link href="/timeline" className="text-xs italic font-bold text-gray-600 no-underline uppercase hover:text-gray-800">&lt; Back to timeline</Link>
-			<h1 className="mx-auto text-3xl font-bold my-5 text-bom">{title}</h1>
-			<div>
-				<p>
-					{description}
-				</p>
-			</div>
-			<CustomComponents items={settings.map((setting) => ({type: setting.component, data: setting.data}))}/>
+			<RenderPage page={query.data}/>
 		</div>
+	</>
+}
+
+interface RenderPageProps {
+	page: EventPage
+}
+export const RenderPage = ({page}: RenderPageProps) => {
+	const {title, description, settings} = page;
+	return <>
+		<h1 className="mx-auto text-3xl font-bold my-5 text-bom">{title}</h1>
+		<div>
+			<p>
+				{description}
+			</p>
+		</div>
+		<CustomComponents items={settings.map((setting) => ({type: setting.component, data: setting.data}))}/>
 	</>
 }
 

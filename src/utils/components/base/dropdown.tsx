@@ -52,6 +52,7 @@ const Dropdown = <T,>({children, initialValue, onChange, items,
 						<Menu.Item key={i}>
 							{({ active }) => (
 								<button
+									data-testid={`dropdown-item-${String(item.id)}`}
 									className={`${
 										active ? 'bg-primary text-white' : 'text-gray-900'
 									} group flex w-full items-center rounded-md px-2 py-2 text-sm`}
@@ -69,25 +70,26 @@ const Dropdown = <T,>({children, initialValue, onChange, items,
 	</>
 }
 
-export interface ListItem {
+export interface ListItem<T> {
 	label: React.ReactNode,
+	id: T,
 	value: boolean
 }
 
 interface ListItemProps<T> extends Omit<DropdownIconProps<T>, 'items'>{
-	items: ListItem[],
-	setItems: (items: ListItem[]) => void
+	items: ListItem<T>[],
+	setItems: (items: ListItem<T>[]) => void
 }
 
 export const DropdownList = <T,>({items, setItems, ...rest}: ListItemProps<T>) => {
 	const copy = items.slice();
-	const onSelect = (item: ListItem) => {
+	const onSelect = (item: ListItem<T>) => {
 		item.value = !item.value;
 		setItems(copy);
 	}
-	const dropdownItems = copy.map(item => ({ name: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, id: undefined }))
+	const dropdownItems = copy.map(item => ({ name: <span>{item.value && <CheckIcon className="w-3 h-3 inline"/>} {item.label}</span>, id: item.id }))
 	return <>
-		<DropdownIcon items={dropdownItems} {...rest} onChange={(item, index) => onSelect(items[index] as ListItem)}/>
+		<DropdownIcon items={dropdownItems} {...rest} onChange={(item, index) => onSelect(items[index] as ListItem<T>)}/>
 	</>
 }
 

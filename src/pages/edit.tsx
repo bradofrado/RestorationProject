@@ -53,11 +53,11 @@ const Edit_page: NextPage = () => {
 }
 
 
-type EditPagesProps = {
+export type EditPagesProps = {
 	id: string | undefined,
 	setId: (id: string | undefined) => void
 }
-const EditPages = ({setId}: EditPagesProps) => {
+export const EditPages = ({setId}: EditPagesProps) => {
 	const [currPage, setCurrPage] = useState<EventPage>();
 	const {create, update, deletem} = useEventPagesMutation();
 	const query = useGetPages();

@@ -11,8 +11,10 @@ type DataGroupbyListProps<T extends ListItem> = {
 } & DisplayListComponentPassthrough<T>
 export const DataGroupbyList = <T extends ListItem>({className, groupByKey, items, ...rest}: DataGroupbyListProps<T>) => {
 	return <div className={className || ''}>
-		{Object.entries<T[]>(groupBy(items, groupByKey))
-			.map(([title, items], i) => <DisplayGroup items={items} title={title} key={i} {...rest}/>)}
+		<ul>
+			{Object.entries<T[]>(groupBy(items, groupByKey))
+				.map(([title, items], i) => <DisplayGroup items={items} title={title} key={i} {...rest}/>)}
+		</ul>
 	</div>
 }
 
@@ -23,12 +25,10 @@ type DisplayGroup<T extends ListItem> = {
 const DisplayGroup = <T extends ListItem>(props: DisplayGroup<T>) => {
 	const {title, ...rest} = props;
 	return <>
-		<ul>
-			<li>
-				<h3 className="text-xl">{title}</h3>
-				<DisplayList {...rest} />
-			</li>
-		</ul>
+		<li>
+			<h3 className="text-xl">{title}</h3>
+			<DisplayList {...rest} />
+		</li>
 	</>
 }
 
@@ -63,10 +63,10 @@ export const RestorationQuote: DisplayListItemComponent<RestorationTimelineItem>
 	const [quote, name] = item.text.split('-');
 	return (
 		<li>
-			<span className="italic" >{quote}</span>
+			<span className="italic">{quote}</span>
 			{name && <>
 				<span className="font-medium">-{name}</span>
-				{item.date && <span className=""> {DateFormat.fullText(item.date)}</span>}
+				{item.date && <span className=""> {DateFormat.fullTextRange(item.date, item.endDate)}</span>}
 			</>}
 			<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={annotate(link)}/>)}</span>
 		</li>

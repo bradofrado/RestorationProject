@@ -35,11 +35,12 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 					const className = i > 0 ? 'ml-1' : '';
 					return <button className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className}`}
 						onClick={icon.handler} key={i}
+						data-testid="editable-edit-icon"
 					>
 						<Icon className="h-5 w-5"/>
 					</button>
 				} else {
-					return icon;
+					return <span key={i} data-testid="editable-edit-icon">{icon}</span>;
 				}
 			})}
 		</div>
