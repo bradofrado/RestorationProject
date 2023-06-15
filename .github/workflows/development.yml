@@ -9,6 +9,9 @@ on:
       - reopened
   workflow_call:
 
+env:
+  NODE_ENV: development
+
 jobs:
   test:
     name: Test application
