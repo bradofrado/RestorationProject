@@ -54,5 +54,8 @@ jobs:
       - name: "📦 install dependencies"
         uses: bahmutov/npm-install@v1
 
+      - name: "Set up environment variables"
+        run: cat .env.development > .env
+
       - name: "🔍 lint code"
         run: npm run lint --if-present
