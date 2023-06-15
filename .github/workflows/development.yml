@@ -54,6 +54,9 @@ jobs:
       - name: "📦 install dependencies"
         uses: bahmutov/npm-install@v1
 
+      - name: "Generate prisma types"
+        run: npx prisma generate
+
       - name: "Set up environment variables"
         run: cat .env.development > .env
 
