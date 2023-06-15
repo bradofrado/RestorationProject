@@ -1,8 +1,6 @@
 import { render, getAllByRole, itemsSorted, categories } from "./util";
 import userEvent from '@testing-library/user-event';
 import { Timeline, type TimelineProps } from '../utils/components/Timeline/Timeline';
-import { type TimelineCategory } from 'src/utils/types/timeline';
-import {type TimelineItemStandalone} from '~/utils/types/timeline';
 const getUrl = (pageId: string) => {
 	return pageId;
 }
@@ -42,7 +40,6 @@ describe('<Timeline/>', () => {
 				fail('Cannot find item ' + i.toString());
 			}
 
-			console.log(`Testing item ${i}`);
 			expect(item.getElementsByTagName('p').length).toBe(1);
 			expect(getAllByRole(item, 'link').length).toBe(itemSorted.links.length);
 

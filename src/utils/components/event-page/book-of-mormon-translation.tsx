@@ -63,10 +63,10 @@ export const RestorationQuote: DisplayListItemComponent<RestorationTimelineItem>
 	const [quote, name] = item.text.split('-');
 	return (
 		<li>
-			<span className="italic" >{quote}</span>
+			<span className="italic">{quote}</span>
 			{name && <>
 				<span className="font-medium">-{name}</span>
-				{item.date && <span className=""> {DateFormat.fullText(item.date)}</span>}
+				{item.date && <span className=""> {DateFormat.fullTextRange(item.date, item.endDate)}</span>}
 			</>}
 			<span>{item.links.map((link, i) => <Annotation link={link} key={i} id={annotate(link)}/>)}</span>
 		</li>

@@ -1,11 +1,12 @@
-import { useEventPagesMutation, useGetPage, useGetPageUrl } from "~/utils/services/EventPageService"; 
-import { type EventPage } from "~/utils/types/page";
-import {type ByRoleMatcher, getByRole, getByTestId as getByTestIdGlobal, render, pages, categories, getByText, getAllByRole, getAllByTestId, queryByRole, queryByText} from '~/test/util';
+import { type ComponentSettings, type EventPage } from "~/utils/types/page";
+import {type ByRoleMatcher, getByRole, getByTestId as getByTestIdGlobal, render, pages, categories, getByText, getAllByRole, getAllByTestId, queryByRole, queryByText, getByTestId} from '~/test/util';
 import userEvent from '@testing-library/user-event';
 import {EditPages, type EditPagesProps} from '~/pages/edit';
 import { type ComponentType } from "~/utils/components/edit/add-component";
-import { useGetCategories } from "~/utils/services/TimelineService";
 import { type UserEvent } from "@testing-library/user-event/dist/types/setup/setup";
+import { RenderPage } from "~/pages/[eventId]";
+import { type RestorationTimelineItem, type TimelineCategory } from "~/utils/types/timeline";
+import { DateFormat, groupBy } from "~/utils/utils";
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -174,6 +175,107 @@ const liElementHasAnnotationNumber = (props: {liIndex: number, annotationNumber:
     expect(getByText(annotation, `${annotationNumber}`));
 }
 
+type PageSettingTester = (props: {setting: ComponentSettings, container: HTMLElement} & RenderProps) => void;
+const simpleSettingTester: PageSettingTester = ({setting, getByText}) => {
+    expect(getByText(setting.data.content)).toBeInTheDocument();
+}
+
+const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
+    "Header": simpleSettingTester,
+    "Paragraph": simpleSettingTester,
+    "Timeline": ({setting, container}) => {
+        const category = getCategories().find(x => x.name == setting.data?.content) as TimelineCategory;
+        expect(category).toBeTruthy();
+
+        const timelineList = getByRole(container, 'list');
+        expect(timelineList).toBeInTheDocument();
+        const items = category.items.filter(x => !!x.date);
+        expect(timelineList.childElementCount).toBe(items.length);
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i] as RestorationTimelineItem;
+            const element = timelineList.children[i] as HTMLElement;
+            expect(queryByText(element, item.text)).toBeInTheDocument();
+            if (!item.date) {
+                fail('No date on item');
+            }
+            const dateText = DateFormat.fullTextRange(item.date, item.endDate);
+            expect(queryByText(element, dateText))
+
+            const annotations = getAllByRole(element, 'annotation');
+            expect(annotations.length).toBe(item.links.length);
+        }
+    },
+    "List": ({setting, container}) => {
+        if (setting.data.content == 'custom' && setting.data.properties) {
+            const items = setting.data.properties.split('|');
+            const ulElement = getByRole(container, 'list');
+            expect(ulElement).toBeInTheDocument();
+            expect(ulElement.childElementCount).toBe(items.length);
+
+            for (let i = 0; i < items.length; i++) {
+                const element = ulElement.children[i] as HTMLElement;
+                const item = items[i] as string;
+                expect(queryByText(element, item)).toBeInTheDocument();
+            }
+        } else {
+            const category = getCategories().find(x => x.name == setting.data.content) as TimelineCategory;
+            expect(category).toBeTruthy();
+
+            const checkList = (props: {container: HTMLUListElement, items: RestorationTimelineItem[]}) => {
+                const {container, items} = props;
+                expect(container).toBeInTheDocument();
+                expect(container.childElementCount).toBe(items.length);
+
+                for (let i = 0; i < items.length; i++) {
+                    const element = container.children[i] as HTMLElement;
+                    const item = items[i] as RestorationTimelineItem;
+
+                    if (item.text.startsWith("\"")) {
+                        const split = item.text.split('-');
+                        expect(split.length).toBe(2);
+                        const quote = split[0]?.trim() as string;
+                        const name = split[1]?.trim() as string;
+                        expect(queryByText(element, quote)).toBeInTheDocument();
+                        expect(queryByText(element, `-${name}`)).toBeInTheDocument();
+                        if (!item.date) {
+                            fail('Item .date needs to be truthy');
+                        }
+                        expect(queryByText(element, DateFormat.fullTextRange(item.date, item.endDate))).toBeInTheDocument();
+                    } else {
+                        expect(queryByText(element, item.text)).toBeInTheDocument();
+                    }
+
+                    const annotations = getAllByRole(element, 'annotation');
+                    expect(annotations.length).toBe(item.links.length);
+                }
+            }
+
+            
+            if (setting.data.properties != 'Group') {
+                const ulElement: HTMLUListElement = getByRole(container, 'list');
+                checkList({container: ulElement, items: category.items});
+            } else {
+                const groups = groupBy(category.items, 'subcategory');
+                const groupNames = Object.keys(groups);
+                const ulElements: HTMLUListElement[] = getAllByRole(container, 'list');
+                expect(ulElements.length).toBe(groupNames.length + 1);
+                
+                for (let i = 0; i < groupNames.length; i++) {
+                    const nextUL: HTMLUListElement = ulElements[i + 1] as HTMLUListElement;
+                    const name = groupNames[i] as string;
+                    const items = groups[name];
+                    if (!items) {
+                        fail('There are no items in the group');
+                    }
+                    expect(getByText(container, name)).toBeInTheDocument();
+                    checkList({container: nextUL, items: items});
+                }
+            }
+        }
+    }
+
+}
 
 
 describe('Edit page', () => {
@@ -287,7 +389,24 @@ describe('Edit page', () => {
 
     describe('Display Page', () => {
         it('should display page with header, paragraph, timeline, and list', () => {
+            const page = pages[1] as EventPage;
+            const user = userEvent.setup();
+            expect(page).toBeTruthy();
+            const {container, ...rest} = render(<RenderPage page={page}/>)
+            const {getByText} = rest;
 
+            expect(getByText(page.title)).toBeInTheDocument();
+            expect(getByText(page.description)).toBeInTheDocument();
+
+            for (let i = 0; i < page.settings.length; i++) {
+                const settingContainer = getByTestId(container, `custom-component-${i}`);
+                expect(settingContainer).toBeInTheDocument();
+                const setting = page.settings[i];
+                if (!setting) {
+                    fail('Setting is undefined');
+                }
+                pageSettingTesters[setting.component]({setting, user, container: settingContainer, ...rest});
+            }
         });
     })
 })

@@ -3,6 +3,13 @@ import dayjs from 'dayjs';
 export const DateFormat = {
 	fullText: (date: Date) => {
 		return dayjs(date).format("MMM, D, YYYY");
+	},
+	fullTextRange: (date: Date, endDate?: Date | null) => {
+		if (!endDate) {
+			return DateFormat.fullText(date);
+		}
+
+		return `${DateFormat.fullText(date)} to ${DateFormat.fullText(endDate)}`;
 	}
 }
 

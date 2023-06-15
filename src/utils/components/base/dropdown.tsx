@@ -52,7 +52,7 @@ const Dropdown = <T,>({children, initialValue, onChange, items,
 						<Menu.Item key={i}>
 							{({ active }) => (
 								<button
-									data-testid={`dropdown-item-${item.id}`}
+									data-testid={`dropdown-item-${String(item.id)}`}
 									className={`${
 										active ? 'bg-primary text-white' : 'text-gray-900'
 									} group flex w-full items-center rounded-md px-2 py-2 text-sm`}
