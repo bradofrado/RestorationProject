@@ -25,7 +25,6 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: cat .env.example > .env
-      - run: npm run build
       - run: npm run test
 
       - name: executing remote ssh commands using ssh key
@@ -34,4 +33,7 @@ jobs:
           host: witnessesoftherestoration.com
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh deploy.sh
+          script_stop: true
+          script: |
+            cd /home/ubuntu/repos/RestorationProject
+            sh deploy.sh
