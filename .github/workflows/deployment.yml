@@ -28,12 +28,10 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-      - name: rsync deployments
-        uses: burnett01/rsync-deployments@5.1
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
         with:
-          switches: -avzr --delete
-          path: ./*
-          remote_path: /var/www/witnessesoftherestoration.com/
-          remote_host: witnessesoftherestoration.com
-          remote_user: ubuntu
-          remote_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          host: witnessesoftherestoration.com
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sh deploy.sh
