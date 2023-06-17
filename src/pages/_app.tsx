@@ -24,7 +24,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 						<link rel="icon" href="/favicon.ico" />
 					</Head>
 					<main className="flex min-h-screen flex-col bg-gradient-to-b from-[#faf8f2] to-[#faf8f2]">
-						<div className="container flex flex-col gap-12 px-4 mx-auto">
+						<div className="container flex flex-col gap-12 px-4 mx-auto h-full flex-1">
 							<Component {...pageProps} />
 						</div>
 					</main>
