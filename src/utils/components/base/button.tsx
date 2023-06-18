@@ -20,7 +20,7 @@ const Button = <T extends React.ElementType>({children, as, mode = 'primary', ba
 		'other': `text-secondary hover:opacity-80`
 	}
 	const style = mode == 'other' ? {backgroundColor}: undefined;
-	const _class = `${className || ''} ${buttonClasses[mode]} inline-flex justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`;
+	const _class = `${className || ''} ${buttonClasses[mode]} inline-flex border justify-center rounded-md px-2 py-1 text-sm font-semibold leading-6 shadow-sm hover:bg-opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`;
 	return <>
 		<Component className={_class} style={style}
 			{...rest}

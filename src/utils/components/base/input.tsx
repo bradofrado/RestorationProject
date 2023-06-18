@@ -11,7 +11,7 @@ type TextProps<C extends React.ElementType> = PolymorphicCustomProps<C, InputPro
 const Input = <T extends React.ElementType>({children, onChange, value, include, required, inputClass, type="input", ...rest}: TextProps<T>) => {
     const Component = include || 'div';
     const props = {
-        className: `${inputClass || ''} rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-light sm:text-sm sm:leading-6 focus-visible:outline-none`,
+        className: `${inputClass || ''} rounded-md border border-gray-200 px-3 py-1.5 text-gray-900 shadow-sm placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-light sm:text-sm sm:leading-6 focus-visible:outline-none focus:outline-none focus:border-gray-200`,
         onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange && onChange(e.target.value),
         required
     }
