@@ -6,7 +6,7 @@ import {
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./db";
-import { loginSchema } from "~/utils/types/auth";
+import { type UserRole, loginSchema } from "~/utils/types/auth";
 import { login } from "./dao/authDAO";
 
 /**
@@ -20,14 +20,14 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: UserRole;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    // ...other properties
+    role: UserRole;
+  }
 }
 
 /**
@@ -40,6 +40,7 @@ export const authOptions: NextAuthOptions = {
     session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
+        session.user.role = token.role as UserRole;
       }
 
       return session;
@@ -48,6 +49,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.role = user.role;
       }
 
       return token;
@@ -66,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await login({input: credentials, db: prisma});
+        console.log(user);
         
         return user;
       },

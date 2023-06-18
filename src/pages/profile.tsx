@@ -1,7 +1,6 @@
 import { type GetServerSideProps, type GetServerSidePropsContext, type NextPage } from "next";
 import { signOut, useSession } from "next-auth/react";
 import { getServerAuthSession } from "~/server/auth";
-import Button from "~/utils/components/base/button";
 import Header from "~/utils/components/base/header";
 import { Hyperlink } from "~/utils/components/base/hyperlink";
 import Panel from "~/utils/components/base/panel";

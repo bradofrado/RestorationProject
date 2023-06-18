@@ -1,4 +1,4 @@
-import { type User, type Signup, type Login } from "~/utils/types/auth"
+import { type User, type Signup, type Login, userRoleSchema } from "~/utils/types/auth"
 import {type User as UserDB} from '@prisma/client'
 import argon from 'argon2';
 import {TRPCError} from '@trpc/server';
@@ -9,7 +9,8 @@ export const dbToUser = (user: UserDB): User => {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: user.image
+        image: user.image,
+        role: userRoleSchema.parse(user.role)
     }
 }
 
