@@ -4,8 +4,10 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import { env } from "~/env.mjs";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { prisma } from "./db";
+import { loginSchema } from "~/utils/types/auth";
+import { login } from "./dao/authDAO";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -35,18 +37,38 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        // session.user.role = user.role; <-- put other properties on the session here
+    session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
       }
+
       return session;
+    },
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+      }
+
+      return token;
     },
   },
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      name: "Credientials",
+      credentials: {
+        email: { label: "Email", type: "text"},
+        password: { label: "Password", type: "password"}
+      },
+      async authorize(credentials) {
+        if (!credentials || !loginSchema.safeParse(credentials).success) {
+          return null;
+        }
+
+        const user = await login({input: credentials, db: prisma});
+        
+        return user;
+      },
     }),
     /**
      * ...add more providers here.
@@ -58,6 +80,13 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  jwt: {
+    maxAge: 15 * 24 * 30 * 60, // 15 days
+  },
+  pages: {
+    signIn: "/login",
+    newUser: "/signup"
+  }
 };
 
 /**

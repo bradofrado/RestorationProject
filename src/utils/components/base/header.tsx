@@ -6,7 +6,15 @@ type HeaderType<C extends Headers> = PolymorphicComponentProps<C, object>
 
 const Header = <T extends Headers,>({children, className, as, ...rest}: HeaderType<T>): JSX.Element => {
 	const Component = as || 'h2';
-	return <Component className={`text-xl font-bold ${className || ''}`} {...rest}>{children}</Component>
+	const size: Record<Headers, string> = {
+		"h1": "text-2xl",
+		"h2": "text-xl",
+		"h3": "text-l",
+		"h4": "text-m",
+		"h5": "text-s",
+		"h6": "text-xs"
+	}
+	return <Component className={`${size[Component]} font-bold leading-9 tracking-tight text-gray-900 ${className || ''}`} {...rest}>{children}</Component>
 }
 
 export default Header;
