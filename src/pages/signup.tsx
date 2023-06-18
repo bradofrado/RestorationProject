@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { SignupForm } from "~/utils/components/auth/signup-form";
 import Header from '~/utils/components/base/header';
@@ -10,17 +9,8 @@ import { type Signup } from "~/utils/types/auth";
 
 const Signup_page: NextPage = () => {
     const query = useSignup();
-    const router = useRouter();
     const [error, setError] = useState<string | null>(null);
-    const [user, setUser] = useState<Signup>();
-
-    // if (query.isSuccess) {
-    //     void signIn('credentials', {
-    //         email: user.email,
-    //         password: user.password
-    //     });
-    //}
-
+    
     if (query.isError && !error) {
         setError("There was an error with your signup, please check your inputs and try again");
     }

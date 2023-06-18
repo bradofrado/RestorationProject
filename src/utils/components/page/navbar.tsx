@@ -1,10 +1,7 @@
 import { signIn, useSession } from "next-auth/react"
 import { ProfileButton } from "../auth/profile-button"
 
-interface HeaderComponentProps {
-
-}
-export const Navbar = ({}: HeaderComponentProps) => {
+export const Navbar = () => {
     const {data} = useSession();
     return <>
         <div className="flex justify-between items-center h-20">

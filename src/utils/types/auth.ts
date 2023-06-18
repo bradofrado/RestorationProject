@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {User as UserDB} from '@prisma/client'
+import {type User as UserDB} from '@prisma/client'
 
 export const signupSchema = z.object({
     name: z.string(),

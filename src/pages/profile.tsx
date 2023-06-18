@@ -1,5 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsContext, type NextPage } from "next";
-import { getServerSession } from "next-auth";
+import { type GetServerSideProps, type GetServerSidePropsContext, type NextPage } from "next";
 import { signOut, useSession } from "next-auth/react";
 import { getServerAuthSession } from "~/server/auth";
 import { Hyperlink } from "~/utils/components/base/hyperlink";
@@ -21,7 +20,7 @@ const requireAuth =
 };
 
 export const getServerSideProps = requireAuth(() => {
-    return {props: {}}
+    return new Promise((resolve) => resolve({props: {}}));
 });
 
 const Profile_page: NextPage = () => {
