@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import { Timeline as TimelineContainer } from "~/utils/components/Timeline/Timeline";
-import { Navbar } from "~/utils/components/page/navbar";
+import { Layout } from "~/utils/components/page/layout";
 import { useGetCategories } from "~/utils/services/TimelineService";
 
 const Timeline: NextPage = () => {
@@ -10,10 +10,11 @@ const Timeline: NextPage = () => {
 	}
 	const categories = query.data;
 	return <>
-		<Navbar/>
-		<div className="min-h-screen flex flex-col justify-center align-middle">
-			<TimelineContainer categories={categories}/>
-		</div>
+		<Layout>
+			<div className="flex flex-col justify-center align-middle">
+				<TimelineContainer categories={categories}/>
+			</div>
+		</Layout>
 	</>
 }
 

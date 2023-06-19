@@ -1,12 +1,13 @@
 import { signIn, useSession } from "next-auth/react"
 import { ProfileButton } from "../auth/profile-button"
+import Link from "next/link";
 
 export const Navbar = () => {
     const {data} = useSession();
     return <>
         <div className="flex justify-between items-center h-20">
             <div>
-                Witnesses of the Restoration
+                <Link href="/">Witnesses of the Restoration</Link>
             </div>
             <div className="">
                {data?.user ? <ProfileButton/> :

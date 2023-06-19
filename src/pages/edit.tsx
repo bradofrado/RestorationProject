@@ -6,6 +6,7 @@ import TabControl, { type TabItem } from "~/utils/components/base/tab";
 import { requireRole } from "~/utils/components/page/protected-routes-hoc";
 import { EditPages } from "~/utils/components/edit/edit-pages";
 import { EditTimelineItems } from "~/utils/components/edit/edit-timeline-items";
+import { Layout } from "~/utils/components/page/layout";
 
 export const getServerSideProps = requireRole('admin')(() => {
 	return new Promise((resolve) => resolve({props: {}}));
@@ -34,12 +35,12 @@ const Edit_page: NextPage = () => {
 			component: <EditTimelineItems/>,
 		}
 	]
-	return <>
-		<div className="max-w-4xl px-4 mx-auto sm:px-24 my-10 w-full">
+	return <Layout>
+		<div className="max-w-4xl px-4 mx-auto sm:px-24 mb-10 w-full">
 			<Link href="/timeline" className="text-xs italic font-bold text-gray-600 no-underline uppercase hover:text-gray-800">&lt; Back to timeline</Link>
 			<TabControl items={tabItems} className="w-full px-2 py-6 sm:px-0"/>
 		</div>
-	</>
+	</Layout>
 }
 
 export default Edit_page;
