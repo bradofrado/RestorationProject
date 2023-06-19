@@ -1,26 +1,10 @@
-import { type GetServerSideProps, type GetServerSidePropsContext, type NextPage } from "next";
+import { type NextPage } from "next";
 import { signOut, useSession } from "next-auth/react";
-import { getServerAuthSession } from "~/server/auth";
 import Header from "~/utils/components/base/header";
 import { Hyperlink } from "~/utils/components/base/hyperlink";
 import Panel from "~/utils/components/base/panel";
 import { ProfileIcon } from "~/utils/components/icons/icons";
-
-const requireAuth =
-  (func: GetServerSideProps) => async (ctx: GetServerSidePropsContext) => {
-    const session = await getServerAuthSession(ctx);
-
-    if (!session?.user) {
-      return {
-        redirect: {
-          destination: "/login", // login path
-          permanent: false,
-        },
-      };
-    }
-
-    return await func(ctx);
-};
+import { requireAuth } from "~/utils/components/page/protected-routes-hoc";
 
 export const getServerSideProps = requireAuth(() => {
     return new Promise((resolve) => resolve({props: {}}));

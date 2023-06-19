@@ -20,6 +20,11 @@ import Label from "~/utils/components/base/label";
 import ColorPicker from "~/utils/components/base/color-picker";
 import { DateRangePicker } from "~/utils/components/base/calendar/date-picker";
 import { RemoveIcon } from "~/utils/components/icons/icons";
+import { requireRole } from "~/utils/components/page/protected-routes-hoc";
+
+export const getServerSideProps = requireRole('admin')(() => {
+	return new Promise((resolve) => resolve({props: {}}));
+});
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
