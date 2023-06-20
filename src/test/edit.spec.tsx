@@ -1,12 +1,12 @@
 import { type ComponentSettings, type EventPage } from "~/utils/types/page";
 import {type ByRoleMatcher, getByRole, getByTestId as getByTestIdGlobal, render, pages, categories, getByText, getAllByRole, getAllByTestId, queryByRole, queryByText, getByTestId} from '~/test/util';
 import userEvent from '@testing-library/user-event';
-import {EditPages, type EditPagesProps} from '~/pages/edit';
 import { type ComponentType } from "~/utils/components/edit/add-component";
 import { type UserEvent } from "@testing-library/user-event/dist/types/setup/setup";
 import { RenderPage } from "~/pages/[eventId]";
 import { type RestorationTimelineItem, type TimelineCategory } from "~/utils/types/timeline";
 import { DateFormat, groupBy } from "~/utils/utils";
+import { EditPages, type EditPagesProps } from "~/utils/components/edit/edit-pages";
 
 const getCategories = () => categories;
 const getPages = () => pages;

@@ -50,3 +50,9 @@ export const useChangeProperty = <T,>(func: (item: T) => void) => {
 }
 
 export type Replace<T, K extends string | number | symbol, Q> = Omit<T, K> & Record<K, Q>
+
+
+
+export const getClass = (...strings: (string | undefined)[]) => {
+    return strings.filter(x => !!x).join(' ');
+}

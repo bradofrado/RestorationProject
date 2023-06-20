@@ -5,7 +5,7 @@ type PanelProps = {
 } & React.PropsWithChildren
 const Panel = ({children, className, disabled=false}: PanelProps) => {
 	return <>
-		<div className={`${className || ''} bg-white relative rounded-xl p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2`}>
+		<div className={`${className || ''} bg-white relative shadow-md rounded-xl p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2`}>
 			{disabled && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl z-10"></div>}
 			{children}
 		</div>

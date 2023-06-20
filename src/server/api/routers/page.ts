@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   createTRPCRouter,
+  criticalProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 import { type prisma } from "~/server/db";
@@ -84,18 +85,18 @@ export const pageRouter = createTRPCRouter({
 
 			return pages.map(x => x.url);
 		}),
-	createPage: publicProcedure
+	createPage: criticalProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
 			input.id = ''; //autogenerate an id
 			return await createPage({input, db: ctx.prisma})
 		}),
-	deletePage: publicProcedure
+	deletePage: criticalProcedure
 		.input(z.string())
 		.mutation(async ({ctx, input}) => {
 			await deletePage({input, db: ctx.prisma})
 		}),
-	updatePage: publicProcedure
+	updatePage: criticalProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
 			await deletePage({input: input.id, db: ctx.prisma});
