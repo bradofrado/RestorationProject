@@ -35,9 +35,9 @@ export const LoginForm = ({onSubmit: onSubmitProps, error, resetError}: LoginFor
             <div>
                 <div className="flex items-center justify-between">
                     <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">Password</label>
-                    <div className="text-sm">
+                    {/* <div className="text-sm">
                         <Hyperlink>Forgot password?</Hyperlink>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="mt-1">
                     <Input inputClass="w-full block" type="password" required value={password} onChange={onChange(setPassword)}/>
