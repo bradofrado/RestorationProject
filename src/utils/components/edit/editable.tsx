@@ -13,15 +13,24 @@ type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
   EditableProps
 >
 
+export interface EditableComponentProps<T> {
+	onDelete: () => void,
+	onEdit: (data: T) => void,
+	data: T | null
+}
+
+export type EditableComponent<T> = React.ComponentType<EditableComponentProps<T>>
+
 export type ButtonIcon = {
 	icon: IconComponent,
 	handler: () => void,
 } | JSX.Element
 
+export type ContentEditableComponent = {contentEditable?: boolean | "true" | "false" };
+
 function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: TextProps<T>) {
 	const Component = as || 'span';
 	
-	//const classAll: string = 'hover:bg-sky-200/50 p-2 rounded-md peer ' + (className || '');
 	const render = wrapped ? children : <Component {...rest} contentEditable={editable}>{children}</Component>
 	return <div className="relative"> 
 		
@@ -46,8 +55,5 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 		</div>
 	</div>
 }
-
-export type ContentEditableComponent = {contentEditable?: boolean | "true" | "false" };
-
 
 export default Editable;

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import Editable, { type ButtonIcon } from './editable'
+import Editable, { type ButtonIcon, type EditableComponentProps } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
@@ -9,23 +9,21 @@ import { type RestorationTimelineItem, type TimelineCategoryName } from '../../t
 import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
+import { DirtyComponent } from './dirty-component'
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
 }
 
-export interface EditableComponent extends DataComponent {
-	onDelete: () => void,
-	onEdit: (data: EditableData) => void,
-}
+type EditableDataComponent = EditableComponentProps<EditableData> & DataComponent;
 interface DataComponent {
 	data: EditableData | null,
 	className?: string
 }
 interface Component {
 	label: string,
-	editable: React.ElementType<EditableComponent>,
-	component: React.ElementType<DataComponent>
+	editable: React.ComponentType<EditableDataComponent>,
+	component: React.ComponentType<DataComponent>
 }
 
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className, ...rest}) => {
@@ -40,7 +38,7 @@ const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, classNam
 		<CondensedTimeline items={items} className={className} {...rest}/>
 	</>
 }
-const EditableCondensedTimeline: React.ElementType<EditableComponent> = ({onDelete, onEdit, data, ...rest}) => {
+const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
@@ -92,7 +90,7 @@ const DataList: React.ElementType<DataListProps> = ({data: orig, ...rest}) => {
 	return <DisplayList items={items} ListComponent={RestorationQuote} {...rest}/>
 }
 
-const EditableList: React.ElementType<EditableComponent> = ({onDelete, onEdit, data, ...rest}) => {
+const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
 	if (query.isLoading || query.isError) {
 		return <></>
@@ -149,16 +147,16 @@ const components = createComponents(
 		editable: (({onDelete, onEdit, data}) => <Editable as={Header} icons={[{icon: DeleteIcon, handler: onDelete}]} 
 			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
-										</Editable>) as React.ElementType<EditableComponent>,
-		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ElementType<DataComponent>
+										</Editable>) as React.ComponentType<EditableDataComponent>,
+		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ComponentType<DataComponent>
 	},
 	{
 		label: 'Paragraph',
 		editable: (({onDelete, onEdit, data}) => <Editable as="p" role="paragraph" icons={[{icon: DeleteIcon, handler: onDelete}]} 
 				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
-										</Editable>) as React.ElementType<EditableComponent>,
-		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ElementType<DataComponent>
+										</Editable>) as React.ComponentType<EditableDataComponent>,
+		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ComponentType<DataComponent>
 	},
 	{
 		label: 'Timeline',
@@ -179,7 +177,7 @@ export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
 	return (componentsTypes as ReadonlyArray<string>).includes(val as string);
 })
 
-type EditableComponentType = {type: ComponentType, editable: true} & EditableComponent;
+type EditableComponentType = {type: ComponentType, editable: true} & EditableDataComponent;
 type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;
 
 const AnnotationLinkContext = React.createContext<Record<string, number>>({});
@@ -225,7 +223,7 @@ export const CustomComponent = (props: CustomComponentType & {id: number}) => {
 	if (props.editable) {
 		const {type: _, editable: _a, id, ...rest} = props;
 		return <div data-testid={`custom-component-editable-${id}`} role="custom-component-editable">
-			<Component.editable {...rest}></Component.editable>
+			<DirtyComponent as={Component.editable} {...rest}></DirtyComponent>
 		</div>
 	}
 	
