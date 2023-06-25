@@ -211,20 +211,21 @@ export const useAnnotationLink = () => {
 	return {annotate};
 }
 
-export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
+export const CustomComponents = ({items, isNew}: {items: CustomComponentType[], isNew: boolean}) => {
 	return <AnnotationLinkProvider>
-		{items.map((item, i) => <CustomComponent key={i} {...item}/>)}
+		{items.map((item, i) => <CustomComponent key={i} {...item} isNew={isNew}/>)}
 	</AnnotationLinkProvider>
 }
 
 type CustomComponentType = (EditableComponentType | DataComponentType) & {id: number};
-export const CustomComponent = (props: CustomComponentType & {id: number}) => {
+export const CustomComponent = (props: CustomComponentType & {isNew: boolean}) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
 		const {type: _, editable: _a, id, ...rest} = props;
 		const isNew = id < 0;
 		return <div data-testid={`custom-component-editable-${id}`} role="custom-component-editable">
-			<DirtyComponent as={Component.editable} {...rest} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}></DirtyComponent>
+			{props.isNew ? <Component.editable {...rest}/> : 
+			<DirtyComponent as={Component.editable} {...rest} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}></DirtyComponent>}
 		</div>
 	}
 	
