@@ -45,7 +45,7 @@ export default function TabControl({items, className}: TabControlProps) {
 								className={classNames(
 									'rounded-xl p-3',
 									item.className,
-									'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2'
+									'ring-white ring-opacity-60 ring-offset-2 ring-offset-primary focus:outline-none focus:ring-2'
 								)}
 							>
 								{item.component}

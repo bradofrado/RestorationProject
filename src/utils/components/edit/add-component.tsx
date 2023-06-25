@@ -145,7 +145,7 @@ const components = createComponents(
 	{
 		label: 'Header',
 		editable: (({onDelete, onEdit, data}) => <Editable as={Header} icons={[{icon: DeleteIcon, handler: onDelete}]} 
-			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
+			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
 										</Editable>) as React.ComponentType<EditableDataComponent>,
 		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ComponentType<DataComponent>
@@ -153,7 +153,7 @@ const components = createComponents(
 	{
 		label: 'Paragraph',
 		editable: (({onDelete, onEdit, data}) => <Editable as="p" role="paragraph" icons={[{icon: DeleteIcon, handler: onDelete}]} 
-				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => onEdit({content: e.target.innerHTML, properties: null})}>
+				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
 										</Editable>) as React.ComponentType<EditableDataComponent>,
 		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ComponentType<DataComponent>

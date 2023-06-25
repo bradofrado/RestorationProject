@@ -37,7 +37,7 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">
 			{render}
 		</div>
-		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 ">
+		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 z-20">
 			{icons?.map((icon, i) => {
 				if ("icon" in icon) {
 					const Icon = icon.icon;
