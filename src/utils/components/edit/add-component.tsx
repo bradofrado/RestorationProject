@@ -17,7 +17,7 @@ const Placeholder = ({children}: React.PropsWithChildren) => {
 
 type EditableDataComponent = EditableComponentProps<EditableData> & DataComponent;
 interface DataComponent {
-	data: EditableData | null,
+	data: EditableData,
 	className?: string
 }
 interface Component {
@@ -213,17 +213,18 @@ export const useAnnotationLink = () => {
 
 export const CustomComponents = ({items}: {items: CustomComponentType[]}) => {
 	return <AnnotationLinkProvider>
-		{items.map((item, i) => <CustomComponent key={i} {...item} id={i}/>)}
+		{items.map((item, i) => <CustomComponent key={i} {...item}/>)}
 	</AnnotationLinkProvider>
 }
 
-type CustomComponentType = (EditableComponentType | DataComponentType);
+type CustomComponentType = (EditableComponentType | DataComponentType) & {id: number};
 export const CustomComponent = (props: CustomComponentType & {id: number}) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
 		const {type: _, editable: _a, id, ...rest} = props;
+		const isNew = id < 0;
 		return <div data-testid={`custom-component-editable-${id}`} role="custom-component-editable">
-			<DirtyComponent as={Component.editable} {...rest}></DirtyComponent>
+			<DirtyComponent as={Component.editable} {...rest} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}></DirtyComponent>
 		</div>
 	}
 	

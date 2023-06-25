@@ -122,7 +122,7 @@ const EditablePage = ({page, setPage}: {page: EventPage, setPage: (page: EventPa
 			<Editable as="p" onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => setPage({...page, description: e.target.innerHTML})}>
 				{page.description}
 			</Editable>
-			<CustomComponents items={page.settings.map((editable: ComponentSettings, i: number) => ({editable: true, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, i), data: editable.data}))}/>
+			<CustomComponents items={page.settings.map((editable: ComponentSettings, i: number) => ({editable: true, id: editable.id, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, i), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }
