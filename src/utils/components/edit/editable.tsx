@@ -13,8 +13,11 @@ type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
   EditableProps
 >
 
-export interface EditableComponentProps<T> {
-	onDelete: () => void,
+export interface DeletableComponentProps {
+	onDelete: () => void
+}
+
+export interface EditableComponentProps<T> extends DeletableComponentProps {
 	onEdit: (data: T) => void,
 	data: T 
 }

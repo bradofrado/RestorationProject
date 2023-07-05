@@ -7,8 +7,8 @@ import {
   criticalProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { Db, type prisma } from "~/server/db";
-import { type EventPage, PageSchema, ComponentSettingsSchema, ComponentSettings } from "~/utils/types/page";
+import { type Db } from "~/server/db";
+import { type EventPage, PageSchema, ComponentSettingsSchema, type ComponentSettings } from "~/utils/types/page";
 
 const getPage = async ({input, db}: {input: string, db: Db }) => {
 	const page: EventPage | null = await db.page.findUnique({

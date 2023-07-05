@@ -211,7 +211,7 @@ export const useAnnotationLink = () => {
 	return {annotate};
 }
 
-export const CustomComponents = ({items, isNew}: {items: CustomComponentType[], isNew: boolean}) => {
+export const CustomComponents = ({items, isNew=false}: {items: CustomComponentType[], isNew?: boolean}) => {
 	return <AnnotationLinkProvider>
 		{items.map((item, i) => <CustomComponent key={i} {...item} isNew={isNew}/>)}
 	</AnnotationLinkProvider>

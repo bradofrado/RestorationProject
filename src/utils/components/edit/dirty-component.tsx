@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {type EditableComponent, type EditableComponentProps} from '~/utils/components/edit/editable';
+import {type EditableComponent} from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import Button from '~/utils/components/base/button';
 type DirtComponentOtherProps = {
@@ -8,7 +8,7 @@ type DirtComponentOtherProps = {
     overrideEdit?: boolean,
     dirty?: boolean
 }
-type DirtyComponentProps<T,> = PolymorphicComponentProps<EditableComponent<T>, EditableComponentProps<T>> & DirtComponentOtherProps;
+type DirtyComponentProps<K, T extends EditableComponent<K>> = PolymorphicComponentProps<T, DirtComponentOtherProps>;
 type DirtyState<T> = {
     state: false
 } | ({
@@ -22,9 +22,9 @@ type DirtyType<T> = {
     type: "delete"
 }
 
-export const DirtyComponent = <T,>({as, onDelete: onDeleteProps, onEdit: onEditProps, data, dirty=false, overrideDelete, overrideEdit, showCancel=true}: DirtyComponentProps<T>) => {
-    const [dirtyState, setDirtyState] = useState<DirtyState<T>>(dirty ? {state: true, type: 'edit', data} : {state: false});
-    const [currData, setCurrData] = useState<T>(data);
+export const DirtyComponent = <K, T extends EditableComponent<K>>({as, onDelete: onDeleteProps, onEdit: onEditProps, data, dirty=false, overrideDelete, overrideEdit, showCancel=true, ...rest}: DirtyComponentProps<K,T>) => {
+    const [dirtyState, setDirtyState] = useState<DirtyState<K>>(dirty ? {state: true, type: 'edit', data} : {state: false});
+    const [currData, setCurrData] = useState<K>(data);
     
     useEffect(() => setCurrData(data), [data]);
 
@@ -36,7 +36,7 @@ export const DirtyComponent = <T,>({as, onDelete: onDeleteProps, onEdit: onEditP
         }
     }
 
-    const onEdit = (data: T) => {
+    const onEdit = (data: K) => {
         if (overrideEdit) {
             onEditProps(data);
         } else { 
@@ -60,13 +60,10 @@ export const DirtyComponent = <T,>({as, onDelete: onDeleteProps, onEdit: onEditP
         setDirtyState({state: false});
     }
 
-    if (!as) {
-        return <div></div>
-    }
-    const Component = as;
+    const Component = as || 'span';
     return <div className="relative">
         {dirtyState.state && dirtyState.type == 'delete' && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl z-10"></div>}
-        <Component onDelete={onDelete} onEdit={onEdit} data={currData}/>
+        <Component onDelete={onDelete} onEdit={onEdit} data={currData} {...rest}/>
         {dirtyState.state && <div className="my-1 text-right mx-4 z-10 relative">
             {showCancel && <Button className="mx-1" mode="secondary" onClick={onCancel}>Cancel</Button>}
             <Button mode="primary" onClick={onSave}>Save</Button>
