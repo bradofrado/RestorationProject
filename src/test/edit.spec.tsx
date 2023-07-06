@@ -1,5 +1,5 @@
 import { type ComponentSettings, type EventPage } from "~/utils/types/page";
-import {type ByRoleMatcher, getByRole, getByTestId as getByTestIdGlobal, render, pages, categories, getByText, getAllByRole, getAllByTestId, queryByRole, queryByText, getByTestId} from '~/test/util';
+import {type ByRoleMatcher, getByRole, getByTestId as getByTestIdGlobal, render, pages, categories, getByText, getAllByRole, getAllByTestId, queryByRole, queryByText, getByTestId, queryByTestId} from '~/test/util';
 import userEvent from '@testing-library/user-event';
 import { type ComponentType } from "~/utils/components/edit/add-component";
 import { type UserEvent } from "@testing-library/user-event/dist/types/setup/setup";
@@ -7,6 +7,7 @@ import { RenderPage } from "~/pages/[eventId]";
 import { type RestorationTimelineItem, type TimelineCategory } from "~/utils/types/timeline";
 import { DateFormat, groupBy } from "~/utils/utils";
 import { EditPages, type EditPagesProps } from "~/utils/components/edit/edit-pages";
+import { EditTimelineItems } from "~/utils/components/edit/edit-timeline-items";
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -17,6 +18,20 @@ const getUrl = (pageId: string) => {
 
 jest.mock('src/utils/services/EventPageService', () => ({
     useEventPagesMutation: () => ({
+        create: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        update: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        deletem: {
+            mutate: () => {return undefined},
+            data: null
+        }
+    }),
+    useComponentSettingsMutation: () => ({
         create: {
             mutate: () => {return undefined},
             data: null
@@ -57,7 +72,35 @@ jest.mock('src/utils/services/TimelineService', () => ({
         })
 
         return {isLoading: false, isError: true};
-    }
+    },
+    useCategoryMutations: () => ({
+        create: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        update: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        deletem: {
+            mutate: () => {return undefined},
+            data: null
+        }
+    }),
+    useTimelineMutations: () => ({
+        create: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        update: {
+            mutate: () => {return undefined},
+            data: null
+        },
+        deletem: {
+            mutate: () => {return undefined},
+            data: null
+        }
+    })
 }))
 
 const renderPage = (props?: EditPagesProps) => {
@@ -69,6 +112,15 @@ const renderPage = (props?: EditPagesProps) => {
 		user: userEvent.setup(),
 		...render(
 			<EditPages {...defaultProps} {...props}/>
+		)
+	}
+}
+
+const renderTimelineItems = () => {
+    return {
+		user: userEvent.setup(),
+		...render(
+			<EditTimelineItems/>
 		)
 	}
 }
@@ -93,6 +145,36 @@ const renderAndSelectPage = async (page: EventPage) => {
     expect(getByText(page.title)).toBeInTheDocument();
     expect(getByText(page.description)).toBeInTheDocument();
     expect(getAllByRole('custom-component-editable').length).toBe(page.settings.length);
+
+    return props;
+}
+
+const renderAndSelectTimelineCategory = async (category: TimelineCategory) => {
+    const props = renderTimelineItems();
+    const {user, getByText, queryByText, getAllByRole} = props;
+
+    const dropdown = getByText('select');
+    expect(dropdown).toBeInTheDocument();
+
+    expect(queryByText(category.name)).toBeFalsy();
+    await user.click(dropdown);
+
+    const dropdownItem = getByText(category.name);
+
+    expect(dropdownItem).toBeInTheDocument();
+
+    await user.click(dropdownItem);
+
+    const pages = getPages();
+    const page = pages.find(x => category.pageId == x.id);
+
+    expect(getByText(category.name)).toBeInTheDocument();
+    if (page) {
+        expect(getByText(page.url)).toBeInTheDocument();
+    } else {
+        expect(getByText('No page')).toBeInTheDocument();
+    }
+    expect(getAllByRole('editable-timeline-item').length).toBe(category.items.length);
 
     return props;
 }
@@ -384,6 +466,111 @@ describe('Edit page', () => {
                 expect(queryByText(timelineList.children[7] as HTMLElement, 'Oliver Cowdery arrives and begins acting as the primary translation scribe. The majority of the Book of Mormon is translated.')).toBeInTheDocument();
                 expect(queryByText(timelineList.children[7] as HTMLElement, 'Apr, 7, 1829 to Jun, 1, 1829')).toBeInTheDocument();
             }, ...await renderAndSelectPage(page)});
+        })
+    })
+
+    describe('EditTimelineItems', () => {
+        it('should be able to select timeline category', async() => {
+            await renderAndSelectTimelineCategory(categories[0] as TimelineCategory);
+        })
+
+        it('should be able to select page', async () => {
+            const category = categories[0] as TimelineCategory;
+            const {getByText, user, container} = await renderAndSelectTimelineCategory(category);
+
+            const page = getPages().find(x => x.id == category.pageId);
+            if (!page) {
+                fail('Could not find page');
+            }
+
+            const dropdown = getByText(page.url);
+            expect(dropdown).toBeInTheDocument();
+            await user.click(dropdown);
+            await selectDropdownItem({user, type: page.id, container});
+
+            expect(dropdown.innerHTML).toContain(page.url);
+        })
+
+        it('should be able to delete timeline item', async () => {
+            const category = categories[0] as TimelineCategory;
+            const {getByTestId, user, queryByTestId: queryByTestIdLocal} = await renderAndSelectTimelineCategory(category);
+            const timelineItem = category.items[0] as RestorationTimelineItem;
+
+            //Get the first timeline item and its editable buttons
+            const timelineItemElement = getByTestId(`dirty-component-${timelineItem.id}`);
+            const editableButtons = getAllByTestId(timelineItemElement, 'editable-edit-icon');
+            expect(editableButtons.length).toBe(timelineItem.links.length + 1);
+
+            //We should not have a delete state initially
+            expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).not.toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Cancel')).not.toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Save')).not.toBeInTheDocument();
+
+            //Get the delete button and click it. We should now have the delete state
+            const deleteButton = editableButtons[timelineItem.links.length] as HTMLElement;
+            await user.click(deleteButton);
+            expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Cancel')).toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Save')).toBeInTheDocument();
+
+            //Cancel this deletion. The delete state should be gone
+            const cancelButton = getByText(timelineItemElement, 'Cancel');
+            await user.click(cancelButton);
+            expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).not.toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Cancel')).not.toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Save')).not.toBeInTheDocument();
+
+            //Delete again
+            await user.click(deleteButton);
+            expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Cancel')).toBeInTheDocument();
+            expect(queryByText(timelineItemElement, 'Save')).toBeInTheDocument();
+
+            //Save this
+            const saveButton = getByText(timelineItemElement, 'Save');
+            await user.click(saveButton);
+            expect(queryByTestIdLocal(`dirty-component-${timelineItem.id}`)).not.toBeInTheDocument();
+        })
+
+        it('should be able to add timeline item', async () => {
+            const category = categories[0] as TimelineCategory;
+            const {getAllByRole, user, getAllByText, getByTestId, queryByTestId: queryByTestIdLocal} = await renderAndSelectTimelineCategory(category);
+
+            const addTimelineItem = async ({addButton}: {addButton: HTMLElement}) => {
+                await user.click(addButton);
+
+                expect(getAllByRole('editable-timeline-item').length).toBe(category.items.length + 1);
+    
+                const newTimelineItemElement = getByTestId('dirty-component--1');
+                expect(queryByText(newTimelineItemElement, 'Cancel')).not.toBeInTheDocument();
+                expect(queryByText(newTimelineItemElement, 'Save')).toBeInTheDocument();
+
+                return newTimelineItemElement;
+            }
+
+            //Each timeline item has a + button for the links, so the outside add button is what we want
+            const addButtons = getAllByText('+');
+            expect(addButtons.length).toBe(category.items.length + 1);
+            const addButton = addButtons[category.items.length] as HTMLElement;
+
+            let newTimelineItemElement = await addTimelineItem({addButton});
+
+            //Get the delete button on this new item
+            const editableButtons = getAllByTestId(newTimelineItemElement, 'editable-edit-icon');
+            expect(editableButtons.length).toBe(1);
+            expect(queryByTestId(newTimelineItemElement, 'dirty-state-delete')).not.toBeInTheDocument();
+
+            //After clicking delete, the component should be gone
+            const deleteButton = editableButtons[0] as HTMLElement;
+            await user.click(deleteButton);
+            expect(queryByTestIdLocal('dirty-component--1')).not.toBeInTheDocument();
+
+            //Add another item and delete then save it.
+            newTimelineItemElement = await addTimelineItem({addButton});
+            const saveButton = getByText(newTimelineItemElement, 'Save');
+            await user.click(saveButton);
+            expect(queryByText(newTimelineItemElement, 'Cancel')).not.toBeInTheDocument();
+            expect(queryByText(newTimelineItemElement, 'Save')).not.toBeInTheDocument();
         })
     })
 

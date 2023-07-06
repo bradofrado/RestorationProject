@@ -21,6 +21,18 @@ export const useEventPagesMutation = () => {
 	};
 }
 
+export const useComponentSettingsMutation = () => {
+	const createMutation = api.page.createSetting.useMutation();
+	const updateMutation = api.page.updateSetting.useMutation();
+	const deleteMutation = api.page.deleteSetting.useMutation();
+
+	return {
+		create: createMutation, 
+		update: updateMutation, 
+		deletem: deleteMutation
+	};
+}
+
 type GetPageUrl = {
 	data: undefined,
 	isLoading: true,

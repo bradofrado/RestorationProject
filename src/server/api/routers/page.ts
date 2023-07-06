@@ -7,10 +7,10 @@ import {
   criticalProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { type prisma } from "~/server/db";
-import { type EventPage, PageSchema } from "~/utils/types/page";
+import { type Db } from "~/server/db";
+import { type EventPage, PageSchema, ComponentSettingsSchema, type ComponentSettings } from "~/utils/types/page";
 
-const getPage = async ({input, db}: {input: string, db: typeof prisma }) => {
+const getPage = async ({input, db}: {input: string, db: Db }) => {
 	const page: EventPage | null = await db.page.findUnique({
 		where: {
 			url: input
@@ -25,7 +25,7 @@ const getPage = async ({input, db}: {input: string, db: typeof prisma }) => {
 	return page;
 }
 
-const deletePage = async({input, db}: {input: string, db: typeof prisma}) => {
+const deletePage = async({input, db}: {input: string, db: Db}) => {
 	await db.page.delete({
 		where: {
 			id: input
@@ -33,7 +33,7 @@ const deletePage = async({input, db}: {input: string, db: typeof prisma}) => {
 	});
 }
 
-const createPage = async ({input, db}: {input: EventPage, db: typeof prisma}) => {
+const createPage = async ({input, db}: {input: EventPage, db: Db}) => {
 	const page: EventPage = await db.page.create({
 		data: {
 			id: input.id || undefined,
@@ -99,9 +99,68 @@ export const pageRouter = createTRPCRouter({
 	updatePage: criticalProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
-			await deletePage({input: input.id, db: ctx.prisma});
-			const page: EventPage = await createPage({input: input, db: ctx.prisma});
-			
+			const page: EventPage = await ctx.prisma.page.update({
+				data: {
+					title: input.title,
+					description: input.description,
+					url: input.url,
+				},
+				include: {
+					settings: {include: {data: true}}
+				},
+				where: {
+					id: input.id
+				}
+			}) as EventPage;
+
 			return page;
-		})
+		}),
+	createSetting: criticalProcedure
+		.input(ComponentSettingsSchema)
+		.mutation(async ({ctx, input}) => {
+			const setting: ComponentSettings = await ctx.prisma.componentSettings.create({
+				data: {
+					data: {create: input.data},
+					component: input.component,
+					page: {
+						connect: {id: input.pageId}
+					}
+				},
+				include: {
+					data: true
+				}
+			}) as ComponentSettings;
+
+			return setting;
+		}),
+	updateSetting: criticalProcedure
+		.input(ComponentSettingsSchema)
+		.mutation(async ({ctx, input}) => {
+			const setting: ComponentSettings = await ctx.prisma.componentSettings.update({
+				data: {
+					data: {update: input.data},
+					component: input.component,
+					page: {
+						connect: {id: input.pageId}
+					}
+				},
+				include: {
+					data: true
+				},
+				where: {
+					id: input.id
+				}
+			}) as ComponentSettings
+
+			return setting;
+		}),
+	deleteSetting: criticalProcedure
+		.input(z.number())
+		.mutation(async ({ctx, input}) => {
+			await ctx.prisma.componentSettings.delete({
+				where: {
+					id: input
+				}
+			});
+		}),
 });

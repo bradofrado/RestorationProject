@@ -49,7 +49,7 @@ export const RenderPage = ({page}: RenderPageProps) => {
 				{description}
 			</p>
 		</div>
-		<CustomComponents items={settings.map((setting) => ({type: setting.component, data: setting.data}))}/>
+		<CustomComponents items={settings.map((setting, i) => ({type: setting.component, data: setting.data, id: i}))}/>
 	</>
 }
 
