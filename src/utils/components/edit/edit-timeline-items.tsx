@@ -142,7 +142,7 @@ export const EditTimelineItems = () => {
 							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
 						</Label>
 					</div>
-					<AddRemoveEditable items={category.items.map((item, i) => ({component: EditRestorationItem, props: {
+					<AddRemoveEditable items={category.items.map((item, i) => ({component: EditRestorationItem, id: item.id.toString(), props: {
 							data: item, 
 							onEdit: (item: RestorationTimelineItem) => saveItem(item, i),
 							onDelete: () => onItemDelete(i)
@@ -189,7 +189,7 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 		changePropertyItem(newItem, "endDate", null);
 	}
 	return <>
-		<Panel className="my-1">
+		<Panel className="my-1" role="editable-timeline-item">
 			<Input include={Label} label="Text" type="textarea" value={propItem.text} inputClass="w-full" onChange={value => changePropertyItem(propItem, "text", value)}/>
 			<Label label="Date" className="inline-block my-1 mr-1">
 				<RemoveField onRemove={onDateRemove} value={!!propItem.date}>
@@ -198,7 +198,7 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 			</Label>
 			<Input include={Label} label="Subcategory" className="my-1" value={propItem.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(propItem, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
-				<AddRemove items={propItem.links.map((link, i) => ({component: Input, props: {value:link, inputClass: "w-full", onChange: (value: string) => onLinkChange(value, i)}}))}
+				<AddRemove items={propItem.links.map((link, i) => ({id: link, component: Input, props: {value:link, inputClass: "w-full", onChange: (value: string) => onLinkChange(value, i)}}))}
 					onAdd={onAddLink} onDelete={onDeleteLink}/>
 			</Label>
 		</Panel>

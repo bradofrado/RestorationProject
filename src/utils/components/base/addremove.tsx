@@ -8,7 +8,8 @@ import { DirtyComponent } from '../edit/dirty-component';
 
 export type RenderableComponent<T> = {
 	component: React.ComponentType<T>,
-	props: T
+	props: T,
+	id: string
 }
 type AddRemoveProps<T> = {
 	items: RenderableComponent<T>[],
@@ -40,7 +41,7 @@ export const AddRemoveEditable = <K,>({items, onAdd, ...rest}: Omit<AddRemovePro
 			const props: AddRemoveItemProps<EditableComponent<K>> = {...item.props, component: item.component};
 			if (rest.isDirty) {
 				const isNew = rest.isNewItem(item.props.data);
-				return <DirtyComponent key={i} as={AddRemoveItem} {...props} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}/>;
+				return <DirtyComponent key={i} as={AddRemoveItem} {...props} dirty={isNew} overrideDelete={isNew} showCancel={!isNew} dataTestId={`dirty-component-${item.id}`}/>;
 			}
 			return <AddRemoveItem key={i} {...props}/>
 		})}

@@ -31,7 +31,7 @@ export const categories: TimelineCategory[] = [
 	{
 		id: 1,
 		name: "Book of Mormon",
-		pageId: "book-of-mormon",
+		pageId: "0",
 		color: colors["Book of Mormon"],
 		items: [
 			{
@@ -111,7 +111,7 @@ export const categories: TimelineCategory[] = [
 	{
 		id: 2,
 		name: "Book of Mormon Translation",
-		pageId: "book-of-mormon-translation",
+		pageId: "1",
 		color: colors["Book of Mormon Translation"],
 		items: [
 			{
