@@ -45,7 +45,7 @@ export const TimelineCategorySchema = z.object({
 	name: z.string(),
 	pageId: z.string().nullable(),
 	color: HexColorSchema,
-	items: z.array(RestorationTimelineItemSchema)
+	items: z.array(RestorationTimelineItemSchema),
 }) satisfies z.Schema<Replace<PrismaTimelineCategory, "items", RestorationTimelineItem[]> & TimelineAttributes>
 
 export type TimelineCategory = z.infer<typeof TimelineCategorySchema>

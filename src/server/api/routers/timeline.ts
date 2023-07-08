@@ -25,12 +25,14 @@ const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryI
 	}
 }
 
-const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTimelineItem => {
-	return {...item, links: item.links.split(',').filter(x => x != '')}
+const translatePrismaToTimelineItem = (item: PrismaTimelineItem, index: number): RestorationTimelineItem => {
+	return {...item, links: item.links.split(',').filter(x => x != ''), order: index}
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
-	return TimelineCategorySchema.parse({...category, items: category.items.map(translatePrismaToTimelineItem)});
+	const items = category.items.map(translatePrismaToTimelineItem);
+	return {...category, items}//TimelineCategorySchema.parse({...category, items});
+	
 }
 
 const getCategories = async (db: Db): Promise<TimelineCategory[]> => {
@@ -88,7 +90,8 @@ export const timelineRouter = createTRPCRouter({
 		}),
 	getCategories: publicProcedure
 		.query(async ({ctx}) => {
-			return await getCategories(ctx.prisma);
+			const categories = await getCategories(ctx.prisma);
+			return categories;
 		}),
 	createCategory: criticalProcedure
 		.input(TimelineCategorySchema)

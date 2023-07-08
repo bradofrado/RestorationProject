@@ -11,6 +11,7 @@ import Editable from '~/utils/components/edit/editable';
 import AddComponent from '~/utils/components/edit/add-component';
 import {type ComponentType, CustomComponents} from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
+import { DraggableListComponent } from '../base/draggable-list';
 
 export type EditPagesProps = {
 	id: string | undefined,
