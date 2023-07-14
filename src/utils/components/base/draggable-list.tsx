@@ -3,6 +3,7 @@ import {DraggableCollectionOptions, DroppableCollectionDropEvent, DroppableColle
 import {Node} from "@react-types/shared"
 import {DraggableCollectionState, DraggableCollectionStateOptions, DroppableCollectionState, Item, ListProps, ListState, useDraggableCollectionState, useDroppableCollectionState, useListData, useListState} from 'react-stately';
 import {Key} from 'react';
+import Button from '~/utils/components/base/button';
 
 function ReorderableListBox<T>(props: ListProps<DraggableListItem<T>> & DroppableCollectionOptions & DraggableCollectionOptions) {
     // See useListBox docs for more details.
@@ -144,12 +145,12 @@ function DropIndicator(props) {
 }
 
 export type DraggableListItem<T> = {
-  id: number | string,
+  id: React.Key,
   element: React.ReactElement,
   data: T
 }
-type DraggableListComponentProps<T> = {
-  onReorder: (items: T[]) => void,
+export type DraggableListComponentProps<T> = {
+  onReorder: (items: DraggableListItem<T>[]) => void,
   items: DraggableListItem<T>[]
 }
 
@@ -160,41 +161,57 @@ export type ReorderableDataProps = {
 
 
 export const DraggableListComponent = <T extends ReorderableDataProps>({items, onReorder: onReorderProps}: DraggableListComponentProps<T>) => {
-  const [isReordering, setIsReordering] = useState(false);
-  const list = useListData({
-    initialItems: items,
-  });
+  // const updateDataOrder = useCallback(() => {
+  //   if (!isReordering) return;
+  //   const dataItems = list.items.map(x => x.data);
+  //   for (let i = 0; i < dataItems.length; i++) {
+  //     dataItems[i] = {...dataItems[i], order: i} as T;
+  //   }
+  //   onReorderProps && onReorderProps(list.items);
+  // }, [isReordering, list.items]);
 
-  const updateDataOrder = useCallback(() => {
-    if (!isReordering) return;
-    const dataItems = list.items.map(x => x.data);
-    for (let i = 0; i < dataItems.length; i++) {
-      dataItems[i] = {...dataItems[i], order: i} as T;
-    }
-    onReorderProps && onReorderProps(dataItems);
-  }, [isReordering, list.items]);
-
-  useEffect(() => {
-    if (!isReordering) return;
-    updateDataOrder();
-    setIsReordering(false);
-  }, [isReordering, updateDataOrder])
+  // useEffect(() => {
+  //   list.update()
+  // }, [items])
   
   const onReorder = (e: DroppableCollectionReorderEvent) => {
+    const copy = items.map(x => ({...x, data: {...x.data}}));
     if (e.target.dropPosition === 'before') {
-        list.moveBefore(e.target.key, e.keys);
+      const indexOfBefore = copy.findIndex(x => x.id == e.target.key);
+      for (const moved of e.keys) {
+        const indexOfMoved = copy.findIndex(x => x.id == moved);
+        for (let i = indexOfMoved + 1; i < indexOfBefore; i++) {
+          const curr = copy[i];
+          if (!curr) throw new Error("Invalid ordering");
+
+          curr.data.order--;
+        }
+        copy[indexOfMoved]?.data.order = copy[indexOfBefore]?.data.order - 1;
+      }
     } else if (e.target.dropPosition === 'after') {
-        list.moveAfter(e.target.key, e.keys);
+      const indexOfAfter = copy.findIndex(x => x.id == e.target.key);
+      for (const moved of e.keys) {
+        const indexOfMoved = copy.findIndex(x => x.id == moved);
+        for (let i = indexOfMoved + 1; i <= indexOfAfter; i++) {
+          const curr = copy[i];
+          if (!curr) throw new Error("Invalid ordering");
+
+          curr.data.order--;
+        }
+        copy[indexOfMoved]?.data.order = copy[indexOfAfter]?.data.order + 1;
+      }
     }
-    setIsReordering(true);
+    onReorderProps(copy);
   };
+
+  const sortedItems = items.slice().sort((a, b) => a.data.order - b.data.order);
   
   return (
     <ReorderableListBox
       aria-label="Favorite animals"
       selectionMode="multiple"
       selectionBehavior="replace"
-      items={list.items}
+      items={sortedItems}
       getDropOperation={() => 'move'}
       //onDrop={(e) => onReorder(e)}
       onReorder={(e) => onReorder(e)}
@@ -202,4 +219,36 @@ export const DraggableListComponent = <T extends ReorderableDataProps>({items, o
       {(item) => <Item>{item.element}</Item>}
     </ReorderableListBox>
   );
+}
+
+export const DirtyDraggableListComponent = <T extends ReorderableDataProps>({items: itemsProps, onReorder: onReorderProps}: DraggableListComponentProps<T>) => {
+  const [items, setItems] = useState(itemsProps);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const onReorder = (newItems: DraggableListItem<T>[]) => {
+    setItems(newItems);
+    setIsDirty(true);
+  }
+
+  const onSave = () => {
+    onReorderProps(items);
+    setIsDirty(false);
+  }
+
+  const onCancel = () => {
+    setItems(itemsProps);
+    setIsDirty(false);
+  }
+
+  return <>
+    {isDirty && <div>
+				<Button className="mx-1" mode="primary" onClick={onSave}>Save</Button>
+				<Button mode="secondary" onClick={onCancel}>Cancel</Button>
+			</div>
+		}
+    <div className='relative my-2'>
+    {isDirty && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl" data-testid="dirty-state-delete"></div>}
+    <DraggableListComponent items={items} onReorder={onReorder} />
+    </div>
+  </>
 }

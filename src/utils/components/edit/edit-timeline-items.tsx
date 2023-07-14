@@ -147,7 +147,7 @@ export const EditTimelineItems = () => {
 							onEdit: (item: RestorationTimelineItem) => saveItem(item, i),
 							onDelete: () => onItemDelete(i)
 						}}))}
-						onAdd={onItemAdd} isDirty={!isNew} isNewItem={item => item.id as number < 0}
+						onAdd={onItemAdd} isDirty={!isNew} isNewItem={item => item.id as number < 0} isDraggable={true}
 					/>
 					</>}
 				</>)}
