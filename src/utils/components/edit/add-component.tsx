@@ -10,6 +10,9 @@ import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
+import { IfElse } from '~/utils/utils'
+import { DraggableListComponent } from '../base/draggable-list'
+import {DirtyDraggableListComponent} from '~/utils/components/base/draggable-list';
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
@@ -177,8 +180,8 @@ export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
 	return (componentsTypes as ReadonlyArray<string>).includes(val as string);
 })
 
-type EditableComponentType = {type: ComponentType, editable: true} & EditableDataComponent;
-type DataComponentType = {type: ComponentType, editable?: false} & DataComponent;
+export type EditableComponentType = {type: ComponentType, id: number} & EditableDataComponent;
+export type DataComponentType = {type: ComponentType, id: number} & DataComponent;
 
 const AnnotationLinkContext = React.createContext<Record<string, number>>({});
 
@@ -211,14 +214,17 @@ export const useAnnotationLink = () => {
 	return {annotate};
 }
 
-export const CustomComponents = ({items, isNew=false}: {items: CustomComponentType[], isNew?: boolean}) => {
+type CustomComponentsProps = {isNew?: boolean} & 
+	IfElse<'editable', {items: EditableComponentType[], onReorder: (items: EditableComponentType[]) => void}, 
+		{items: DataComponentType[]}>
+export const CustomComponents = ({isNew=false, ...rest}: CustomComponentsProps) => {
 	return <AnnotationLinkProvider>
-		{items.map((item, i) => <CustomComponent key={i} {...item} isNew={isNew}/>)}
+		{rest.editable ? <EditableComponentsList items={rest.items} isNew={isNew} onReorder={rest.onReorder}/> 
+			: rest.items.map((item, i) => <CustomComponent key={i} {...item} isNew={isNew} editable={false}/>)}
 	</AnnotationLinkProvider>
 }
 
-type CustomComponentType = (EditableComponentType | DataComponentType) & {id: number};
-export const CustomComponent = (props: CustomComponentType & {isNew: boolean}) => {
+export const CustomComponent = (props: IfElse<'editable', EditableComponentType, DataComponentType> & {isNew: boolean}) => {
 	const Component = components.find(x => x.label == props.type) || components[0];
 	if (props.editable) {
 		const {type: _, editable: _a, id, ...rest} = props;
@@ -233,6 +239,19 @@ export const CustomComponent = (props: CustomComponentType & {isNew: boolean}) =
 	return <div data-testid={`custom-component-${id}`} role="custom-component">
 		<Component.component {...rest}></Component.component>
 	</div>
+}
+
+type EditableComponentsListProps = {
+	items: EditableComponentType[],
+	isNew: boolean,
+	onReorder: (items: EditableComponentType[]) => void
+}
+const EditableComponentsList = ({items, isNew, onReorder}: EditableComponentsListProps) => {
+	return <>
+		<DirtyDraggableListComponent id="editable-components" items={items} onReorder={onReorder}>
+			{item => <CustomComponent {...item} isNew={isNew} editable={true}/> }
+		</DirtyDraggableListComponent>
+	</>
 }
 
 export default function AddComponent({onAdd}: {onAdd: (component: ComponentType) => void}) {

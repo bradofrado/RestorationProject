@@ -16,8 +16,6 @@ type AddRemoveValueProps<T> = {
 } & IfElse<'custom', {children: (item: T, index: number, component: typeof AddRemoveItem) => React.ReactNode}, 
 	{children: (item: T, index: number) => React.ReactNode, onDelete: (index: number) => void}>
 
-type IfElse<PROPERTY extends string, IF, ELSE> = (Record<PROPERTY, true> & IF) | (Partial<Record<PROPERTY, false>> & ELSE)
-
 type AddRemoveProps<C extends React.ElementType<React.PropsWithChildren>, T> = PolymorphicCustomProps<C, AddRemoveValueProps<T>, {container?: C}>
 
 const AddRemove = <C extends React.ElementType, T>(props: AddRemoveProps<C, T>) => {

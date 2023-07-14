@@ -122,6 +122,7 @@ export const pageRouter = createTRPCRouter({
 				data: {
 					data: {create: input.data},
 					component: input.component,
+					order: input.order,
 					page: {
 						connect: {id: input.pageId}
 					}
@@ -140,6 +141,7 @@ export const pageRouter = createTRPCRouter({
 				data: {
 					data: {update: input.data},
 					component: input.component,
+					order: input.order,
 					page: {
 						connect: {id: input.pageId}
 					}
@@ -153,6 +155,20 @@ export const pageRouter = createTRPCRouter({
 			}) as ComponentSettings
 
 			return setting;
+		}),
+	updateSettingOrder: criticalProcedure
+		.input(z.array(z.object({id: z.number(), order: z.number()})))
+		.mutation(async ({ctx, input}) => {
+			for (const inputItem of input) {
+				await ctx.prisma.componentSettings.update({
+					data: {
+						order: inputItem.order
+					},
+					where: {
+						id: inputItem.id
+					}
+				})
+			}
 		}),
 	deleteSetting: criticalProcedure
 		.input(z.number())

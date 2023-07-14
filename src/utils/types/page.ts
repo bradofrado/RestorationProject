@@ -24,7 +24,8 @@ export const ComponentSettingsSchema = z.object({
 	id: z.number(),
 	pageId: z.string(),
 	component: ComponentTypeSchema,
-	data: EditableDataSchema
+	data: EditableDataSchema,
+	order: z.number()
 }) satisfies z.Schema<Prisma.ComponentSettingsGetPayload<typeof settingsWithData>>
 export type ComponentSettings = z.infer<typeof ComponentSettingsSchema>
 
@@ -33,6 +34,6 @@ export const PageSchema = z.object({
 	title: z.string(),
 	description: z.string(),
 	settings: z.array(ComponentSettingsSchema),
-	url: z.string()
+	url: z.string(),
 }) satisfies z.Schema<Prisma.PageGetPayload<typeof pageWithSettings>>
 export type EventPage = z.infer<typeof PageSchema>
