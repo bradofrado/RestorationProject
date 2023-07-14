@@ -71,3 +71,9 @@ export const DirtyComponent = <K, T extends EditableComponent<K>>({as, onDelete:
         </div>}
     </div>
 }
+
+export const defaultDirtyProps = (isNew: boolean) => ({
+    dirty: isNew,
+    overrideDelete: isNew,
+    showCancel: !isNew
+})

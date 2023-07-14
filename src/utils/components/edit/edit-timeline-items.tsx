@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {createContext, useContext, useEffect, useState} from 'react';
 import Dropdown from '~/utils/components/base/dropdown';
 import {type ItemAction, type DropdownItem} from '~/utils/components/base/dropdown';
 import {useGetPages} from '~/utils/services/EventPageService';
@@ -6,7 +6,7 @@ import {useCategoryMutations, useGetCategories, useTimelineMutations} from '~/ut
 import {type RestorationTimelineItem, type TimelineCategory} from '~/utils/types/timeline';
 import {useChangeProperty, groupByDistinct} from '~/utils/utils';
 import Panel from '~/utils/components/base/panel';
-import AddRemove, { AddRemoveEditable } from '~/utils/components/base/addremove';
+import AddRemove from '~/utils/components/base/addremove';
 import Input from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import Label from '~/utils/components/base/label';
@@ -14,6 +14,8 @@ import ColorPicker from '~/utils/components/base/color-picker';
 import {DateRangePicker} from '~/utils/components/base/calendar/date-picker';
 import { RemoveField } from '../base/remove-field';
 import { type EditableComponentProps } from './editable';
+import { DirtyDraggableListComponent, DraggableComponent, DraggableListComponent, DroppableComponent, DroppableContext } from '../base/draggable-list';
+import { DirtyComponent, defaultDirtyProps } from './dirty-component';
 
 export const EditTimelineItems = () => {
 	const [category, setCategory] = useState<TimelineCategory>();
@@ -124,6 +126,25 @@ export const EditTimelineItems = () => {
 		item.id < 0 ? createItem.mutate(item) : updateItem.mutate(item);
 		changeProperty(category, "items", copy);
 	}
+
+	const onReorder = (items: RestorationTimelineItem[]) => {
+		if (!category) return;
+		changeProperty(category, 'items', items.map((item, i) => ({...item, order: i})));
+	}
+
+	const sortItems = (items: RestorationTimelineItem[]): RestorationTimelineItem[] => {
+		return items.slice().sort((a, b) => {
+			if (!a.date) {
+				return -1;
+			}
+
+			if (!b.date) {
+				return 1;
+			}
+
+			return a.date.valueOf() - b.date.valueOf();
+		})
+	}
 	
 	return <>
 		<div>
@@ -142,13 +163,18 @@ export const EditTimelineItems = () => {
 							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
 						</Label>
 					</div>
-					<AddRemoveEditable items={category.items.map((item, i) => ({component: EditRestorationItem, id: item.id.toString(), props: {
-							data: item, 
-							onEdit: (item: RestorationTimelineItem) => saveItem(item, i),
-							onDelete: () => onItemDelete(i)
-						}}))}
-						onAdd={onItemAdd} isDirty={!isNew} isNewItem={item => item.id as number < 0} isDraggable={true}
-					/>
+					<AddRemove custom={true} items={sortItems(category.items)} onAdd={onItemAdd} >
+						{(item, i, AddRemoveItem) => {
+							const props = {
+								onDelete: () => onItemDelete(i),
+								component: EditRestorationItem,
+								data: item,
+								onEdit: (item: RestorationTimelineItem) => saveItem(item, i)
+							}
+							return isNew ? <AddRemoveItem {...props}/> : <DirtyComponent id={`${item.id}`} index={i} {...defaultDirtyProps(item.id < 0)} as={AddRemoveItem} {...props}/>
+						}}
+					</AddRemove>
+					
 					</>}
 				</>)}
 			</EditItemsButtons>
@@ -198,8 +224,10 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 			</Label>
 			<Input include={Label} label="Subcategory" className="my-1" value={propItem.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(propItem, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
-				<AddRemove items={propItem.links.map((link, i) => ({id: link, component: Input, props: {value:link, inputClass: "w-full", onChange: (value: string) => onLinkChange(value, i)}}))}
-					onAdd={onAddLink} onDelete={onDeleteLink}/>
+				<AddRemove items={propItem.links}
+					onAdd={onAddLink} onDelete={onDeleteLink}>
+					{(link, i) => <Input value={link} inputClass="w-full" onChange={value => onLinkChange(value, i)}/>}
+				</AddRemove>
 			</Label>
 		</Panel>
 	</>
