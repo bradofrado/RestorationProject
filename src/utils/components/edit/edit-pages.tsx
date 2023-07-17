@@ -126,9 +126,12 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		editSettings(components => components.push({component: component, data: {content: "custom", properties: null}, id: -1, pageId: page.id, order: components.length}));
 	}
 
-	const onEdit = (data: EditableData, i: number) => {
-		const page = editSettings(components => (components[i] || {data: null}).data = data);
-		const setting = page.settings[i];
+	const onEdit = (data: EditableData, id: number) => {
+		const page = editSettings(components => {
+			const component = components.find(x => x.id == id);
+			(component || {data: null}).data = data;
+		});
+		const setting = page.settings.find(x => x.id == id);
 		if (!setting) {
 			throw new Error("Cannot update setting");
 		}
@@ -179,7 +182,7 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 				{page.description}
 			</Editable>
 			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
-				items={settings.map((editable: ComponentSettings, i: number) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, i), data: editable.data}))}/>
+				items={settings.map((editable: ComponentSettings, i: number) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }

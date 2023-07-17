@@ -75,10 +75,18 @@ export const DroppableContext = <T,>({onReorder, id, children, items}: Droppable
 }
 
 type DraggableListComponentProps<T> = Replace<DroppableContextProps<T>, 'children', (item: T, index: number) => React.ReactNode>
-export const DraggableListComponent = <T,>({children, items, ...rest}: DraggableListComponentProps<T>) => {
+export const DraggableListComponent = <T extends {id: number} | string>({children, items, ...rest}: DraggableListComponentProps<T>) => {
+  const getId = (item: T): string => {
+    if (typeof item == 'string') {
+      return item;
+    }
+    
+    return `${item.id}`;
+  }
+  
   return <>
   <DroppableContext items={items} {...rest}>
-    {items.map((item, i) => <DraggableComponent key={`item-${i}`} id={`item-${i}`} index={i}>
+    {items.map((item, i) => <DraggableComponent key={getId(item)} id={getId(item)} index={i}>
       {children(item, i)}
     </DraggableComponent>)}
   </DroppableContext>
@@ -87,24 +95,26 @@ export const DraggableListComponent = <T,>({children, items, ...rest}: Draggable
 }
 
 
-export const DirtyDraggableListComponent = <T,>({children, items: itemsProps, onReorder: onReorderProps, ...rest}: DraggableListComponentProps<T>) => {
-  const [items, setItems] = useStateUpdate(itemsProps);
+export const DirtyDraggableListComponent = <T extends {id: number}>({children, items: itemsProps, onReorder: onReorderProps, ...rest}: DraggableListComponentProps<T>) => {
+  const [items, setItems] = useStateUpdate(itemsProps.map(x => x.id));
   const [isDirty, setIsDirty] = useState(false);
 
   const onReorder = (newItems: T[]) => {
-    setItems(newItems);
+    setItems(newItems.map(x => x.id));
     setIsDirty(true);
   }
 
   const onSave = () => {
-    onReorderProps(items);
+    onReorderProps(itemsProps.slice().sort((a, b) => items.indexOf(a.id) - items.indexOf(b.id)));
     setIsDirty(false);
   }
 
   const onCancel = () => {
-    setItems(itemsProps);
+    setItems(itemsProps.map(x => x.id));
     setIsDirty(false);
   }
+
+  const sortedItems = itemsProps.slice().sort((a, b) => items.indexOf(a.id) - items.indexOf(b.id))
 
   return <>
     {isDirty && <div>
@@ -114,7 +124,7 @@ export const DirtyDraggableListComponent = <T,>({children, items: itemsProps, on
 		}
     <div className='relative my-2'>
     {isDirty && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl" data-testid="dirty-state-delete"></div>}
-    <DraggableListComponent items={items} onReorder={onReorder} {...rest}>
+    <DraggableListComponent items={sortedItems} onReorder={onReorder} {...rest}>
       {children}
     </DraggableListComponent>
     </div>
