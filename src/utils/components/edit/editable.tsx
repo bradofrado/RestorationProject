@@ -2,15 +2,15 @@ import React, { type PropsWithChildren } from "react";
 import { type PolymorphicComponentProps } from "../../types/polymorphic";
 import { type IconComponent } from "../icons/icons";
 
-interface EditableProps extends PropsWithChildren {
+interface EditablePropsInner extends PropsWithChildren {
 	icons?: ButtonIcon[],
 	editable?: 'true' | 'false' | boolean,
 	wrapped?: boolean
 }
 
-type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
+export type EditableProps<C extends React.ElementType> = PolymorphicComponentProps<
   C,
-  EditableProps
+  EditablePropsInner
 >
 
 export interface DeletableComponentProps {
@@ -31,7 +31,7 @@ export type ButtonIcon = {
 
 export type ContentEditableComponent = {contentEditable?: boolean | "true" | "false" };
 
-function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: TextProps<T>) {
+function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: EditableProps<T>) {
 	const Component = as || 'span';
 	
 	const render = wrapped ? children : <Component {...rest} contentEditable={editable}>{children}</Component>

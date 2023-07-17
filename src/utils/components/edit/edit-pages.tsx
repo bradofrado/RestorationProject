@@ -8,10 +8,9 @@ import {type EventPage, type ComponentSettings, type EditableData} from '~/utils
 import Input from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import Editable from '~/utils/components/edit/editable';
-import AddComponent, { EditableComponentType } from '~/utils/components/edit/add-component';
+import AddComponent, { type EditableComponentType } from '~/utils/components/edit/add-component';
 import {type ComponentType, CustomComponents} from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
-import { DraggableListComponent } from '../base/draggable-list';
 
 export type EditPagesProps = {
 	id: string | undefined,

@@ -25,13 +25,13 @@ const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryI
 	}
 }
 
-const translatePrismaToTimelineItem = (item: PrismaTimelineItem, index: number): RestorationTimelineItem => {
-	return {...item, links: item.links.split(',').filter(x => x != ''), order: index}
+const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTimelineItem => {
+	return {...item, links: item.links.split(',').filter(x => x != '')}
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
 	const items = category.items.map(translatePrismaToTimelineItem);
-	return {...category, items}//TimelineCategorySchema.parse({...category, items});
+	return TimelineCategorySchema.parse({...category, items});
 	
 }
 

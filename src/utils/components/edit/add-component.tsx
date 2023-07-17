@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
-import Editable, { type ButtonIcon, type EditableComponentProps } from './editable'
+import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
-import { AddIcon, AdjustIcon, DeleteIcon, EditIcon } from '../icons/icons'
+import { AddIcon, AdjustIcon, DeleteIcon, DragMoveIcon, EditIcon } from '../icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
 import Header from '../base/header'
 import { DataGroupbyList, DisplayList, DisplayListItem, RestorationQuote } from '../event-page/book-of-mormon-translation'
@@ -10,8 +10,7 @@ import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
-import { IfElse } from '~/utils/utils'
-import { DraggableListComponent } from '../base/draggable-list'
+import { type IfElse } from '~/utils/utils'
 import {DirtyDraggableListComponent} from '~/utils/components/base/draggable-list';
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
@@ -49,13 +48,12 @@ const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({on
 	const dropdownItems: DropdownItem<string>[] = query.data.map(x => ({id: x.name, name: x.name}))
 	
 	return <>
-			<Editable as={DataCondensedTimeline} data={data} {...rest}
-				icons={[{icon: DeleteIcon, handler: onDelete}, 
-									<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
-											key={1} items={dropdownItems} icon={EditIcon}/>]}
+			<EditableComponentContainer as={DataCondensedTimeline} data={data} onDelete={onDelete} {...rest}
+				icons={[<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
+				key={1} items={dropdownItems} icon={EditIcon}/>]}
 				>
 				Text
-			</Editable>
+			</EditableComponentContainer>
 		</>
 }
 
@@ -119,7 +117,7 @@ const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdi
 	}
 
 	const editIcons: ButtonIcon[] = [
-		{icon: DeleteIcon, handler: onDelete},
+		//{icon: DeleteIcon, handler: onDelete},
 		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: data?.properties || null})}/>,
 	];
 
@@ -136,7 +134,19 @@ const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdi
 	}
 	
 	return <>
-		<Editable as={DataList} icons={editIcons} data={data} onBlur={editLiItem} {...rest}/>
+		<EditableComponentContainer as={DataList} icons={editIcons} data={data} onBlur={editLiItem} onDelete={onDelete} {...rest}/>
+	</>
+}
+
+type EditableComponentContainerProps<C extends React.ElementType> = DeletableComponentProps & EditableProps<C>
+const EditableComponentContainer = <C extends React.ElementType>(props: EditableComponentContainerProps<C>) => {
+	const defaultIcons: ButtonIcon[] = [
+		{icon: DeleteIcon, handler: props.onDelete},
+		{icon: DragMoveIcon, handler: () => undefined}
+	];
+	const allIcons = defaultIcons.concat(props.icons || []); 
+	return <>
+		<Editable {...props} icons={allIcons}/>
 	</>
 }
 
@@ -147,18 +157,18 @@ function createComponents<T extends readonly Component[] & Array<{label: V}>, V 
 const components = createComponents(
 	{
 		label: 'Header',
-		editable: (({onDelete, onEdit, data}) => <Editable as={Header} icons={[{icon: DeleteIcon, handler: onDelete}]} 
+		editable: (({onDelete, onEdit, data}) => <EditableComponentContainer as={Header} onDelete={onDelete}
 			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
-										</Editable>) as React.ComponentType<EditableDataComponent>,
+										</EditableComponentContainer>) as React.ComponentType<EditableDataComponent>,
 		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ComponentType<DataComponent>
 	},
 	{
 		label: 'Paragraph',
-		editable: (({onDelete, onEdit, data}) => <Editable as="p" role="paragraph" icons={[{icon: DeleteIcon, handler: onDelete}]} 
+		editable: (({onDelete, onEdit, data}) => <EditableComponentContainer as="p" role="paragraph" onDelete={onDelete} 
 				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
 											{data?.content || 'Text'}
-										</Editable>) as React.ComponentType<EditableDataComponent>,
+										</EditableComponentContainer>) as React.ComponentType<EditableDataComponent>,
 		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ComponentType<DataComponent>
 	},
 	{

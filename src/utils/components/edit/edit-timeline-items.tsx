@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import Dropdown from '~/utils/components/base/dropdown';
 import {type ItemAction, type DropdownItem} from '~/utils/components/base/dropdown';
 import {useGetPages} from '~/utils/services/EventPageService';
@@ -14,7 +14,6 @@ import ColorPicker from '~/utils/components/base/color-picker';
 import {DateRangePicker} from '~/utils/components/base/calendar/date-picker';
 import { RemoveField } from '../base/remove-field';
 import { type EditableComponentProps } from './editable';
-import { DirtyDraggableListComponent, DraggableComponent, DraggableListComponent, DroppableComponent, DroppableContext } from '../base/draggable-list';
 import { DirtyComponent, defaultDirtyProps } from './dirty-component';
 
 export const EditTimelineItems = () => {
@@ -127,11 +126,6 @@ export const EditTimelineItems = () => {
 		changeProperty(category, "items", copy);
 	}
 
-	const onReorder = (items: RestorationTimelineItem[]) => {
-		if (!category) return;
-		changeProperty(category, 'items', items.map((item, i) => ({...item, order: i})));
-	}
-
 	const sortItems = (items: RestorationTimelineItem[]): RestorationTimelineItem[] => {
 		return items.slice().sort((a, b) => {
 			if (!a.date) {
@@ -226,7 +220,7 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 			<Label label="Links" className="my-1">
 				<AddRemove items={propItem.links}
 					onAdd={onAddLink} onDelete={onDeleteLink}>
-					{(link, i) => <Input value={link} inputClass="w-full" onChange={value => onLinkChange(value, i)}/>}
+					{(link: string, i: number) => <Input value={link} inputClass="w-full" onChange={value => onLinkChange(value, i)}/>}
 				</AddRemove>
 			</Label>
 		</Panel>

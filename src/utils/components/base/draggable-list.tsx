@@ -2,6 +2,7 @@ import React, {useEffect, useState } from 'react';
 import Button from '~/utils/components/base/button';
 import { Draggable, DragDropContext, Droppable, type DroppableProps, type DraggableProps, type DropResult } from "react-beautiful-dnd";
 import { type Replace, type ReplaceWithName } from '~/utils/utils';
+import {useStateUpdate} from '~/utils/components/hooks/hooks';
 
 export const DroppableComponent = ({ children, ...props }: Replace<DroppableProps, 'children', React.ReactNode>) => {
   const [enabled, setEnabled] = useState(false);
@@ -22,7 +23,6 @@ export const DroppableComponent = ({ children, ...props }: Replace<DroppableProp
   return <Droppable {...props}>
     {(provided) => (
         <div
-          className="w-full h-full flex flex-col overflow-auto scrollbar-hide"
           ref={provided.innerRef}
           {...provided.droppableProps}
         >
@@ -88,7 +88,7 @@ export const DraggableListComponent = <T,>({children, items, ...rest}: Draggable
 
 
 export const DirtyDraggableListComponent = <T,>({children, items: itemsProps, onReorder: onReorderProps, ...rest}: DraggableListComponentProps<T>) => {
-  const [items, setItems] = useState(itemsProps);
+  const [items, setItems] = useStateUpdate(itemsProps);
   const [isDirty, setIsDirty] = useState(false);
 
   const onReorder = (newItems: T[]) => {

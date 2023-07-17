@@ -192,7 +192,8 @@ export const pages: EventPage[] = [
                   properties: null
               },
               pageId: "0",
-              component: "Header"
+              component: "Header",
+			  order: 0
           },
           {
               id: 1,
@@ -201,7 +202,8 @@ export const pages: EventPage[] = [
                   properties: null
               },
               pageId: "0",
-              component: "Paragraph"
+              component: "Paragraph",
+			  order: 1
           },
       ]
   },
@@ -218,7 +220,8 @@ export const pages: EventPage[] = [
 				properties: null
 			},
 			pageId: "1",
-			component: "Header"
+			component: "Header",
+			order: 0
 		},
 		{
 			id: 3,
@@ -227,7 +230,8 @@ export const pages: EventPage[] = [
 				properties: null
 			},
 			pageId: "1",
-			component: "Paragraph"
+			component: "Paragraph",
+			order: 1,
 		},
 		{
 		    id: 4,
@@ -236,7 +240,8 @@ export const pages: EventPage[] = [
 		        properties: null
 		    },
 		    pageId: "1",
-		    component: "Timeline"
+		    component: "Timeline",
+			order: 2,
 		},
 		{
 		    id: 5,
@@ -245,7 +250,8 @@ export const pages: EventPage[] = [
 		        properties: "Here|are|some|List|items"
 		    },
 		    pageId: "1",
-		    component: "List"
+		    component: "List",
+			order: 3,
 		},
 		{
 		    id: 6,
@@ -254,7 +260,8 @@ export const pages: EventPage[] = [
 		        properties: null
 		    },
 		    pageId: "1",
-		    component: "List"
+		    component: "List",
+			order: 4,
 		},
 		{
 		    id: 7,
@@ -263,7 +270,8 @@ export const pages: EventPage[] = [
 		        properties: 'Group'
 		    },
 		    pageId: "1",
-		    component: "List"
+		    component: "List",
+			order: 5
 		},
 	]
 }
