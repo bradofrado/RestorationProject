@@ -77,6 +77,7 @@ model ComponentSettings {
 	data           EditableData?
   page           Page?        @relation(fields: [pageId], references: [id], onDelete: Cascade)
   pageId         String?
+  order          Int          @default(0)
 }
 
 model EditableData {

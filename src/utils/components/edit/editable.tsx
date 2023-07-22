@@ -2,15 +2,15 @@ import React, { type PropsWithChildren } from "react";
 import { type PolymorphicComponentProps } from "../../types/polymorphic";
 import { type IconComponent } from "../icons/icons";
 
-interface EditableProps extends PropsWithChildren {
+interface EditablePropsInner extends PropsWithChildren {
 	icons?: ButtonIcon[],
 	editable?: 'true' | 'false' | boolean,
 	wrapped?: boolean
 }
 
-type TextProps<C extends React.ElementType> = PolymorphicComponentProps<
+export type EditableProps<C extends React.ElementType> = PolymorphicComponentProps<
   C,
-  EditableProps
+  EditablePropsInner
 >
 
 export interface DeletableComponentProps {
@@ -26,15 +26,15 @@ export type EditableComponent<T> = React.ComponentType<EditableComponentProps<T>
 
 export type ButtonIcon = {
 	icon: IconComponent,
-	handler: () => void,
+	handler?: () => void,
 } | JSX.Element
 
 export type ContentEditableComponent = {contentEditable?: boolean | "true" | "false" };
 
-function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: TextProps<T>) {
+function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: EditableProps<T>) {
 	const Component = as || 'span';
 	
-	const render = wrapped ? children : <Component {...rest} contentEditable={editable}>{children}</Component>
+	const render = wrapped ? children : <Component {...rest} contentEditable={editable} suppressContentEditableWarning>{children}</Component>
 	return <div className="relative"> 
 		
 		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">

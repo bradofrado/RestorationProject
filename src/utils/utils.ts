@@ -48,9 +48,10 @@ export const useChangeProperty = <T,>(func: (item: T) => void) => {
 		return copy;
 	}
 }
+export type ReplaceWithName<T, K extends keyof T, Q> = Omit<T, K> & Q
+export type Replace<T, K extends keyof T, Q> = ReplaceWithName<T, K, Record<K, Q>>
 
-export type Replace<T, K extends string | number | symbol, Q> = Omit<T, K> & Record<K, Q>
-
+export type IfElse<PROPERTY extends string, IF, ELSE> = (Record<PROPERTY, true> & IF) | (Partial<Record<PROPERTY, false>> & ELSE)
 
 
 export const getClass = (...strings: (string | undefined)[]) => {

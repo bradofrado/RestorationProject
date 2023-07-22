@@ -55,7 +55,7 @@ export type DisplayListComponentPassthrough<T extends ListItem> = {
 type DisplayListItemComponent<T extends ListItem> = (props: {item: T, index: number} & ContentEditableBlur) => JSX.Element
 
 export const DisplayListItem: DisplayListItemComponent<{text: string}> = function({item, index, contentEditable, onBlur}) {
-	return <li onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, index)} contentEditable={contentEditable}>{item.text}</li>
+	return <li onBlur={(e: React.FocusEvent<HTMLLIElement>) => onBlur && onBlur(e.target.innerHTML, index)} contentEditable={contentEditable} suppressContentEditableWarning>{item.text}</li>
 }
 
 export const RestorationQuote: DisplayListItemComponent<RestorationTimelineItem> = ({item}) => {

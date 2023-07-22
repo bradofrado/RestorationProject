@@ -1,26 +1,32 @@
 import React from 'react';
-import Editable, { type EditableComponent, type EditableComponentProps } from '~/utils/components/edit/editable';
+import Editable from '~/utils/components/edit/editable';
 import {type ButtonIcon} from '~/utils/components/edit/editable';
 import Button from '~/utils/components/base/button';
 import {DeleteIcon} from '~/utils/components/icons/icons';
 import { type PolymorphicCustomProps } from '~/utils/types/polymorphic';
-import { DirtyComponent } from '../edit/dirty-component';
+import { type IfElse } from '~/utils/utils';
 
 export type RenderableComponent<T> = {
 	component: React.ComponentType<T>,
 	props: T,
 	id: string
 }
-type AddRemoveProps<T> = {
-	items: RenderableComponent<T>[],
+type AddRemoveValueProps<T> = {
+	items: T[],
 	onAdd: () => void,
-	onDelete: (index: number) => void
-}
-const AddRemove = ({items, onAdd, onDelete}: AddRemoveProps<object>) => {
+} & IfElse<'custom', {children: (item: T, index: number, component: typeof AddRemoveItem) => React.ReactNode}, 
+	{children: (item: T, index: number) => React.ReactNode, onDelete: (index: number) => void}>
+
+type AddRemoveProps<C extends React.ElementType<React.PropsWithChildren>, T> = PolymorphicCustomProps<C, AddRemoveValueProps<T>, {container?: C}>
+
+const AddRemove = <C extends React.ElementType, T>(props: AddRemoveProps<C, T>) => {
+	const {onAdd, children, items, container, onDelete, custom} = props;
+	const Component = container || 'span';
+	const itemElements = items.map((item, i) => custom ? children(item, i, AddRemoveItem) : <AddRemoveItem key={i} onDelete={() => onDelete(i)}>{children(item, i)}</AddRemoveItem>);
+	const rendered = container ? <Component {...props}>{itemElements}</Component> :
+		itemElements
 	return <>
-		{items.map((item, i) => {
-			return <AddRemoveItem key={i} component={item.component} onDelete={() => onDelete(i)} {...item.props}/>
-		})}
+		{rendered}
 		<div>
 			<Button mode="secondary" className="my-1" onClick={onAdd}>
 				+
@@ -29,34 +35,13 @@ const AddRemove = ({items, onAdd, onDelete}: AddRemoveProps<object>) => {
 	</>
 }
 
-type AddRemoveEditableProps<T> = {
-	isDirty?: false,
-} | {
-	isDirty: true,
-	isNewItem: (item: T) => boolean
-}
-export const AddRemoveEditable = <K,>({items, onAdd, ...rest}: Omit<AddRemoveProps<EditableComponentProps<K>>, 'onDelete'> & AddRemoveEditableProps<K>) => {
-	return <>
-		{items.map((item, i) => {
-			const props: AddRemoveItemProps<EditableComponent<K>> = {...item.props, component: item.component};
-			if (rest.isDirty) {
-				const isNew = rest.isNewItem(item.props.data);
-				return <DirtyComponent key={i} as={AddRemoveItem} {...props} dirty={isNew} overrideDelete={isNew} showCancel={!isNew} dataTestId={`dirty-component-${item.id}`}/>;
-			}
-			return <AddRemoveItem key={i} {...props}/>
-		})}
-		<div>
-			<Button mode="secondary" className="my-1" onClick={onAdd}>
-				+
-			</Button>
-		</div>
-	</>
-}
 type Props = {
-	onDelete: () => void
+	onDelete: () => void,
+	children?: React.ReactNode,
+	icons?: ButtonIcon[]
 }
 type AddRemoveItemProps<T extends React.ElementType> = PolymorphicCustomProps<T, Props, {component?: T}>
-const AddRemoveItem = <T extends React.ElementType>({component, onDelete, ...rest}: AddRemoveItemProps<T>) => {
+const AddRemoveItem = <T extends React.ElementType>({component, onDelete, children, icons: iconsProp, ...rest}: AddRemoveItemProps<T>) => {
 	const Component = component || 'span';
 	const icons: ButtonIcon[] = [
 		{
@@ -64,7 +49,8 @@ const AddRemoveItem = <T extends React.ElementType>({component, onDelete, ...res
 			handler: onDelete
 		}
 	];
-	return <Editable icons={icons} editable="false"><Component {...rest}/></Editable>
+	iconsProp && icons.push(...iconsProp);
+	return <Editable icons={icons} editable="false">{children || <Component {...rest}/>}</Editable>
 }
 
 export default AddRemove;

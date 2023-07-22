@@ -25,11 +25,13 @@ export const useComponentSettingsMutation = () => {
 	const createMutation = api.page.createSetting.useMutation();
 	const updateMutation = api.page.updateSetting.useMutation();
 	const deleteMutation = api.page.deleteSetting.useMutation();
+	const reorderMutation = api.page.updateSettingOrder.useMutation();
 
 	return {
 		create: createMutation, 
 		update: updateMutation, 
-		deletem: deleteMutation
+		deletem: deleteMutation,
+		reorder: reorderMutation
 	};
 }
 

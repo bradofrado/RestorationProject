@@ -8,7 +8,7 @@ import {type EventPage, type ComponentSettings, type EditableData} from '~/utils
 import Input from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import Editable from '~/utils/components/edit/editable';
-import AddComponent from '~/utils/components/edit/add-component';
+import AddComponent, { type EditableComponentType } from '~/utils/components/edit/add-component';
 import {type ComponentType, CustomComponents} from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
 
@@ -19,7 +19,7 @@ export type EditPagesProps = {
 export const EditPages = ({setId}: EditPagesProps) => {
 	const [currPage, setCurrPage] = useState<EventPage>();
 	const {create, update, deletem} = useEventPagesMutation();
-	const {create: createSetting, update: updateSetting, deletem: deleteSetting} = useComponentSettingsMutation();
+	const {create: createSetting, update: updateSetting, deletem: deleteSetting, reorder: reorderSetting} = useComponentSettingsMutation();
 	const query = useGetPages();
 
 	let pages: EventPage[] | null = null;
@@ -90,7 +90,9 @@ export const EditPages = ({setId}: EditPagesProps) => {
 							<Button as={Link} href={`/${currPage.url}`} className="ml-1">Go</Button>
 						</div>
 						<EditablePage page={currPage} setPage={setCurrPage} isNew={isNew} 
-							createSetting={createSetting.mutate} updateSetting={updateSetting.mutate} deleteSetting={deleteSetting.mutate}/>
+							createSetting={createSetting.mutate} updateSetting={updateSetting.mutate} 
+							deleteSetting={deleteSetting.mutate} reorderSettings={reorderSetting.mutate}
+						/>
 						</>}
 					</>}
 			</EditItemsButtons>
@@ -99,7 +101,7 @@ export const EditPages = ({setId}: EditPagesProps) => {
 	</>
 }
 
-
+type ReorderSettingsParam = Pick<ComponentSettings, 'id' | 'order'>[]
 type EditablePageProps = {
 	page: EventPage, 
 	setPage: (page: EventPage) => void, 
@@ -107,8 +109,9 @@ type EditablePageProps = {
 	createSetting: (setting: ComponentSettings) => void,
 	updateSetting: (setting: ComponentSettings) => void,
 	deleteSetting: (id: number) => void,
+	reorderSettings: (params: ReorderSettingsParam) => void,
 }
-const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, deleteSetting}: EditablePageProps) => {
+const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, deleteSetting, reorderSettings}: EditablePageProps) => {
 	const editSettings = (f: (settings: ComponentSettings[]) => void) => {
 		const copy: EventPage = {...page};
 		const settings = copy.settings.slice();
@@ -120,12 +123,27 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 	}
 
 	const onAdd = (component: ComponentType) => {
-		editSettings(components => components.push({component: component, data: {content: "custom", properties: null}, id: -1, pageId: page.id}));
+		const maxId = page.settings.length > 0 ? 
+			Math.max(...page.settings.map(x => Math.abs(x.id))) :
+			0;
+		editSettings(components => components.push({
+			component, 
+			data: {
+				content: "custom", 
+				properties: null
+			}, 
+			id: -1 * (maxId + 1), 
+			pageId: page.id, 
+			order: components.length
+		}));
 	}
 
-	const onEdit = (data: EditableData, i: number) => {
-		const page = editSettings(components => (components[i] || {data: null}).data = data);
-		const setting = page.settings[i];
+	const onEdit = (data: EditableData, id: number) => {
+		const page = editSettings(components => {
+			const component = components.find(x => x.id == id);
+			(component || {data: null}).data = data;
+		});
+		const setting = page.settings.find(x => x.id == id);
 		if (!setting) {
 			throw new Error("Cannot update setting");
 		}
@@ -136,7 +154,11 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		}
 	}
 
-	const deleteComponent = (index: number) => {
+	const deleteComponent = (id: number) => {
+		const index = page.settings.findIndex(x => x.id == id);
+		if (index < -1) {
+			throw new Error(`Cannot delete setting ${id}`);
+		}
 		editSettings(components => components.splice(index, 1));
 		const setting = page.settings[index];
 		if (!setting) {
@@ -144,6 +166,30 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		}
 		!isNew && setting.id >= 0 && deleteSetting(setting.id);
 	}
+	
+	const onReorder = (items: EditableComponentType[]) => {
+		const components: ComponentSettings[] = [];
+		const updateComponents = (callback: (component: ComponentSettings) => void) => (components: ComponentSettings[]) => {
+			for (let i = 0; i < items.length; i++) {
+				const item = items[i] as EditableComponentType;
+				const component = components.find(settings => settings.id == item.id);
+				if (!component) {
+					throw new Error(`Error updating reorder of component ${item.id}`);
+				}
+				component.order = i;
+				callback(component);
+			}
+		}
+		const updateComponent = (component: ComponentSettings) => {
+			components.push(component);
+		}
+
+		editSettings(updateComponents(() => undefined));
+		updateComponents(updateComponent)(page.settings.slice());
+		reorderSettings(components);
+	}
+
+	const settings = page.settings.slice().sort((a, b) => a.order - b.order);
 	return <>
 			<Editable as="h1" className="mx-auto text-3xl font-bold my-5 text-bom" onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => setPage({...page, title: e.target.innerHTML})}>
 				{page.title}
@@ -151,7 +197,8 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 			<Editable as="p" onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => setPage({...page, description: e.target.innerHTML})}>
 				{page.description}
 			</Editable>
-			<CustomComponents isNew={isNew} items={page.settings.map((editable: ComponentSettings, i: number) => ({editable: true, id: editable.id, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, i), data: editable.data}))}/>
+			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
+				items={settings.map((editable: ComponentSettings) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }
