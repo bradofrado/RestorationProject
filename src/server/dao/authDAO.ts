@@ -19,7 +19,8 @@ type SignupProps = {
     db: Db
 }
 export const signup = async ({input, db}: SignupProps) => {
-    const {email, name, password} = input;
+    const {name, password} = input;
+    const email = input.email.toLowerCase();
 
     const exists = await db.user.findFirst({
         where: { email },
@@ -56,7 +57,7 @@ export const signup = async ({input, db}: SignupProps) => {
   }
   export const login = async ({input, db}: LoginProps): Promise<User | null> => {
     const user = await db.user.findFirst({
-        where: {email: input.email}
+        where: {email: input.email.toLowerCase()}
     });
   
     if (!user) {
