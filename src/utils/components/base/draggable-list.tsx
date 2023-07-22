@@ -143,7 +143,7 @@ export const DirtyDraggableListComponent = <T extends {id: number}>({children, i
 			</div>
 		}
     <div className='relative my-2'>
-    {isDirty && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl" data-testid="dirty-state-delete"></div>}
+    {isDirty && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-primary-light rounded-xl" data-testid="dirty-state-delete"></div>}
     <DraggableListComponent items={sortedItems} onReorder={onReorder} {...rest}>
       {children}
     </DraggableListComponent>
