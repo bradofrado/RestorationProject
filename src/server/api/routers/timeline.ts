@@ -14,6 +14,20 @@ const getCategoryDeprecated = (categoryName: TimelineCategoryName) => {
 	return category;
 }
 
+const sortTimelineItems = (items: RestorationTimelineItem[]): RestorationTimelineItem[] => {
+	return items.slice().sort((a, b) => {
+		if (!a.date) {
+			return -1;
+		}
+
+		if (!b.date) {
+			return 1;
+		}
+
+		return a.date.valueOf() - b.date.valueOf();
+	})
+}
+
 const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryId?: number): Prisma.TimelineItemUncheckedCreateInput => {
 	return {
 		date: input.date,
@@ -30,7 +44,7 @@ const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTim
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
-	const items = category.items.map(translatePrismaToTimelineItem);
+	const items = sortTimelineItems(category.items.map(translatePrismaToTimelineItem))
 	return TimelineCategorySchema.parse({...category, items});
 	
 }

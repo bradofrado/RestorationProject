@@ -5,11 +5,13 @@ export const DateFormat = {
 		return dayjs(date).format("MMM, D, YYYY");
 	},
 	fullTextRange: (date: Date, endDate?: Date | null) => {
-		if (!endDate) {
-			return DateFormat.fullText(date);
+		const dateText = DateFormat.fullText(date);
+		const endDateText = endDate ? DateFormat.fullText(endDate) : null;
+		if (!endDateText || dateText == endDateText) {
+			return dateText;
 		}
 
-		return `${DateFormat.fullText(date)} to ${DateFormat.fullText(endDate)}`;
+		return `${dateText} to ${endDateText}`;
 	}
 }
 

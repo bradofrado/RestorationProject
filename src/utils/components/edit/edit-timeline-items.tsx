@@ -32,7 +32,7 @@ export const EditTimelineItems = () => {
 			setCategory(update.data);
 		}
 	}, [create.data, update.data])
-	
+
 	if (pageQuery.isLoading || pageQuery.isError || categoryQuery.isLoading || categoryQuery.isError) {
 		return <></>
 	}
@@ -124,20 +124,6 @@ export const EditTimelineItems = () => {
 		changeProperty(category, "items", copy);
 	}
 
-	const sortItems = (items: RestorationTimelineItem[]): RestorationTimelineItem[] => {
-		return items.slice().sort((a, b) => {
-			if (!a.date) {
-				return -1;
-			}
-
-			if (!b.date) {
-				return 1;
-			}
-
-			return a.date.valueOf() - b.date.valueOf();
-		})
-	}
-	
 	return <>
 		<div>
 			<EditItemsButtons items={categoryNames} value={category?.id} onChange={onChange}
@@ -155,7 +141,7 @@ export const EditTimelineItems = () => {
 							<ColorPicker value={category.color} onChange={(color) => changeProperty(category, 'color', color)}/>
 						</Label>
 					</div>
-					<AddRemove custom={true} items={sortItems(category.items)} onAdd={onItemAdd} >
+					<AddRemove custom={true} items={category.items} onAdd={onItemAdd} >
 						{(item, i, AddRemoveItem) => {
 							const props = {
 								onDelete: () => onItemDelete(i),

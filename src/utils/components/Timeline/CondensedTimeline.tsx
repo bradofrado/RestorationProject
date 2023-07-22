@@ -2,6 +2,7 @@ import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
 import { useAnnotationLink } from "../edit/add-component";
 
+
 export interface CondensedTimelineProps {
 	items: RestorationTimelineItem[],
 	className?: string
@@ -22,7 +23,7 @@ const TimelineRow : React.FC<TimelineRowProps> = ({item}: TimelineRowProps) => {
 	const {annotate} = useAnnotationLink();
 	if (!item.date) return <></>
 	
-	const date = item.endDate ? `${DateFormat.fullText(item.date)} to ${DateFormat.fullText(item.endDate)}` : DateFormat.fullText(item.date);
+	const date = DateFormat.fullTextRange(item.date, item.endDate);
 	return <>
 		<li className="condensed-timeline-row">
 			<div className="condensed-timeline-row-label">
