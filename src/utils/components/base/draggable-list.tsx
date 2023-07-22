@@ -2,7 +2,6 @@ import React, {useEffect, useState } from 'react';
 import Button from '~/utils/components/base/button';
 import { Draggable, DragDropContext, Droppable, type DroppableProps, type DraggableProps, type DropResult } from "react-beautiful-dnd";
 import { type Replace, type ReplaceWithName } from '~/utils/utils';
-import {useStateUpdate} from '~/utils/components/hooks/hooks';
 
 export const DroppableComponent = ({ children, ...props }: Replace<DroppableProps, 'children', React.ReactNode>) => {
   const [enabled, setEnabled] = useState(false);

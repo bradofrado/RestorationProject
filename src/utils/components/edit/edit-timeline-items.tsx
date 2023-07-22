@@ -15,6 +15,8 @@ import {DateRangePicker} from '~/utils/components/base/calendar/date-picker';
 import { RemoveField } from '../base/remove-field';
 import { type EditableComponentProps } from './editable';
 import { DirtyComponent, defaultDirtyProps } from './dirty-component';
+import {DraggableComponent, DroppableContext} from '~/utils/components/base/draggable-list';
+import { DragMoveIcon } from '../icons/icons';
 
 export const EditTimelineItems = () => {
 	const [category, setCategory] = useState<TimelineCategory>();
@@ -208,6 +210,7 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 		const newItem = changePropertyItem(propItem, "date", null);
 		changePropertyItem(newItem, "endDate", null);
 	}
+
 	return <>
 		<Panel className="my-1" role="editable-timeline-item">
 			<Input include={Label} label="Text" type="textarea" value={propItem.text} inputClass="w-full" onChange={value => changePropertyItem(propItem, "text", value)}/>
@@ -218,9 +221,15 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 			</Label>
 			<Input include={Label} label="Subcategory" className="my-1" value={propItem.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(propItem, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
-				<AddRemove items={propItem.links}
-					onAdd={onAddLink} onDelete={onDeleteLink}>
-					{(link: string, i: number) => <Input value={link} inputClass="w-full" onChange={value => onLinkChange(value, i)}/>}
+				<AddRemove items={propItem.links} onAdd={onAddLink} custom
+					container={DroppableContext<string>} id={`links-${propItem.id}`} onReorder={(links: string[]) => changePropertyItem(propItem, 'links', links)}>
+					{(link: string, i: number, Wrapper) => (
+						<DraggableComponent id={`${i}`} index={i}>
+							<Wrapper onDelete={() => onDeleteLink(i)} icons={[{icon: DragMoveIcon}]}>
+								<Input value={link} inputClass="w-full" onChange={value => onLinkChange(value, i)}/>
+							</Wrapper>
+						</DraggableComponent>
+					)}
 				</AddRemove>
 			</Label>
 		</Panel>

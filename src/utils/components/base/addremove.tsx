@@ -37,10 +37,11 @@ const AddRemove = <C extends React.ElementType, T>(props: AddRemoveProps<C, T>) 
 
 type Props = {
 	onDelete: () => void,
-	children?: React.ReactNode
+	children?: React.ReactNode,
+	icons?: ButtonIcon[]
 }
 type AddRemoveItemProps<T extends React.ElementType> = PolymorphicCustomProps<T, Props, {component?: T}>
-const AddRemoveItem = <T extends React.ElementType>({component, onDelete, children, ...rest}: AddRemoveItemProps<T>) => {
+const AddRemoveItem = <T extends React.ElementType>({component, onDelete, children, icons: iconsProp, ...rest}: AddRemoveItemProps<T>) => {
 	const Component = component || 'span';
 	const icons: ButtonIcon[] = [
 		{
@@ -48,6 +49,7 @@ const AddRemoveItem = <T extends React.ElementType>({component, onDelete, childr
 			handler: onDelete
 		}
 	];
+	iconsProp && icons.push(...iconsProp);
 	return <Editable icons={icons} editable="false">{children || <Component {...rest}/>}</Editable>
 }
 

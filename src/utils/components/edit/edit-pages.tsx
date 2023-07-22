@@ -196,7 +196,7 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 				{page.description}
 			</Editable>
 			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
-				items={settings.map((editable: ComponentSettings, i: number) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
+				items={settings.map((editable: ComponentSettings) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }

@@ -142,7 +142,7 @@ type EditableComponentContainerProps<C extends React.ElementType> = DeletableCom
 const EditableComponentContainer = <C extends React.ElementType>(props: EditableComponentContainerProps<C>) => {
 	const defaultIcons: ButtonIcon[] = [
 		{icon: DeleteIcon, handler: props.onDelete},
-		{icon: DragMoveIcon, handler: () => undefined}
+		{icon: DragMoveIcon}
 	];
 	const allIcons = defaultIcons.concat(props.icons || []); 
 	return <>

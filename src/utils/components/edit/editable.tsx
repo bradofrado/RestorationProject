@@ -26,7 +26,7 @@ export type EditableComponent<T> = React.ComponentType<EditableComponentProps<T>
 
 export type ButtonIcon = {
 	icon: IconComponent,
-	handler: () => void,
+	handler?: () => void,
 } | JSX.Element
 
 export type ContentEditableComponent = {contentEditable?: boolean | "true" | "false" };

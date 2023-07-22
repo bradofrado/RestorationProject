@@ -503,7 +503,7 @@ describe('Edit page', () => {
             //Get the first timeline item and its editable buttons
             const timelineItemElement = getByTestId(`dirty-component-${timelineItem.id}`);
             const editableButtons = getAllByTestId(timelineItemElement, 'editable-edit-icon');
-            expect(editableButtons.length).toBe(timelineItem.links.length + 1);
+            expect(editableButtons.length).toBe((2 * timelineItem.links.length) + 1);
 
             //We should not have a delete state initially
             expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).not.toBeInTheDocument();
@@ -511,7 +511,7 @@ describe('Edit page', () => {
             expect(queryByText(timelineItemElement, 'Save')).not.toBeInTheDocument();
 
             //Get the delete button and click it. We should now have the delete state
-            const deleteButton = editableButtons[timelineItem.links.length] as HTMLElement;
+            const deleteButton = editableButtons[editableButtons.length - 1] as HTMLElement;
             await user.click(deleteButton);
             expect(queryByTestId(timelineItemElement, 'dirty-state-delete')).toBeInTheDocument();
             expect(queryByText(timelineItemElement, 'Cancel')).toBeInTheDocument();
