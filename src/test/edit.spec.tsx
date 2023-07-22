@@ -43,6 +43,10 @@ jest.mock('src/utils/services/EventPageService', () => ({
         deletem: {
             mutate: () => {return undefined},
             data: null
+        },
+        reorder: {
+            mutate: () => undefined,
+            data: null
         }
     }),
 	useGetPages: () => ({
@@ -380,11 +384,11 @@ describe('Edit page', () => {
             const page = pages[0] as EventPage;
             await addAndDeleteItemToPage({type: 'List', page, callback: async ({newComponent, user}) => {
                 let editableButtons = getAllByTestId(newComponent, 'editable-edit-icon');
-                expect(editableButtons.length).toBe(3);
+                expect(editableButtons.length).toBe(4);
                 expect(queryByRole(newComponent, 'list')).toBeFalsy();
 
                 //Add a list item
-                const addListItem = editableButtons[2] as HTMLElement;
+                const addListItem = editableButtons[3] as HTMLElement;
                 expect(addListItem).toBeInTheDocument();
                 await user.click(addListItem);
 
@@ -398,7 +402,7 @@ describe('Edit page', () => {
                 expect(ulElement.childElementCount).toBe(2);
 
                 //Change the list type to Book of Mormon
-                const editListItem = editableButtons[1] as HTMLElement;
+                const editListItem = editableButtons[2] as HTMLElement;
                 await clickIconWithDropdown({container: editListItem, user});
                 expect(getAllByRole(editListItem, 'menuitem', {hidden: true}).length).toBe(3);
                 await selectDropdownItem({type: 'Book of Mormon', user, container: editListItem});
@@ -419,8 +423,8 @@ describe('Edit page', () => {
 
                 //Click 'Group' from the adjust icon
                 editableButtons = getAllByTestId(newComponent, 'editable-edit-icon');
-                expect(editableButtons.length).toBe(3);
-                const adjustIcon = editableButtons[2] as HTMLElement;
+                expect(editableButtons.length).toBe(4);
+                const adjustIcon = editableButtons[3] as HTMLElement;
                 expect(adjustIcon).toBeInTheDocument();
                 await user.click(adjustIcon);
                 await clickIconWithDropdown({container: adjustIcon, user});
@@ -443,12 +447,12 @@ describe('Edit page', () => {
                 const placeholder = getByText(newComponent, 'Pick Timeline items');
                 expect(placeholder).toBeInTheDocument();
 
-                //Only has two editable icons
+                //Only has three editable icons
                 const editableButtons = getAllByTestId(newComponent, 'editable-edit-icon');
-                expect(editableButtons.length).toBe(2);
+                expect(editableButtons.length).toBe(3);
 
                 //Select Book of Mormon
-                const editIcon = editableButtons[1] as HTMLElement;
+                const editIcon = editableButtons[2] as HTMLElement;
                 await clickIconWithDropdown({container: editIcon, user});
                 await selectDropdownItem({type: 'Book of Mormon', user, container: editIcon});
 

@@ -123,7 +123,17 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 	}
 
 	const onAdd = (component: ComponentType) => {
-		editSettings(components => components.push({component: component, data: {content: "custom", properties: null}, id: -1, pageId: page.id, order: components.length}));
+		const maxId = Math.max(...page.settings.map(x => Math.abs(x.id)));
+		editSettings(components => components.push({
+			component, 
+			data: {
+				content: "custom", 
+				properties: null
+			}, 
+			id: -1 * (maxId + 1), 
+			pageId: page.id, 
+			order: components.length
+		}));
 	}
 
 	const onEdit = (data: EditableData, id: number) => {
@@ -142,7 +152,11 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		}
 	}
 
-	const deleteComponent = (index: number) => {
+	const deleteComponent = (id: number) => {
+		const index = page.settings.findIndex(x => x.id == id);
+		if (index < -1) {
+			throw new Error(`Cannot delete setting ${id}`);
+		}
 		editSettings(components => components.splice(index, 1));
 		const setting = page.settings[index];
 		if (!setting) {
@@ -182,7 +196,7 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 				{page.description}
 			</Editable>
 			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
-				items={settings.map((editable: ComponentSettings, i: number) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(i), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
+				items={settings.map((editable: ComponentSettings, i: number) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
 	</>
 }

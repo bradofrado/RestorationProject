@@ -94,18 +94,39 @@ export const DraggableListComponent = <T extends {id: number} | string>({childre
   </>
 }
 
-
-export const DirtyDraggableListComponent = <T extends {id: number}>({children, items: itemsProps, onReorder: onReorderProps, ...rest}: DraggableListComponentProps<T>) => {
-  const [items, setItems] = useStateUpdate(itemsProps.map(x => x.id));
+type DirtyDraggableListComponentProps<T> = DraggableListComponentProps<T> & {
+  onReordering?: () => void
+}
+export const DirtyDraggableListComponent = <T extends {id: number}>({children, items: itemsProps, onReorder: onReorderProps, onReordering, ...rest}: DirtyDraggableListComponentProps<T>) => {
+  const [items, setItems] = useState(itemsProps.map(x => x.id));
   const [isDirty, setIsDirty] = useState(false);
 
+  const sortItems = (_items: T[]) => _items.slice().sort((a, b) => {
+    const aIndex = items.indexOf(a.id);
+    const bIndex = items.indexOf(b.id);
+    if (aIndex < 0 || bIndex < 0) {
+      if (aIndex >= 0) {
+        return -1;
+      }
+
+      if (bIndex >= 0) {
+        return 1;
+      }
+
+      return Math.abs(a.id) - Math.abs(b.id);
+    }
+
+    return aIndex - bIndex;
+  })
+  
   const onReorder = (newItems: T[]) => {
     setItems(newItems.map(x => x.id));
     setIsDirty(true);
+    onReordering && onReordering();
   }
 
   const onSave = () => {
-    onReorderProps(itemsProps.slice().sort((a, b) => items.indexOf(a.id) - items.indexOf(b.id)));
+    onReorderProps(sortItems(itemsProps));
     setIsDirty(false);
   }
 
@@ -114,7 +135,7 @@ export const DirtyDraggableListComponent = <T extends {id: number}>({children, i
     setIsDirty(false);
   }
 
-  const sortedItems = itemsProps.slice().sort((a, b) => items.indexOf(a.id) - items.indexOf(b.id))
+  const sortedItems = sortItems(itemsProps)
 
   return <>
     {isDirty && <div>

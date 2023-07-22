@@ -160,6 +160,7 @@ export const pageRouter = createTRPCRouter({
 		.input(z.array(z.object({id: z.number(), order: z.number()})))
 		.mutation(async ({ctx, input}) => {
 			for (const inputItem of input) {
+				if (inputItem.id < 0) continue;
 				await ctx.prisma.componentSettings.update({
 					data: {
 						order: inputItem.order

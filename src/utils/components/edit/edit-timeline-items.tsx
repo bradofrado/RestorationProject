@@ -165,7 +165,7 @@ export const EditTimelineItems = () => {
 								data: item,
 								onEdit: (item: RestorationTimelineItem) => saveItem(item, i)
 							}
-							return isNew ? <AddRemoveItem {...props}/> : <DirtyComponent id={`${item.id}`} index={i} {...defaultDirtyProps(item.id < 0)} as={AddRemoveItem} {...props}/>
+							return isNew ? <AddRemoveItem {...props}/> : <DirtyComponent id={`${item.id}`} index={i} {...defaultDirtyProps(item.id < 0)} as={AddRemoveItem} {...props} dataTestId={`dirty-component-${item.id}`}/>
 						}}
 					</AddRemove>
 					

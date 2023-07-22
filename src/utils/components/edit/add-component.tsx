@@ -241,7 +241,7 @@ export const CustomComponent = (props: IfElse<'editable', EditableComponentType,
 		const isNew = id < 0;
 		return <div data-testid={`custom-component-editable-${id}`} role="custom-component-editable">
 			{props.isNew ? <Component.editable {...rest}/> : 
-			<DirtyComponent as={Component.editable} {...rest} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}></DirtyComponent>}
+			<DirtyComponent key={id} as={Component.editable} {...rest} dirty={isNew} overrideDelete={isNew} showCancel={!isNew}></DirtyComponent>}
 		</div>
 	}
 	
