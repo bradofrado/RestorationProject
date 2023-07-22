@@ -32,14 +32,7 @@ export const EditTimelineItems = () => {
 			setCategory(update.data);
 		}
 	}, [create.data, update.data])
-	useEffect(() => {
-		const data = createItem.data || updateItem.data;
-		if (data) {
-			const item = categoryQuery.data?.find(x => x.id == data.categoryId);
-			item && setCategory(item);
-		}
-	}, [categoryQuery.data, createItem.data, updateItem.data])
-
+	
 	if (pageQuery.isLoading || pageQuery.isError || categoryQuery.isLoading || categoryQuery.isError) {
 		return <></>
 	}
@@ -108,8 +101,11 @@ export const EditTimelineItems = () => {
 	const onItemAdd = () => {
 		if (!category) return;
 		const copy = category.items.slice();
+		const maxId = category.items.length > 0 ?
+			Math.max(...category.items.map(x => x.id)) :
+			0;
 		copy.push({
-			id: -1,
+			id: -1 * (maxId + 1),
 			text: "new text", 
 			date: new Date(), 
 			endDate: null, 

@@ -168,8 +168,7 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 	}
 	
 	const onReorder = (items: EditableComponentType[]) => {
-		const components: ComponentSettings[] = [];
-		const updateComponents = (callback: (component: ComponentSettings) => void) => (components: ComponentSettings[]) => {
+		const updateComponents = (components: ComponentSettings[]) => {
 			for (let i = 0; i < items.length; i++) {
 				const item = items[i] as EditableComponentType;
 				const component = components.find(settings => settings.id == item.id);
@@ -177,16 +176,10 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 					throw new Error(`Error updating reorder of component ${item.id}`);
 				}
 				component.order = i;
-				callback(component);
 			}
 		}
-		const updateComponent = (component: ComponentSettings) => {
-			components.push(component);
-		}
-
-		editSettings(updateComponents(() => undefined));
-		updateComponents(updateComponent)(page.settings.slice());
-		reorderSettings(components);
+		const page = editSettings(updateComponents);
+		!isNew && reorderSettings(page.settings);
 	}
 
 	const settings = page.settings.slice().sort((a, b) => a.order - b.order);

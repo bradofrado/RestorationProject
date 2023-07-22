@@ -43,7 +43,8 @@ const createPage = async ({input, db}: {input: EventPage, db: Db}) => {
 			settings: {
 				create: input.settings.map(x => {
 					const setting: Prisma.ComponentSettingsCreateWithoutPageInput = {
-						component: x.component
+						component: x.component,
+						order: x.order
 					}
 					if (x.data) {
 						setting.data = {
