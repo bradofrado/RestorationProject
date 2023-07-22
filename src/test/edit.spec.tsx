@@ -144,6 +144,7 @@ const renderAndSelectPage = async (page: EventPage) => {
     expect(dropdownItem).toBeInTheDocument();
 
     await user.click(dropdownItem);
+    await new Promise((r) => setTimeout(r, 100));
 
     expect(getByRole('textbox')).toBeInTheDocument();
     expect(getByText(page.title)).toBeInTheDocument();
