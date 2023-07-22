@@ -540,12 +540,13 @@ describe('Edit page', () => {
             const category = categories[0] as TimelineCategory;
             const {getAllByRole, user, getAllByText, getByTestId, queryByTestId: queryByTestIdLocal} = await renderAndSelectTimelineCategory(category);
 
+            const dirtyComponentId = `dirty-component--${(category.items[category.items.length - 1]?.id ?? 0)+ 1}`
             const addTimelineItem = async ({addButton}: {addButton: HTMLElement}) => {
                 await user.click(addButton);
 
                 expect(getAllByRole('editable-timeline-item').length).toBe(category.items.length + 1);
     
-                const newTimelineItemElement = getByTestId('dirty-component--1');
+                const newTimelineItemElement = getByTestId(dirtyComponentId);
                 expect(queryByText(newTimelineItemElement, 'Cancel')).not.toBeInTheDocument();
                 expect(queryByText(newTimelineItemElement, 'Save')).toBeInTheDocument();
 
@@ -567,7 +568,7 @@ describe('Edit page', () => {
             //After clicking delete, the component should be gone
             const deleteButton = editableButtons[0] as HTMLElement;
             await user.click(deleteButton);
-            expect(queryByTestIdLocal('dirty-component--1')).not.toBeInTheDocument();
+            expect(queryByTestIdLocal(dirtyComponentId)).not.toBeInTheDocument();
 
             //Add another item and delete then save it.
             newTimelineItemElement = await addTimelineItem({addButton});

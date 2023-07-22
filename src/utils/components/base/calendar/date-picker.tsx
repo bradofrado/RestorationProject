@@ -59,8 +59,8 @@ export const DateRangePicker = (props: DateRangePickerProps) => {
       start: new CalendarDate(props.start.getFullYear(), props.start.getMonth() + 1, props.start.getDate()),
       end: new CalendarDate(props.end.getFullYear(), props.end.getMonth() + 1, props.end.getDate()),
     } : null,
-    onChange: ({start, end}: DateRange) => {
-      props.onChange(start.toDate(getLocalTimeZone()), end.toDate(getLocalTimeZone()))
+    onChange: (range: DateRange) => {
+      props.onChange(range?.start.toDate(getLocalTimeZone()), range?.end.toDate(getLocalTimeZone()))
     }
   }
   const state = useDateRangePickerState(options);
