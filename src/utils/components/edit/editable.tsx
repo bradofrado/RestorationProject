@@ -34,7 +34,7 @@ export type ContentEditableComponent = {contentEditable?: boolean | "true" | "fa
 function Editable<T extends React.ElementType>({children, as, icons, editable = 'true', wrapped = false, ...rest}: EditableProps<T>) {
 	const Component = as || 'span';
 	
-	const render = wrapped ? children : <Component {...rest} contentEditable={editable}>{children}</Component>
+	const render = wrapped ? children : <Component {...rest} contentEditable={editable} suppressContentEditableWarning>{children}</Component>
 	return <div className="relative"> 
 		
 		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">

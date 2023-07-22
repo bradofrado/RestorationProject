@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
 import { type IfElse } from '~/utils/utils'
-import {DirtyDraggableListComponent} from '~/utils/components/base/draggable-list';
+import {DirtyDraggableListComponent, DraggableListComponent} from '~/utils/components/base/draggable-list';
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
@@ -257,10 +257,11 @@ type EditableComponentsListProps = {
 	onReorder: (items: EditableComponentType[]) => void
 }
 const EditableComponentsList = ({items, isNew, onReorder}: EditableComponentsListProps) => {
+	const Component = isNew ? DraggableListComponent : DirtyDraggableListComponent;
 	return <>
-		<DirtyDraggableListComponent id="editable-components" items={items} onReorder={onReorder}>
+		<Component id="editable-components" items={items} onReorder={onReorder}>
 			{item => <CustomComponent {...item} isNew={isNew} editable={true}/> }
-		</DirtyDraggableListComponent>
+		</Component>
 	</>
 }
 

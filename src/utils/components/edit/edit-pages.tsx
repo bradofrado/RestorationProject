@@ -123,7 +123,9 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 	}
 
 	const onAdd = (component: ComponentType) => {
-		const maxId = Math.max(...page.settings.map(x => Math.abs(x.id)));
+		const maxId = page.settings.length > 0 ? 
+			Math.max(...page.settings.map(x => Math.abs(x.id))) :
+			0;
 		editSettings(components => components.push({
 			component, 
 			data: {
