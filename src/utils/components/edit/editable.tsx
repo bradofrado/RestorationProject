@@ -17,12 +17,15 @@ export interface DeletableComponentProps {
 	onDelete: () => void
 }
 
-export interface EditableComponentProps<T> extends DeletableComponentProps {
+export interface EditableComponentProps<T> {
 	onEdit: (data: T) => void,
 	data: T 
 }
 
+export interface EditableDeleteableComponentProps<T> extends EditableComponentProps<T>, DeletableComponentProps {}
+
 export type EditableComponent<T> = React.ComponentType<EditableComponentProps<T>>
+export type EditableDeleteableComponent<T> = React.ComponentType<EditableDeleteableComponentProps<T>>
 
 export type ButtonIcon = {
 	icon: IconComponent,

@@ -182,7 +182,7 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		!isNew && reorderSettings(page.settings);
 	}
 
-	const settings = page.settings.slice().sort((a, b) => a.order - b.order);
+	const settings = page.settings;//.slice().sort((a, b) => a.order - b.order);
 	return <>
 			<Editable as="h1" className="mx-auto text-3xl font-bold my-5 text-bom" onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => setPage({...page, title: e.target.innerHTML})}>
 				{page.title}

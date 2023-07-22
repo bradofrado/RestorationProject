@@ -1,28 +1,31 @@
 import React, { useContext, useState } from 'react'
-import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps } from './editable'
+import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps, EditableDeleteableComponent, EditableDeleteableComponentProps, EditableComponent } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, DragMoveIcon, EditIcon } from '../icons/icons'
 import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
-import Header from '../base/header'
+import Header, { HeaderLevels, HeaderProps, HeaderSettings, SettingsComponentSettings, SettingsComponentSettingsSchema } from '../base/header'
 import { DataGroupbyList, DisplayList, DisplayListItem, RestorationQuote } from '../event-page/book-of-mormon-translation'
 import { type RestorationTimelineItem, type TimelineCategoryName } from '../../types/timeline'
 import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
-import { useChangeProperty, type IfElse } from '~/utils/utils'
+import { useChangeProperty, type IfElse, jsonParse } from '~/utils/utils'
 import {DirtyDraggableListComponent, DraggableListComponent} from '~/utils/components/base/draggable-list';
 import {PopoverIcon} from '~/utils/components/base/popover';
 import Input, { NumberInput } from '../base/input'
 import Label from '../base/label';
 import ColorPicker from '../base/color-picker'
-import { HexColor } from '~/utils/types/colors'
+import { HexColor, HexColorSchema } from '~/utils/types/colors'
+import { PropsOf } from '~/utils/types/polymorphic'
+import Paragraph, { ParagraphProps } from '../base/paragraph'
+import {HeaderSettingsSchema} from '~/utils/components/base/header';
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
 }
 
-type EditableDataComponent = EditableComponentProps<EditableData> & DataComponent;
+type EditableDataComponent = EditableDeleteableComponentProps<EditableData> & DataComponent;
 interface DataComponent {
 	data: EditableData,
 	className?: string
@@ -155,45 +158,88 @@ const EditableComponentContainer = <C extends React.ElementType>(props: Editable
 	</>
 }
 
-interface HeaderSettings {
-	level: number,
-	color: HexColor,
-	margin: number,
-}
-
 type HeaderSettingsComponentProps = {
-	settings: HeaderSettings,
+	settings?: HeaderSettings,
 	onEdit: (settings: HeaderSettings) => void
 }
-const HeaderSettingsComponent = ({settings, onEdit}: HeaderSettingsComponentProps) => {
-	const changeSetting = useChangeProperty<HeaderSettings>(onEdit);
-	const {level, color, margin} = settings;
+const HeaderSettingsComponent = ({settings={margin: 0, color: '#000', level: 2}, onEdit}: HeaderSettingsComponentProps) => {
+	return <>
+		<SettingsComponentCallout data={settings} onEdit={onEdit}>
+			{({level}, changeSetting) => <>
+				<NumberInput inputClass="w-[4rem] ml-1" value={level} onChange={value => changeSetting('level', value as HeaderLevels)} min={1} max={6}
+					include={Label} label="Level" sameLine/>
+			</>}
+		</SettingsComponentCallout>
+	</>
+}
+
+type SettingsComponentProps<T extends SettingsComponentSettings> = {
+	settings: T
+}
+
+type SettingsComponentCalloutProps<T extends SettingsComponentSettings> = EditableComponentProps<T> & {
+	children?: (rest: Omit<T, 'margin' | 'color'>, changeSetting: (key: keyof T, value: T[keyof T]) => T) => React.ReactNode
+};
+const SettingsComponentCallout = <T extends SettingsComponentSettings>({data, onEdit, children}: SettingsComponentCalloutProps<T>) => {
+	const changeSetting = useChangeProperty<T>(onEdit);
+	const {margin, color, ...rest} = data;
 	return <>
 		<div className="flex flex-col p-1 w-[8rem] gap-1">
-			<NumberInput inputClass="w-[4rem] ml-1" value={level} onChange={value => changeSetting(settings, 'level', value)} min={1} max={6}
-				include={Label} label="Level" sameLine/>
 			<Label label="Margin" sameLine>
-				<NumberInput inputClass="w-[4rem]" value={margin} onChange={value => changeSetting(settings, 'margin', value)} min={0}/>
+				<NumberInput inputClass="w-[4rem]" value={margin} onChange={value => changeSetting(data, 'margin', value)} min={0}/>
 			</Label>
 			<Label label="Color" sameLine>
-				<ColorPicker className="m-auto" value={color} onChange={value => changeSetting(settings, 'color', value)}/>
+				<ColorPicker className="m-auto" value={color} onChange={value => changeSetting(data, 'color', value)}/>
 			</Label>
+			{children && children(rest, (key, value) => changeSetting(data, key, value))}
 		</div>
 	</>
 }
 
 const EditableHeader: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
-	const [setting, setSettings] = useState<HeaderSettings>({level: 1, color: '#000', margin: 0})
+	const settings = data.properties ? jsonParse(HeaderSettingsSchema).parse(data.properties) : undefined;
 	const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})
 	const icons: ButtonIcon[] = [
 		<PopoverIcon icon={AdjustIcon} key={0}>
-			<HeaderSettingsComponent settings={setting} onEdit={setSettings}/>
+			<HeaderSettingsComponent settings={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}/>
 		</PopoverIcon>
 	]
 	return <>
-		<EditableComponentContainer as={Header} onDelete={onDelete} onBlur={onBlur} icons={icons}>
-			{data?.content || 'Text'}
-		</EditableComponentContainer>
+		<EditableComponentContainer as={DataHeader} onDelete={onDelete} onBlur={onBlur} icons={icons} data={data}/>
+	</>
+}
+
+const DataHeader: React.ComponentType<DataComponent & Omit<HeaderProps, 'settings'>> = ({data, ...rest}) => {
+	const settings = data.properties ? jsonParse(HeaderSettingsSchema).parse(data.properties) : undefined;
+	return <>
+		<Header className="py-2" {...rest} settings={settings}>{data?.content || 'Text'}</Header>
+	</>
+}
+
+
+const ParagraphSettingsCallout: EditableComponent<SettingsComponentSettings> = ({data, onEdit}) => {
+	return <>
+		<SettingsComponentCallout data={data} onEdit={onEdit}/>
+	</>
+}
+const EditableParagraph: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
+	const settings = data.properties ? jsonParse(SettingsComponentSettingsSchema).parse(data.properties) : {margin: 0, color: '#000'} as const;
+	const onBlur = (e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null});
+	const icons: ButtonIcon[] = [
+		<PopoverIcon icon={AdjustIcon} key={0}>
+			<ParagraphSettingsCallout data={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}/>
+		</PopoverIcon>
+	]
+	return <>
+		<EditableComponentContainer as={DataParagraph} role="paragraph" onDelete={onDelete} data={data} icons={icons}
+					onBlur={onBlur}/>
+	</>
+}
+
+const DataParagraph: React.ComponentType<DataComponent & Omit<ParagraphProps, 'settings'>> = ({data, ...rest}) => {
+	const settings = data.properties ? jsonParse(SettingsComponentSettingsSchema).parse(data.properties) : {margin: 0, color: '#000'} as const;
+	return <>
+		<Paragraph className="py-2" settings={settings} {...rest}>{data?.content || 'Text'}</Paragraph>
 	</>
 }
 
@@ -205,15 +251,12 @@ const components = createComponents(
 	{
 		label: 'Header',
 		editable: EditableHeader,
-		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ComponentType<DataComponent>
+		component: DataHeader
 	},
 	{
 		label: 'Paragraph',
-		editable: (({onDelete, onEdit, data}) => <EditableComponentContainer as="p" role="paragraph" onDelete={onDelete} 
-				onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
-											{data?.content || 'Text'}
-										</EditableComponentContainer>) as React.ComponentType<EditableDataComponent>,
-		component: (({data}) => <p className="py-2">{data?.content || 'Text'}</p>) as React.ComponentType<DataComponent>
+		editable: EditableParagraph,
+		component: DataParagraph
 	},
 	{
 		label: 'Timeline',
@@ -279,7 +322,7 @@ export const CustomComponents = ({isNew=false, ...rest}: CustomComponentsProps) 
 }
 
 export const CustomComponent = (props: IfElse<'editable', EditableComponentType, DataComponentType> & {isNew: boolean}) => {
-	const Component = components.find(x => x.label == props.type) || components[0];
+	const Component = components.find(x => x.label == props.type) || components[0] as Component;
 	if (props.editable) {
 		const {type: _, editable: _a, id, ...rest} = props;
 		const isNew = id < 0;

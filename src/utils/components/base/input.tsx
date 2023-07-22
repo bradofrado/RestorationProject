@@ -1,6 +1,6 @@
 import React from 'react';
 import { type PolymorphicCustomProps } from '~/utils/types/polymorphic';
-import { ReplaceWithName } from '~/utils/utils';
+import { type ReplaceWithName } from '~/utils/utils';
 type InputProps = React.PropsWithChildren & {
 	onChange?: (value: string) => void,
     value?: string | number | readonly string[] | undefined,

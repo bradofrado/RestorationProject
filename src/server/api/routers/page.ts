@@ -22,6 +22,7 @@ const getPage = async ({input, db}: {input: string, db: Db }) => {
 		throw new TRPCError({code: "BAD_REQUEST", message: `Invalid input: ${input}`})
 	}
 
+	page.settings.sort((a, b) => a.order - b.order);
 	return page;
 }
 
@@ -61,6 +62,8 @@ const createPage = async ({input, db}: {input: EventPage, db: Db}) => {
 		}
 	}) as EventPage;
 
+	page.settings.sort((a, b) => a.order - b.order);
+
 	return page;
 }
 
@@ -71,7 +74,7 @@ export const pageRouter = createTRPCRouter({
 				include: { settings: {include: {data: true }}}
 			}) as EventPage[];
 
-			return pages;
+			return pages.map(page => ({...page, settings: page.settings.slice().sort((a, b) => a.order - b.order)}));
 		}),
 	getPage: publicProcedure
 		.input(z.string())

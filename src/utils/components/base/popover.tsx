@@ -1,8 +1,7 @@
 import {Fragment} from 'react';
 import {Popover as ReactPopover, Transition} from '@headlessui/react';
-import { ReplaceWithName } from '~/utils/utils';
-import { IconComponent } from '../icons/icons';
-import Button from './button';
+import { type ReplaceWithName } from '~/utils/utils';
+import { type IconComponent } from '../icons/icons';
 
 type PopoverProps = React.PropsWithChildren<{
     button: React.ReactNode,
