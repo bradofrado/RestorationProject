@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, DragMoveIcon, EditIcon } from '../icons/icons'
@@ -10,8 +10,13 @@ import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
-import { type IfElse } from '~/utils/utils'
+import { useChangeProperty, type IfElse } from '~/utils/utils'
 import {DirtyDraggableListComponent, DraggableListComponent} from '~/utils/components/base/draggable-list';
+import {PopoverIcon} from '~/utils/components/base/popover';
+import Input, { NumberInput } from '../base/input'
+import Label from '../base/label';
+import ColorPicker from '../base/color-picker'
+import { HexColor } from '~/utils/types/colors'
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
@@ -49,7 +54,7 @@ const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({on
 	
 	return <>
 			<EditableComponentContainer as={DataCondensedTimeline} data={data} onDelete={onDelete} {...rest}
-				icons={[<DropdownIcon className="ml-1" onChange={item => onEdit({content: item.id, properties: null})}
+				icons={[<DropdownIcon onChange={item => onEdit({content: item.id, properties: null})}
 				key={1} items={dropdownItems} icon={EditIcon}/>]}
 				>
 				Text
@@ -118,11 +123,11 @@ const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdi
 
 	const editIcons: ButtonIcon[] = [
 		//{icon: DeleteIcon, handler: onDelete},
-		<DropdownIcon className="ml-1" items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: data?.properties || null})}/>,
+		<DropdownIcon items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: data?.properties || null})}/>,
 	];
 
 	if (type != 'custom') {
-		editIcons.push(<DropdownList className="ml-1" items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />)
+		editIcons.push(<DropdownList items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />)
 	} else {
 		editIcons.push({icon: AddIcon, handler: () => onEdit({content: 'custom', properties: data?.properties ? data?.properties + '|Text' : 'Text'})})
 	}
@@ -150,6 +155,48 @@ const EditableComponentContainer = <C extends React.ElementType>(props: Editable
 	</>
 }
 
+interface HeaderSettings {
+	level: number,
+	color: HexColor,
+	margin: number,
+}
+
+type HeaderSettingsComponentProps = {
+	settings: HeaderSettings,
+	onEdit: (settings: HeaderSettings) => void
+}
+const HeaderSettingsComponent = ({settings, onEdit}: HeaderSettingsComponentProps) => {
+	const changeSetting = useChangeProperty<HeaderSettings>(onEdit);
+	const {level, color, margin} = settings;
+	return <>
+		<div className="flex flex-col p-1 w-[8rem] gap-1">
+			<NumberInput inputClass="w-[4rem] ml-1" value={level} onChange={value => changeSetting(settings, 'level', value)} min={1} max={6}
+				include={Label} label="Level" sameLine/>
+			<Label label="Margin" sameLine>
+				<NumberInput inputClass="w-[4rem]" value={margin} onChange={value => changeSetting(settings, 'margin', value)} min={0}/>
+			</Label>
+			<Label label="Color" sameLine>
+				<ColorPicker className="m-auto" value={color} onChange={value => changeSetting(settings, 'color', value)}/>
+			</Label>
+		</div>
+	</>
+}
+
+const EditableHeader: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
+	const [setting, setSettings] = useState<HeaderSettings>({level: 1, color: '#000', margin: 0})
+	const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})
+	const icons: ButtonIcon[] = [
+		<PopoverIcon icon={AdjustIcon} key={0}>
+			<HeaderSettingsComponent settings={setting} onEdit={setSettings}/>
+		</PopoverIcon>
+	]
+	return <>
+		<EditableComponentContainer as={Header} onDelete={onDelete} onBlur={onBlur} icons={icons}>
+			{data?.content || 'Text'}
+		</EditableComponentContainer>
+	</>
+}
+
 function createComponents<T extends readonly Component[] & Array<{label: V}>, V extends string>(...args: T) {
 	return args
 }
@@ -157,10 +204,7 @@ function createComponents<T extends readonly Component[] & Array<{label: V}>, V 
 const components = createComponents(
 	{
 		label: 'Header',
-		editable: (({onDelete, onEdit, data}) => <EditableComponentContainer as={Header} onDelete={onDelete}
-			onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})}>
-											{data?.content || 'Text'}
-										</EditableComponentContainer>) as React.ComponentType<EditableDataComponent>,
+		editable: EditableHeader,
 		component: (({data}) => <Header className="py-2">{data?.content || 'Text'}</Header>) as React.ComponentType<DataComponent>
 	},
 	{

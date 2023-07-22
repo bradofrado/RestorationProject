@@ -209,7 +209,8 @@ function ColorSlider(props: ColorSliderProps) {
 
 type ColorPickerProps<T extends Color | HexColor> = {
   value: PickerColor<T>,
-  onChange: (color: PickerColor<T>) => void
+  onChange: (color: PickerColor<T>) => void,
+  className?: string
 }
 type ColorPickerFullProps<T extends Color | HexColor> = {
   preview?: boolean | "true" | "false"
@@ -291,9 +292,9 @@ export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, pr
   );
 }
 
-const ColorPicker = <T extends Color | HexColor>({value, onChange}: ColorPickerProps<T>) => {
+const ColorPicker = <T extends Color | HexColor>({value, onChange, className}: ColorPickerProps<T>) => {
   return <>
-    <Popover button={<ColorSwatch value={value} aria-label={`current color swatch: ${value.toString('rgb')}`}/>}>
+    <Popover className={className} button={<ColorSwatch value={value} aria-label={`current color swatch: ${value.toString('rgb')}`}/>}>
       <ColorPickerFull value={value} onChange={onChange} preview="false"/>    
     </Popover>
   </>

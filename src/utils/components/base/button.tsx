@@ -16,7 +16,7 @@ const Button = <T extends React.ElementType>({children, as, mode = 'primary', ba
     const Component = as || 'button';
 	const buttonClasses: {[key in ButtonType]: string} = {
 		'primary': 'bg-primary text-white hover:bg-opacity-80 focus-visible:outline-primary-light',
-		'secondary': 'bg-white text-gray-900 hover:bg-opacity-30',
+		'secondary': 'bg-slate-50 hover:bg-slate-300 text-gray-900',
 		'other': `text-secondary hover:opacity-80`
 	}
 	const style = mode == 'other' ? {backgroundColor}: undefined;
