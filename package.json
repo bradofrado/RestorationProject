@@ -9,7 +9,7 @@
     "start": "next start",
     "test": "jest --env=jsdom",
     "test:watch": "jest --watch",
-    "remote-build": "node prisma/readDBScript.js && npx prisma generate && next build"
+    "remote-build": "npx prisma generate && next build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
