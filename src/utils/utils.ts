@@ -52,8 +52,8 @@ export const setStyleFromSettings = (settings: Settings): React.CSSProperties =>
 		return m ? `${m/4}rem` : undefined;
 	}
 	return {
-		marginTop: margin(settings.margin),
-		marginBottom: margin(settings.margin),
+		paddingTop: margin(settings.margin),
+		paddingBottom: margin(settings.margin),
 		color: settings.color
 	}
 }

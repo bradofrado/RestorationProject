@@ -17,7 +17,7 @@ const CondensedTimeline : React.FC<CondensedTimelineProps> = ({items, className,
 		color && ref.current?.style.setProperty('--bom-color', color);
 	}, [color])
 	return <>
-		<ul className={`condensed-timeline-container pt-5 ${className || ''}`} ref={ref}>
+		<ul className={`condensed-timeline-container ${className || ''}`} ref={ref}>
 			{items.map((item, i) => <TimelineRow item={item} key={i} />)}
 		</ul>
 	</>

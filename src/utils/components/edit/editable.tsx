@@ -40,7 +40,7 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 	const render = wrapped ? children : <Component {...rest} contentEditable={editable} suppressContentEditableWarning>{children}</Component>
 	return <div className="relative"> 
 		
-		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">
+		<div className="hover:bg-sky-200/50 rounded-md peer">
 			{render}
 		</div>
 		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 z-20">
