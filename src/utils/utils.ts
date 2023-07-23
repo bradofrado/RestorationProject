@@ -69,13 +69,16 @@ export const jsonParse = <T>(schema: z.ZodType<T>) => z.string()
 } )
 
 export const useChangeProperty = <T,>(func: (item: T) => void) => {
-	return <K extends keyof T>(item: T, key: K, value: T[K]): T => {
+	const ret = <K extends keyof T>(item: T, key: K, value: T[K]): T => {
 		const copy = {...item};
 		copy[key] = value;
 		func(copy);
 
 		return copy;
 	}
+	ret.function = func;
+
+	return ret;
 }
 export type ReplaceWithName<T, K extends keyof T, Q> = Omit<T, K> & Q
 export type Replace<T, K extends keyof T, Q> = ReplaceWithName<T, K, Record<K, Q>>

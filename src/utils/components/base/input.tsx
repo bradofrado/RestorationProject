@@ -51,4 +51,15 @@ export const NumberInput = <T extends React.ElementType>({children, onChange, va
 	return input;
 }
 
+type CheckboxInputProps = {
+    value: boolean,
+    onChange: (value: boolean) => void
+}
+export const CheckboxInput = ({value, onChange}: CheckboxInputProps) => {
+    return <>
+        <input className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded-md focus:ring-primary-light dark:focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" 
+            type="checkbox" checked={value} onChange={e => onChange(e.target.checked)}/>
+    </>
+}
+
 export default Input;

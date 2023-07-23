@@ -184,12 +184,6 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 
 	const settings = page.settings;//.slice().sort((a, b) => a.order - b.order);
 	return <>
-			<Editable as="h1" className="mx-auto text-3xl font-bold my-5 text-bom" onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => setPage({...page, title: e.target.innerHTML})}>
-				{page.title}
-			</Editable>
-			<Editable as="p" onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => setPage({...page, description: e.target.innerHTML})}>
-				{page.description}
-			</Editable>
 			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
 				items={settings.map((editable: ComponentSettings) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>

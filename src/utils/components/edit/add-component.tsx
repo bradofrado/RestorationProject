@@ -1,25 +1,25 @@
-import React, { useContext, useState } from 'react'
-import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps, EditableDeleteableComponent, EditableDeleteableComponentProps, EditableComponent } from './editable'
+import React, { useContext } from 'react'
+import Editable, { type EditableProps, type ButtonIcon, type EditableComponentProps, type DeletableComponentProps, type EditableDeleteableComponentProps, type EditableComponent } from './editable'
 import CondensedTimeline from '../Timeline/CondensedTimeline'
 import { AddIcon, AdjustIcon, DeleteIcon, DragMoveIcon, EditIcon } from '../icons/icons'
-import Dropdown, { DropdownIcon, DropdownList, type DropdownItem, type ListItem } from '../base/dropdown'
-import Header, { HeaderLevels, HeaderProps, HeaderSettings, SettingsComponentSettings, SettingsComponentSettingsSchema } from '../base/header'
+import Dropdown, { DropdownIcon, type DropdownItem } from '../base/dropdown'
+import Header, { type HeaderLevels, type HeaderProps, type HeaderSettings, type SettingsComponentSettings, SettingsComponentSettingsSchema } from '../base/header'
 import { DataGroupbyList, DisplayList, DisplayListItem, RestorationQuote } from '../event-page/book-of-mormon-translation'
 import { type RestorationTimelineItem, type TimelineCategoryName } from '../../types/timeline'
 import { type EditableData } from '../../types/page'
 import { z } from 'zod'
 import { useGetCategories, useGetCategory } from '../../services/TimelineService'
 import { DirtyComponent } from './dirty-component'
-import { useChangeProperty, type IfElse, jsonParse } from '~/utils/utils'
+import { useChangeProperty, type IfElse, jsonParse, setStyleFromSettings } from '~/utils/utils'
 import {DirtyDraggableListComponent, DraggableListComponent} from '~/utils/components/base/draggable-list';
 import {PopoverIcon} from '~/utils/components/base/popover';
-import Input, { NumberInput } from '../base/input'
+import { NumberInput } from '../base/input'
 import Label from '../base/label';
 import ColorPicker from '../base/color-picker'
-import { HexColor, HexColorSchema } from '~/utils/types/colors'
-import { PropsOf } from '~/utils/types/polymorphic'
-import Paragraph, { ParagraphProps } from '../base/paragraph'
+import { HexColorSchema } from '~/utils/types/colors'
+import Paragraph, { type ParagraphProps } from '../base/paragraph'
 import {HeaderSettingsSchema} from '~/utils/components/base/header';
+import {CheckboxInput} from '~/utils/components/base/input';
 
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
@@ -36,29 +36,47 @@ interface Component {
 	component: React.ComponentType<DataComponent>
 }
 
+
+const CondensedTimelineSettingsSchema = SettingsComponentSettingsSchema.extend({
+	dotColor: HexColorSchema
+});
 const DataCondensedTimeline: React.ElementType<DataComponent> = ({data, className, ...rest}) => {
 	const query = useGetCategory(data?.content || 'Book of Mormon');
+	const settings = useParseSettings(data.properties, CondensedTimelineSettingsSchema, {dotColor: '#ad643a'});
 	if (query.isLoading || query.isError) {
 		return <Placeholder>Pick Timeline items</Placeholder>
 	}
 
 	const items = query.data.items;
 
-	return <>
-		<CondensedTimeline items={items} className={className} {...rest}/>
-	</>
+	return <div style={setStyleFromSettings(settings)}>
+		<CondensedTimeline items={items} className={className} color={settings.dotColor} {...rest}/>
+	</div>
 }
 const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
+	const settings = useParseSettings(data.properties, CondensedTimelineSettingsSchema, {dotColor: '#ad643a'});
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
-	const dropdownItems: DropdownItem<string>[] = query.data.map(x => ({id: x.name, name: x.name}))
+	const dropdownItems: DropdownItem<string>[] = query.data.map(x => ({id: x.name, name: x.name}));
+	const icons: ButtonIcon[] = [
+		<DropdownIcon onChange={item => onEdit({content: item.id, properties: data.properties})}
+				key={1} items={dropdownItems} icon={EditIcon}/>,
+		<PopoverIcon icon={AdjustIcon} key={0}>
+			<SettingsComponentCallout data={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}>
+				{({dotColor: color}, changeSetting) => <>
+					<Label label="Dot Color" sameLine>
+						<ColorPicker className="m-auto" value={color} onChange={value => changeSetting('dotColor', value)}/>
+					</Label>
+				</>}
+			</SettingsComponentCallout>
+		</PopoverIcon>
+	]
 	
 	return <>
 			<EditableComponentContainer as={DataCondensedTimeline} data={data} onDelete={onDelete} {...rest}
-				icons={[<DropdownIcon onChange={item => onEdit({content: item.id, properties: null})}
-				key={1} items={dropdownItems} icon={EditIcon}/>]}
+				icons={icons}
 				>
 				Text
 			</EditableComponentContainer>
@@ -75,32 +93,40 @@ interface DataListProps extends DataComponent, ContentEditableBlur {
 
 }
 
-const DataList: React.ElementType<DataListProps> = ({data: orig, ...rest}) => {
+const ListSettingsSchema = SettingsComponentSettingsSchema.extend({
+	group: z.boolean(),
+	items: z.array(z.string())
+})
+const DataList: React.ElementType<DataListProps> = ({data, ...rest}) => {
 	const query = useGetCategories();
+	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: true, items: []});
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
-	const data = orig ?? {content: 'custom', properties: null};
 
-	if (data.content == 'custom' && !data.properties) {
-		return <Placeholder>List is empty</Placeholder>
+	const style = setStyleFromSettings(settings);
+	
+	if (data.content == 'custom' && !settings.items.length) {
+		return <div style={style}><Placeholder>List is empty</Placeholder></div>
 	}
 	if (data.content == 'custom') {
-		const items = data.properties ? data.properties.split('|') : [];
-		return <DisplayList items={items.map(x => ({text: x}))} ListComponent={DisplayListItem} {...rest}/>
+		const items = settings.items;
+		return <div style={style}><DisplayList items={items.map(x => ({text: x}))} ListComponent={DisplayListItem} {...rest}/></div>
 	}
 
 	const items: RestorationTimelineItem[] = query.data.find(x => x.name == data.content)?.items || [];
 
-	if (data?.properties?.includes('Group')) {
-		return <DataGroupbyList items={items} ListComponent={RestorationQuote} groupByKey='subcategory' {...rest}/>
+	if (settings.group) {
+		return <div style={style}><DataGroupbyList items={items} ListComponent={RestorationQuote} groupByKey='subcategory' {...rest}/></div>
 	}
 
-	return <DisplayList items={items} ListComponent={RestorationQuote} {...rest}/>
+	return <div style={style}><DisplayList items={items} ListComponent={RestorationQuote} {...rest}/></div>
 }
 
 const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
+	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: true, items: []});
+	const changeProperty = useChangeProperty<typeof settings>(settings => onEdit({content: data.content, properties: JSON.stringify(settings)}));
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
@@ -112,33 +138,27 @@ const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdi
 		},
 	].concat(query.data.map(x => ({id: x.name, name: x.name})));
 
-	const listItems: ListItem<string>[] = [
-		{
-			label: 'Group',
-			value: !!data?.properties?.includes('Group'),
-			id: 'group',
-		}
-	]
-
-	const setListItems: (items: ListItem<string>[]) => void = (items) => {
-		onEdit({content: data?.content || 'custom', properties: items.reduce((prev, curr) => prev + (curr.value ? `|${curr.label as string}` : ''), '') });
-	}
-
 	const editIcons: ButtonIcon[] = [
-		//{icon: DeleteIcon, handler: onDelete},
 		<DropdownIcon items={dropdownItems} icon={EditIcon} key={1} onChange={(item) => onEdit({content: item.id, properties: data?.properties || null})}/>,
 	];
 
-	if (type != 'custom') {
-		editIcons.push(<DropdownList items={listItems} setItems={setListItems} icon={AdjustIcon} key={2} />)
-	} else {
-		editIcons.push({icon: AddIcon, handler: () => onEdit({content: 'custom', properties: data?.properties ? data?.properties + '|Text' : 'Text'})})
+	editIcons.push(<PopoverIcon icon={AdjustIcon}>
+		<SettingsComponentCallout data={settings} onEdit={changeProperty.function}>
+			{({group}, changeSettings) => <>
+				{data.content != 'custom' && <Label label="Group" sameLine>
+					<CheckboxInput value={group} onChange={value => changeSettings('group', value)}/>
+				</Label>}
+			</>}
+		</SettingsComponentCallout>
+	</PopoverIcon>)
+	if (type == 'custom') {
+		editIcons.push({icon: AddIcon, handler: () => changeProperty(settings, 'items', settings.items.concat('Text'))})
 	}
 
 	const editLiItem = (value: string, index: number) => {
-		const vals = data?.properties ? data?.properties?.split('|') : ['Text'];
+		const vals = [...settings.items];
 		vals[index] = value;
-		onEdit({content: data?.content || 'custom', properties: vals.join('|')})
+		changeProperty(settings, 'items', vals);
 	}
 	
 	return <>
@@ -173,8 +193,10 @@ const HeaderSettingsComponent = ({settings={margin: 0, color: '#000', level: 2},
 	</>
 }
 
-type SettingsComponentProps<T extends SettingsComponentSettings> = {
-	settings: T
+export const useParseSettings = <T extends SettingsComponentSettings, K extends keyof T>(settings: string | undefined | null, schema: z.ZodType<T>, dSettings: Record<K, T[K]>): T => {
+	const settingsParsed: T = settings ? jsonParse(schema).parse(settings) : {...dSettings, margin: 0, color: '#000',} as T;
+
+	return settingsParsed;
 }
 
 type SettingsComponentCalloutProps<T extends SettingsComponentSettings> = EditableComponentProps<T> & {
@@ -197,7 +219,7 @@ const SettingsComponentCallout = <T extends SettingsComponentSettings>({data, on
 }
 
 const EditableHeader: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
-	const settings = data.properties ? jsonParse(HeaderSettingsSchema).parse(data.properties) : undefined;
+	const settings = useParseSettings(data.properties, HeaderSettingsSchema, {level: 2});
 	const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})
 	const icons: ButtonIcon[] = [
 		<PopoverIcon icon={AdjustIcon} key={0}>
@@ -210,7 +232,7 @@ const EditableHeader: React.ComponentType<EditableDataComponent> = ({onDelete, o
 }
 
 const DataHeader: React.ComponentType<DataComponent & Omit<HeaderProps, 'settings'>> = ({data, ...rest}) => {
-	const settings = data.properties ? jsonParse(HeaderSettingsSchema).parse(data.properties) : undefined;
+	const settings = useParseSettings(data.properties, HeaderSettingsSchema, {level: 2});
 	return <>
 		<Header className="py-2" {...rest} settings={settings}>{data?.content || 'Text'}</Header>
 	</>
@@ -223,7 +245,7 @@ const ParagraphSettingsCallout: EditableComponent<SettingsComponentSettings> = (
 	</>
 }
 const EditableParagraph: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
-	const settings = data.properties ? jsonParse(SettingsComponentSettingsSchema).parse(data.properties) : {margin: 0, color: '#000'} as const;
+	const settings = useParseSettings(data.properties, SettingsComponentSettingsSchema, {});
 	const onBlur = (e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null});
 	const icons: ButtonIcon[] = [
 		<PopoverIcon icon={AdjustIcon} key={0}>
@@ -237,7 +259,7 @@ const EditableParagraph: React.ComponentType<EditableDataComponent> = ({onDelete
 }
 
 const DataParagraph: React.ComponentType<DataComponent & Omit<ParagraphProps, 'settings'>> = ({data, ...rest}) => {
-	const settings = data.properties ? jsonParse(SettingsComponentSettingsSchema).parse(data.properties) : {margin: 0, color: '#000'} as const;
+	const settings = useParseSettings(data.properties, SettingsComponentSettingsSchema, {});
 	return <>
 		<Paragraph className="py-2" settings={settings} {...rest}>{data?.content || 'Text'}</Paragraph>
 	</>

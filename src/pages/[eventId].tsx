@@ -43,12 +43,6 @@ interface RenderPageProps {
 export const RenderPage = ({page}: RenderPageProps) => {
 	const {title, description, settings} = page;
 	return <>
-		<h1 className="mx-auto text-3xl font-bold my-5 text-bom">{title}</h1>
-		<div>
-			<p>
-				{description}
-			</p>
-		</div>
 		<CustomComponents items={settings.map((setting, i) => ({type: setting.component, data: setting.data, id: i}))}/>
 	</>
 }
