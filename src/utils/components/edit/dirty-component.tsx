@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {type EditableComponent} from '~/utils/components/edit/editable';
+import { type EditableDeleteableComponent } from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import Button from '~/utils/components/base/button';
 type DirtComponentOtherProps = {
@@ -9,7 +9,7 @@ type DirtComponentOtherProps = {
     dirty?: boolean,
     dataTestId?: string
 }
-type DirtyComponentProps<K, T extends EditableComponent<K>> = PolymorphicComponentProps<T, DirtComponentOtherProps>;
+type DirtyComponentProps<K, T extends EditableDeleteableComponent<K>> = PolymorphicComponentProps<T, DirtComponentOtherProps>;
 type DirtyState<T> = {
     state: false
 } | ({
@@ -23,7 +23,7 @@ type DirtyType<T> = {
     type: "delete"
 }
 
-export const DirtyComponent = <K, T extends EditableComponent<K>>({as, onDelete: onDeleteProps, onEdit: onEditProps, data, dirty=false, overrideDelete, overrideEdit, showCancel=true, dataTestId, ...rest}: DirtyComponentProps<K,T>) => {
+export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({as, onDelete: onDeleteProps, onEdit: onEditProps, data, dirty=false, overrideDelete, overrideEdit, showCancel=true, dataTestId, ...rest}: DirtyComponentProps<K,T>) => {
     const [dirtyState, setDirtyState] = useState<DirtyState<K>>(dirty ? {state: true, type: 'edit', data} : {state: false});
     const [currData, setCurrData] = useState<K>(data);
     

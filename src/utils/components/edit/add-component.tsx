@@ -93,13 +93,13 @@ interface DataListProps extends DataComponent, ContentEditableBlur {
 
 }
 
-const ListSettingsSchema = SettingsComponentSettingsSchema.extend({
+export const ListSettingsSchema = SettingsComponentSettingsSchema.extend({
 	group: z.boolean(),
 	items: z.array(z.string())
 })
 const DataList: React.ElementType<DataListProps> = ({data, ...rest}) => {
 	const query = useGetCategories();
-	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: true, items: []});
+	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: false, items: []});
 	if (query.isLoading || query.isError) {
 		return <></>
 	}
@@ -125,7 +125,7 @@ const DataList: React.ElementType<DataListProps> = ({data, ...rest}) => {
 
 const EditableList: React.ElementType<EditableDataComponent> = ({onDelete, onEdit, data, ...rest}) => {
 	const query = useGetCategories();
-	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: true, items: []});
+	const settings = useParseSettings(data.properties, ListSettingsSchema, {group: false, items: []});
 	const changeProperty = useChangeProperty<typeof settings>(settings => onEdit({content: data.content, properties: JSON.stringify(settings)}));
 	if (query.isLoading || query.isError) {
 		return <></>
@@ -193,8 +193,8 @@ const HeaderSettingsComponent = ({settings={margin: 0, color: '#000', level: 2},
 	</>
 }
 
-export const useParseSettings = <T extends SettingsComponentSettings, K extends keyof T>(settings: string | undefined | null, schema: z.ZodType<T>, dSettings: Record<K, T[K]>): T => {
-	const settingsParsed: T = settings ? jsonParse(schema).parse(settings) : {...dSettings, margin: 0, color: '#000',} as T;
+export const useParseSettings = <T extends SettingsComponentSettings>(settings: string | undefined | null, schema: z.ZodType<T>, {margin=0, color='#000', ...rest}: Partial<T>): T => {
+	const settingsParsed: T = settings ? jsonParse(schema).parse(settings) : {margin, color, ...rest} as T;
 
 	return settingsParsed;
 }

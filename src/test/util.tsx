@@ -185,25 +185,45 @@ export const pages: EventPage[] = [
       description: "This is a description",
       url: "this-is-url",
       settings: [
+		  {
+			id: 0,
+			data: {
+				content: "This is a page",
+				properties: null
+			},
+			pageId: "0",
+			component: "Header",
+			order: 0,
+		  },
+		  {
+			id: 1,
+			data: {
+				content: "This is a description",
+				properties: null
+			},
+			pageId: "0",
+			component: "Paragraph",
+			order: 1,
+		  },
           {
-              id: 0,
+              id: 2,
               data: {
                   content: "This is a header",
                   properties: null
               },
               pageId: "0",
               component: "Header",
-			  order: 0
+			  order: 2
           },
           {
-              id: 1,
+              id: 3,
               data: {
                   content: "This is a paragraph",
                   properties: null
               },
               pageId: "0",
               component: "Paragraph",
-			  order: 1
+			  order: 3
           },
       ]
   },
@@ -216,41 +236,41 @@ export const pages: EventPage[] = [
 		{
 			id: 2,
 			data: {
+				content: "This is another page",
+				properties: null
+			},
+			pageId: "0",
+			component: "Header",
+			order: 0,
+		},
+		{
+			id: 3,
+			data: {
+				content: "This is another description",
+				properties: null
+			},
+			pageId: "0",
+			component: "Paragraph",
+			order: 1,
+		},
+		{
+			id: 4,
+			data: {
 				content: "This is another header",
 				properties: null
 			},
 			pageId: "1",
 			component: "Header",
-			order: 0
+			order: 2
 		},
 		{
-			id: 3,
+			id: 5,
 			data: {
 				content: "This is another paragraph",
 				properties: null
 			},
 			pageId: "1",
 			component: "Paragraph",
-			order: 1,
-		},
-		{
-		    id: 4,
-		    data: {
-		        content: "Book of Mormon",
-		        properties: null
-		    },
-		    pageId: "1",
-		    component: "Timeline",
-			order: 2,
-		},
-		{
-		    id: 5,
-		    data: {
-		        content: "custom",
-		        properties: "Here|are|some|List|items"
-		    },
-		    pageId: "1",
-		    component: "List",
 			order: 3,
 		},
 		{
@@ -260,18 +280,38 @@ export const pages: EventPage[] = [
 		        properties: null
 		    },
 		    pageId: "1",
-		    component: "List",
+		    component: "Timeline",
 			order: 4,
 		},
 		{
 		    id: 7,
 		    data: {
-		        content: "Book of Mormon Translation",
-		        properties: 'Group'
+		        content: "custom",
+		        properties: "{\"margin\":0,\"color\":\"#D87D7DFF\",\"group\":true,\"items\":[\"Here\",\"are\",\"some\",\"List\",\"items\"]}"
 		    },
 		    pageId: "1",
 		    component: "List",
-			order: 5
+			order: 5,
+		},
+		{
+		    id: 8,
+		    data: {
+		        content: "Book of Mormon",
+		        properties: null
+		    },
+		    pageId: "1",
+		    component: "List",
+			order: 6,
+		},
+		{
+		    id: 9,
+		    data: {
+		        content: "Book of Mormon Translation",
+		        properties: '{\"margin\":0,\"color\":\"#D87D7DFF\",\"group\":true,\"items\":[]}'
+		    },
+		    pageId: "1",
+		    component: "List",
+			order: 7
 		},
 	]
 }

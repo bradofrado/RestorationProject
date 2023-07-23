@@ -13,7 +13,7 @@ import Label from '~/utils/components/base/label';
 import ColorPicker from '~/utils/components/base/color-picker';
 import {DateRangePicker} from '~/utils/components/base/calendar/date-picker';
 import { RemoveField } from '../base/remove-field';
-import { type EditableComponentProps } from './editable';
+import { type EditableDeleteableComponentProps } from './editable';
 import { DirtyComponent, defaultDirtyProps } from './dirty-component';
 import {DraggableComponent, DroppableContext} from '~/utils/components/base/draggable-list';
 import { DragMoveIcon } from '../icons/icons';
@@ -160,7 +160,7 @@ export const EditTimelineItems = () => {
 	</>
 }
 
-type EditRestorationItemProps = EditableComponentProps<RestorationTimelineItem>
+type EditRestorationItemProps = EditableDeleteableComponentProps<RestorationTimelineItem>
 const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorationItemProps) => {
 	const changePropertyItem = useChangeProperty<RestorationTimelineItem>(onSaveProp);
 

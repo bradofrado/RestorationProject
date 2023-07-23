@@ -41,7 +41,7 @@ interface RenderPageProps {
 	page: EventPage
 }
 export const RenderPage = ({page}: RenderPageProps) => {
-	const {title, description, settings} = page;
+	const {settings} = page;
 	return <>
 		<CustomComponents items={settings.map((setting, i) => ({type: setting.component, data: setting.data, id: i}))}/>
 	</>
