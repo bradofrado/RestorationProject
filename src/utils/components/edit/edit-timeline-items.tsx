@@ -204,7 +204,7 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 			<Input include={Label} label="Subcategory" className="my-1" value={propItem.subcategory || ''} inputClass="w-full" onChange={value => changePropertyItem(propItem, "subcategory", value || null)}/>
 			<Label label="Links" className="my-1">
 				<AddRemove items={propItem.links} onAdd={onAddLink} custom
-					container={DroppableContext<string>} id={`links-${propItem.id}`} onReorder={(links: string[]) => changePropertyItem(propItem, 'links', links)}>
+					container={DroppableContext<string>} id={`links-${propItem.id}`} onReorder={(links: string[]) => changePropertyItem(propItem, 'links', links)} className="flex flex-col gap-2">
 					{(link: string, i: number, Wrapper) => (
 						<DraggableComponent id={`${i}`} index={i}>
 							<Wrapper onDelete={() => onDeleteLink(i)} icons={[{icon: DragMoveIcon}]}>

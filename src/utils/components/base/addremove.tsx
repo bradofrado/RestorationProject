@@ -26,7 +26,9 @@ const AddRemove = <C extends React.ElementType, T>(props: AddRemoveProps<C, T>) 
 	const rendered = container ? <Component {...props}>{itemElements}</Component> :
 		itemElements
 	return <>
-		{rendered}
+		<div className="flex flex-col gap-2">
+			{rendered}
+		</div>
 		<div>
 			<Button mode="secondary" className="my-1" onClick={onAdd}>
 				+

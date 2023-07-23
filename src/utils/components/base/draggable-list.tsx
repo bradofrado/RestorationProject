@@ -3,7 +3,7 @@ import Button from '~/utils/components/base/button';
 import { Draggable, DragDropContext, Droppable, type DroppableProps, type DraggableProps, type DropResult } from "react-beautiful-dnd";
 import { type Replace, type ReplaceWithName } from '~/utils/utils';
 
-export const DroppableComponent = ({ children, ...props }: Replace<DroppableProps, 'children', React.ReactNode>) => {
+export const DroppableComponent = ({ children, className, ...props }: Replace<DroppableProps, 'children', React.ReactNode> & {className?: string}) => {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -24,6 +24,7 @@ export const DroppableComponent = ({ children, ...props }: Replace<DroppableProp
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
+          className={className}
         >
       {children}
       {provided.placeholder}
@@ -53,9 +54,10 @@ type DroppableContextProps<T> = {
   onReorder: (items: T[]) => void,
   id: string,
   children: React.ReactNode,
-  items: T[]
+  items: T[],
+  className?: string
 }
-export const DroppableContext = <T,>({onReorder, id, children, items}: DroppableContextProps<T>) => {
+export const DroppableContext = <T,>({onReorder, id, children, items, className}: DroppableContextProps<T>) => {
   const handleOnDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const copy = [...items];
@@ -66,7 +68,7 @@ export const DroppableContext = <T,>({onReorder, id, children, items}: Droppable
   }
   return <>
   <DragDropContext onDragEnd={handleOnDragEnd}>
-    <DroppableComponent droppableId={id}>
+    <DroppableComponent droppableId={id} className={className}>
       {children}
     </DroppableComponent>
   </DragDropContext>
