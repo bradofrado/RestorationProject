@@ -16,7 +16,7 @@ import {PopoverIcon} from '~/utils/components/base/popover';
 import { NumberInput } from '../base/input'
 import Label from '../base/label';
 import ColorPicker from '../base/color-picker'
-import { HexColorSchema } from '~/utils/types/colors'
+import { type HexColor, HexColorSchema } from '~/utils/types/colors'
 import Paragraph, { type ParagraphProps } from '../base/paragraph'
 import {HeaderSettingsSchema} from '~/utils/components/base/header';
 import {CheckboxInput} from '~/utils/components/base/input';
@@ -24,6 +24,8 @@ import {CheckboxInput} from '~/utils/components/base/input';
 const Placeholder = ({children}: React.PropsWithChildren) => {
 	return <div className="text-gray-400">{children}</div>
 }
+
+const defaultColors: HexColor[] = ['#ad643a', '#f1635c', '#111827']
 
 type EditableDataComponent = EditableDeleteableComponentProps<EditableData> & DataComponent;
 interface DataComponent {
@@ -67,7 +69,7 @@ const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({on
 			<SettingsComponentCallout data={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}>
 				{({dotColor: color}, changeSetting) => <>
 					<Label label="Dot Color" sameLine>
-						<ColorPicker className="m-auto" value={color} onChange={value => changeSetting('dotColor', value)}/>
+						<ColorPicker className="m-auto" value={color} onChange={value => changeSetting('dotColor', value)} defaultColors={defaultColors}/>
 					</Label>
 				</>}
 			</SettingsComponentCallout>
@@ -211,7 +213,8 @@ const SettingsComponentCallout = <T extends SettingsComponentSettings>({data, on
 				<NumberInput inputClass="w-[4rem]" value={margin} onChange={value => changeSetting(data, 'margin', value)} min={0}/>
 			</Label>
 			<Label label="Color" sameLine>
-				<ColorPicker className="m-auto" value={color} onChange={value => changeSetting(data, 'color', value)}/>
+				<ColorPicker className="m-auto" value={color} onChange={value => changeSetting(data, 'color', value)}
+					defaultColors={defaultColors}/>
 			</Label>
 			{children && children(rest, (key, value) => changeSetting(data, key, value))}
 		</div>

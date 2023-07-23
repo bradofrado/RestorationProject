@@ -48,7 +48,29 @@ export const EditPages = ({setId}: EditPagesProps) => {
 	}
 
 	const onAddPage = () => {
-		setCurrPage({id: '', url: "new-url", title: "Book of Mormon Translation", description: "Text", settings: []});
+		const settings: ComponentSettings[] = [
+			{
+				id: -1,
+				component: 'Header',
+				pageId: '',
+				order: 0,
+				data: {
+					content: 'New Page Header',
+					properties: JSON.stringify({margin: 0, color: '#ad643a', level: 1})
+				}
+			},
+			{
+				id: -2,
+				component: 'Paragraph',
+				pageId: '',
+				order: 1,
+				data: {
+					content: 'This is a description',
+					properties: JSON.stringify({margin: 0, color: '#000'})
+				}
+			},
+		]
+		setCurrPage({id: '', url: "new-url", title: "Book of Mormon Translation", description: "Text", settings});
 	}
 
 	const onSave = (isNew: boolean) => {

@@ -1,22 +1,32 @@
 import React from 'react';
 import { type PolymorphicCustomProps } from '~/utils/types/polymorphic';
 import { type ReplaceWithName } from '~/utils/utils';
+import { useStateUpdate } from '../hooks/hooks';
 type InputProps = React.PropsWithChildren & {
 	onChange?: (value: string) => void,
+    onBlur?: (value: string) => void,
     value?: string | number | readonly string[] | undefined,
     inputClass?: string,
     type?: React.HTMLInputTypeAttribute,
     required?: boolean
 }
 type TextProps<C extends React.ElementType> = PolymorphicCustomProps<C, InputProps, {include?: C}>
-const Input = <T extends React.ElementType>({children, onChange, value, include, required, inputClass, type="input", ...rest}: TextProps<T>) => {
+const Input = <T extends React.ElementType>({children, onChange, onBlur, value, include, required, inputClass, type="input", ...rest}: TextProps<T>) => {
+    const [tempValue, setTempValue] = useStateUpdate(value);
     const Component = include || 'div';
     const props = {
         className: `${inputClass || ''} rounded-md border border-gray-200 px-3 py-1.5 text-gray-900 shadow-sm placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-light sm:text-sm sm:leading-6 focus-visible:outline-none focus:outline-none focus:border-gray-200`,
-        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange && onChange(e.target.value),
-        required
+        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            if (onChange) {
+                onChange(e.target.value);
+            } 
+            setTempValue(e.target.value);
+        },
+        onBlur: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onBlur && onBlur(e.target.value),
+        required,
+        value: tempValue
     }
-    const input = type == "textarea" ? <textarea {...props} value={value}></textarea> : <input {...props} value={value} type={type}/>
+    const input = type == "textarea" ? <textarea {...props}></textarea> : <input {...props} type={type}/>
     if (include) {
         return <Component {...rest}>{input}{children}</Component>
     }
