@@ -2,12 +2,8 @@
 	margin-bottom: 1rem;
 	display: grid;
 	grid-template-columns: minmax(25%,min-content) auto;
+	--bom-color: var(--primary-color);
 }
-
-/* .condensed-timeline-container p {
-	font-size: 1.25em;
-  line-height: 1.75rem;
-} */
 
 .condensed-timeline-row {
 	display: contents;
@@ -54,5 +50,5 @@
 	width: 0.5rem;
 	border-radius: 0.5rem;
 	--tw-bg-opacity: 1;
-	background-color: rgb(251 113 133 / var(--tw-bg-opacity));
+	background-color: var(--bom-color);
 }

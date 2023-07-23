@@ -30,7 +30,7 @@ const EventPage = ({eventId} : {eventId: string}) => {
 	}
 	
 	return <Layout>
-		<div className="max-w-4xl px-4 mx-auto sm:px-24 mb-10">
+		<div className="max-w-4xl px-4 mx-auto sm:px-24 mb-10 w-full">
 			<Link href="/timeline" className="text-xs italic font-bold text-gray-600 no-underline uppercase hover:text-gray-800">&lt; Back to timeline</Link>
 			<RenderPage page={query.data}/>
 		</div>
@@ -41,16 +41,10 @@ interface RenderPageProps {
 	page: EventPage
 }
 export const RenderPage = ({page}: RenderPageProps) => {
-	const {title, description, settings} = page;
-	return <>
-		<h1 className="mx-auto text-3xl font-bold my-5 text-bom">{title}</h1>
-		<div>
-			<p>
-				{description}
-			</p>
-		</div>
+	const {settings} = page;
+	return <div className="w-full px-2 py-6 sm:px-0">
 		<CustomComponents items={settings.map((setting, i) => ({type: setting.component, data: setting.data, id: i}))}/>
-	</>
+	</div>
 }
 
 export default Event_page;

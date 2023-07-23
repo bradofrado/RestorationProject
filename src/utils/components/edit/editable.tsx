@@ -17,12 +17,15 @@ export interface DeletableComponentProps {
 	onDelete: () => void
 }
 
-export interface EditableComponentProps<T> extends DeletableComponentProps {
+export interface EditableComponentProps<T> {
 	onEdit: (data: T) => void,
 	data: T 
 }
 
+export interface EditableDeleteableComponentProps<T> extends EditableComponentProps<T>, DeletableComponentProps {}
+
 export type EditableComponent<T> = React.ComponentType<EditableComponentProps<T>>
+export type EditableDeleteableComponent<T> = React.ComponentType<EditableDeleteableComponentProps<T>>
 
 export type ButtonIcon = {
 	icon: IconComponent,
@@ -37,14 +40,14 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 	const render = wrapped ? children : <Component {...rest} contentEditable={editable} suppressContentEditableWarning>{children}</Component>
 	return <div className="relative"> 
 		
-		<div className="hover:bg-sky-200/50 p-2 rounded-md peer">
+		<div className="hover:bg-sky-200/50 rounded-md peer">
 			{render}
 		</div>
 		<div className="transition-all peer-focus:opacity-100 peer-hover:opacity-100 opacity-0 invisible peer-focus:visible peer-hover:visible hover:visible hover:opacity-100 absolute -top-8 z-20">
 			{icons?.map((icon, i) => {
+				const className = i > 0 ? 'ml-1' : '';
 				if ("icon" in icon) {
 					const Icon = icon.icon;
-					const className = i > 0 ? 'ml-1' : '';
 					return <button className={`rounded-md bg-slate-50 hover:bg-slate-300 p-1 ${className}`}
 						onClick={icon.handler} key={i}
 						data-testid="editable-edit-icon"
@@ -52,7 +55,7 @@ function Editable<T extends React.ElementType>({children, as, icons, editable = 
 						<Icon className="h-5 w-5"/>
 					</button>
 				} else {
-					return <span key={i} data-testid="editable-edit-icon">{icon}</span>;
+					return <span key={i} data-testid="editable-edit-icon" className={className}>{icon}</span>;
 				}
 			})}
 		</div>

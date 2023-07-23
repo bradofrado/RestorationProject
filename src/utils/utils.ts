@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import { type HexColor } from './types/colors';
+import { z } from 'zod';
 
 export const DateFormat = {
 	fullText: (date: Date) => {
@@ -41,14 +43,42 @@ export const groupByDistinct = function<T extends Pick<T, K>, K extends keyof T>
 	}, {})
 }
 
+interface Settings {
+	margin?: number,
+	color?: HexColor
+}
+export const setStyleFromSettings = (settings: Settings): React.CSSProperties => {
+	const margin = (m: number | undefined) => {
+		return m ? `${m/4}rem` : undefined;
+	}
+	return {
+		paddingTop: margin(settings.margin),
+		paddingBottom: margin(settings.margin),
+		color: settings.color
+	}
+}
+
+export const jsonParse = <T>(schema: z.ZodType<T>) => z.string()
+.transform( ( str, ctx ): z.infer<typeof schema> => {
+	try {
+		return schema.parse(JSON.parse( str ))
+	} catch ( e ) {
+		ctx.addIssue( { code: 'custom', message: 'Invalid JSON' } )
+		return z.NEVER
+	}
+} )
+
 export const useChangeProperty = <T,>(func: (item: T) => void) => {
-	return <K extends keyof T>(item: T, key: K, value: T[K]): T => {
+	const ret = <K extends keyof T>(item: T, key: K, value: T[K]): T => {
 		const copy = {...item};
 		copy[key] = value;
 		func(copy);
 
 		return copy;
 	}
+	ret.function = func;
+
+	return ret;
 }
 export type ReplaceWithName<T, K extends keyof T, Q> = Omit<T, K> & Q
 export type Replace<T, K extends keyof T, Q> = ReplaceWithName<T, K, Record<K, Q>>

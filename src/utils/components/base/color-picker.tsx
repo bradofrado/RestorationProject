@@ -6,6 +6,7 @@ import { VisuallyHidden, useLocale } from 'react-aria';
 import {type ColorSliderProps} from '@react-types/color';
 import {type HexColor, HexColorSchema} from '~/utils/types/colors';
 import Popover from './popover';
+import Input from './input';
 
 const SIZE = 192;
 const FOCUSED_THUMB_SIZE = 28;
@@ -18,6 +19,10 @@ const getHslaColor = <T extends Color | HexColor>(value: PickerColor<T>): Color 
 
 const colorToHex = (value: Color): HexColor => {
   return HexColorSchema.parse(value.toString('hexa'));
+}
+
+const hexToColor = (value: HexColor): Color => {
+  return parseColor(value);
 }
 
 type PickerColor<T extends Color | HexColor> = T;
@@ -50,7 +55,8 @@ function ColorArea(props: ColorAreaProps) {
         width: SIZE,
         height: SIZE,
         borderRadius: BORDER_RADIUS,
-        opacity: isDisabled ? 0.3 : undefined
+        opacity: isDisabled ? 0.3 : undefined,
+        margin: 'auto'
       }}
     >
       <div
@@ -87,7 +93,9 @@ function ColorArea(props: ColorAreaProps) {
 }
 
 type ColorSwatchProps<T extends Color | HexColor> = {
-  value: PickerColor<T>
+  value: PickerColor<T>,
+  onClick?: () => void,
+  className?: string
 } & React.ComponentPropsWithoutRef<'div'>
 function ColorSwatch <T extends Color | HexColor>(props: ColorSwatchProps<T>) {
   const {
@@ -100,9 +108,10 @@ function ColorSwatch <T extends Color | HexColor>(props: ColorSwatchProps<T>) {
   return (
     <div
       role="img"
-      className="inline-block rounded-sm relative w-10 h-10 overflow-hidden"
+      className={`inline-block rounded-sm relative w-10 h-10 overflow-hidden ${props.className || ''}`}
       aria-label={valueString}
       {...otherProps}
+      onClick={props.onClick}
     >
       <div className="absolute w-full h-full bg-white" />
       <div
@@ -114,7 +123,7 @@ function ColorSwatch <T extends Color | HexColor>(props: ColorSwatchProps<T>) {
   );
 }
 
-function ColorSlider(props: ColorSliderProps) {
+function ColorSlider(props: ColorSliderProps & {preview?: boolean}) {
   const { locale } = useLocale();
   const state = useColorSliderState({ ...props, locale });
   const trackRef = React.useRef(null);
@@ -139,15 +148,15 @@ function ColorSlider(props: ColorSliderProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: SIZE
+        width: '100%'
       }}
     >
       {/* Create a flex container for the label and output element. */}
       <div style={{ display: 'flex', alignSelf: 'stretch' }}>
         <label {...labelProps}>{label}</label>
-        <output {...outputProps} style={{ flex: '1 0 auto', textAlign: 'end' }}>
+        {props.preview && <output {...outputProps} style={{ flex: '1 0 auto', textAlign: 'end' }}>
           {state.value.formatChannelValue(props.channel, locale)}
-        </output>
+        </output>}
       </div>
       {/* The track element holds the visible track line and the thumb. */}
       <div
@@ -209,12 +218,14 @@ function ColorSlider(props: ColorSliderProps) {
 
 type ColorPickerProps<T extends Color | HexColor> = {
   value: PickerColor<T>,
-  onChange: (color: PickerColor<T>) => void
+  onChange: (color: PickerColor<T>) => void,
+  className?: string
 }
 type ColorPickerFullProps<T extends Color | HexColor> = {
-  preview?: boolean | "true" | "false"
+  preview?: boolean | "true" | "false",
+  defaultColors?: HexColor[]
 } & ColorPickerProps<T>;
-export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, preview=true}: ColorPickerFullProps<T>) => {
+export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, preview=true, defaultColors}: ColorPickerFullProps<T>) => {
   const color = getHslaColor(value);
   const isHex = typeof value == 'string';
 
@@ -227,6 +238,14 @@ export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, pr
   const onColorChange = (color: Color) => {
     const value = (isHex ? colorToHex(color) : color) as T;
     onChange(value);
+  }
+
+  const onInput = (value: string) => {
+    try {
+      onColorChange(hexToColor(HexColorSchema.parse(value)))
+    } catch {
+
+    }
   }
   return (
     <>
@@ -244,12 +263,18 @@ export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, pr
             gap: '1rem'
           }}
         >
-          <ColorArea
-            value={color}
-            onChange={onColorChange}
-            xChannel={sChannel}
-            yChannel={lChannel}
-          />
+          <div className="flex flex-row">
+            <ColorArea
+              value={color}
+              onChange={onColorChange}
+              xChannel={sChannel}
+              yChannel={lChannel}
+            />
+            {defaultColors && <div className="flex flex-col ml-1 gap-1">
+              {defaultColors.map((color, i) => <ColorSwatch value={color} key={i} onClick={() => onColorChange(hexToColor(color))}/>)}
+            </div>}
+          </div>
+          <Input className="w-full" value={colorToHex(color)} onBlur={onInput} />
           <ColorSlider
             channel={hChannel}
             value={color}
@@ -291,10 +316,10 @@ export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, pr
   );
 }
 
-const ColorPicker = <T extends Color | HexColor>({value, onChange}: ColorPickerProps<T>) => {
+const ColorPicker = <T extends Color | HexColor>({value, onChange, className, defaultColors}: ColorPickerProps<T> & {defaultColors?: HexColor[]}) => {
   return <>
-    <Popover button={<ColorSwatch value={value} aria-label={`current color swatch: ${value.toString('rgb')}`}/>}>
-      <ColorPickerFull value={value} onChange={onChange} preview="false"/>    
+    <Popover className={className} button={<ColorSwatch value={value} aria-label={`current color swatch: ${value.toString('rgb')}`}/>}>
+      <ColorPickerFull value={value} onChange={onChange} preview="false" defaultColors={defaultColors}/>    
     </Popover>
   </>
 }

@@ -1,16 +1,23 @@
 import { type RestorationTimelineItem } from "~/utils/types/timeline";
 import { DateFormat } from "~/utils/utils";
 import { useAnnotationLink } from "../edit/add-component";
+import { type HexColor } from "~/utils/types/colors";
+import { useEffect, useRef } from "react";
 
 
 export interface CondensedTimelineProps {
 	items: RestorationTimelineItem[],
-	className?: string
+	className?: string,
+	color?: HexColor
 }
 
-const CondensedTimeline : React.FC<CondensedTimelineProps> = ({items, className}: CondensedTimelineProps) => {
+const CondensedTimeline : React.FC<CondensedTimelineProps> = ({items, className, color}: CondensedTimelineProps) => {
+	const ref = useRef<HTMLUListElement>(null);
+	useEffect(() => {
+		color && ref.current?.style.setProperty('--bom-color', color);
+	}, [color])
 	return <>
-		<ul className={`condensed-timeline-container pt-5 ${className || ''}`}>
+		<ul className={`condensed-timeline-container ${className || ''}`} ref={ref}>
 			{items.map((item, i) => <TimelineRow item={item} key={i} />)}
 		</ul>
 	</>

@@ -7,7 +7,6 @@ import {useComponentSettingsMutation, useEventPagesMutation, useGetPages} from '
 import {type EventPage, type ComponentSettings, type EditableData} from '~/utils/types/page';
 import Input from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
-import Editable from '~/utils/components/edit/editable';
 import AddComponent, { type EditableComponentType } from '~/utils/components/edit/add-component';
 import {type ComponentType, CustomComponents} from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
@@ -49,7 +48,29 @@ export const EditPages = ({setId}: EditPagesProps) => {
 	}
 
 	const onAddPage = () => {
-		setCurrPage({id: '', url: "new-url", title: "Book of Mormon Translation", description: "Text", settings: []});
+		const settings: ComponentSettings[] = [
+			{
+				id: -1,
+				component: 'Header',
+				pageId: '',
+				order: 0,
+				data: {
+					content: 'New Page Header',
+					properties: JSON.stringify({margin: 0, color: '#ad643a', level: 1})
+				}
+			},
+			{
+				id: -2,
+				component: 'Paragraph',
+				pageId: '',
+				order: 1,
+				data: {
+					content: 'This is a description',
+					properties: JSON.stringify({margin: 0, color: '#000'})
+				}
+			},
+		]
+		setCurrPage({id: '', url: "new-url", title: "Book of Mormon Translation", description: "Text", settings});
 	}
 
 	const onSave = (isNew: boolean) => {
@@ -182,14 +203,8 @@ const EditablePage = ({page, setPage, isNew, createSetting, updateSetting, delet
 		!isNew && reorderSettings(page.settings);
 	}
 
-	const settings = page.settings.slice().sort((a, b) => a.order - b.order);
+	const settings = page.settings;//.slice().sort((a, b) => a.order - b.order);
 	return <>
-			<Editable as="h1" className="mx-auto text-3xl font-bold my-5 text-bom" onBlur={(e: React.FocusEvent<HTMLHeadingElement>) => setPage({...page, title: e.target.innerHTML})}>
-				{page.title}
-			</Editable>
-			<Editable as="p" onBlur={(e: React.FocusEvent<HTMLParagraphElement>) => setPage({...page, description: e.target.innerHTML})}>
-				{page.description}
-			</Editable>
 			<CustomComponents isNew={isNew} editable={true} onReorder={onReorder}
 				items={settings.map((editable: ComponentSettings) => ({id: editable.id, type: editable.component, onDelete: () => deleteComponent(editable.id), onEdit: (data: EditableData) => onEdit(data, editable.id), data: editable.data}))}/>
 			<AddComponent onAdd={onAdd}/>
