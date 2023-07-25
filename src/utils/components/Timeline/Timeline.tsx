@@ -6,7 +6,7 @@ import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
 import {type TimelineCategory, type TimelineItemStandalone} from '~/utils/types/timeline';
 import { useGetPageUrl } from 'src/utils/services/EventPageService';
-import Button from '../base/button';
+import Button from '../base/buttons/button';
 import Label from '../base/label';
 import Header from '../base/header';
 import { Annotation } from './CondensedTimeline';

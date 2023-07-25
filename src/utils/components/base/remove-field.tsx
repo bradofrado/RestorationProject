@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '~/utils/components/base/button';
+import Button from '~/utils/components/base/buttons/button';
 import {RemoveIcon} from '~/utils/components/icons/icons';
 type RemoveFieldProps = {
 	value: boolean,

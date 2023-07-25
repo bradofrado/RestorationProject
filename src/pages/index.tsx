@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Link from "next/link";
-import Button from "~/utils/components/base/button";
+import Button from "~/utils/components/base/buttons/button";
 
 const Index: NextPage = () => {
  return (

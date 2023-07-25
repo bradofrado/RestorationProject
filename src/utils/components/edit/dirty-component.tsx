@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { type EditableDeleteableComponent } from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
-import Button from '~/utils/components/base/button';
+import Button from '~/utils/components/base/buttons/button';
 type DirtComponentOtherProps = {
     showCancel?: boolean,
     overrideDelete?: boolean,

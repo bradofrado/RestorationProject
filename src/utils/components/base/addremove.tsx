@@ -1,7 +1,7 @@
 import React from 'react';
 import Editable from '~/utils/components/edit/editable';
 import {type ButtonIcon} from '~/utils/components/edit/editable';
-import Button from '~/utils/components/base/button';
+import Button from '~/utils/components/base/buttons/button';
 import {DeleteIcon} from '~/utils/components/icons/icons';
 import { type PolymorphicCustomProps } from '~/utils/types/polymorphic';
 import { type IfElse } from '~/utils/utils';

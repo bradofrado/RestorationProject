@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Dropdown, { type DropdownItem, type ItemAction } from "../base/dropdown";
-import Button from "../base/button";
+import Button from "../base/buttons/button";
+import ConfirmButton from "../base/buttons/confirmbutton";
 
 type EditItemsAction = (isNew: boolean) => void;
 type EditItemsButtonsProps<T> = {
@@ -39,7 +40,8 @@ const EditItemsButtons = <T,>({items, value, onAdd, onSave, onClear, onDelete, o
 				<Button onClick={onAction(onAdd, true)} mode="secondary">Add</Button> : 
 				(<>
 					<Button className="mr-1" onClick={onAction(onSave, false)}>Save</Button>
-					{!isNew && <Button className="mr-1" onClick={onAction(onDelete, false)} mode="secondary">Delete</Button>}
+					{!isNew && <ConfirmButton className="mr-1" onConfirm={onAction(onDelete, false)} mode="secondary" 
+						header="Confirm deletion" message="Are you sure you want to delete this item?">Delete</ConfirmButton>}
 					<Button onClick={onAction(onClear, false)} mode="secondary">Clear</Button>
 				</>)}
 		</span>
