@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from 'react';
-import Button from '~/utils/components/base/button';
+import Button from '~/utils/components/base/buttons/button';
 import { Draggable, DragDropContext, Droppable, type DroppableProps, type DraggableProps, type DropResult } from "react-beautiful-dnd";
 import { type Replace, type ReplaceWithName } from '~/utils/utils';
 

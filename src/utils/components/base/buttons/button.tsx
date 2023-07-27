@@ -1,8 +1,8 @@
 import React from 'react';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 
-type ButtonType = 'primary' | 'secondary' | 'other'
-type ButtonProps = {
+export type ButtonType = 'primary' | 'secondary' | 'other'
+type ButtonPropsInner = {
     mode?: 'primary' | 'secondary',
     className?: string,
 	backgroundColor?: string
@@ -11,8 +11,8 @@ type ButtonProps = {
 	backgroundColor: string,
 	className?: string
 }
-type TextProps<C extends React.ElementType> = PolymorphicComponentProps<C, ButtonProps>
-const Button = <T extends React.ElementType>({children, as, mode = 'primary', backgroundColor, className, ...rest}: TextProps<T>) => {
+export type ButtonProps<C extends React.ElementType> = PolymorphicComponentProps<C, ButtonPropsInner>
+const Button = <T extends React.ElementType>({children, as, mode = 'primary', backgroundColor, className, ...rest}: ButtonProps<T>) => {
     const Component = as || 'button';
 	const buttonClasses: {[key in ButtonType]: string} = {
 		'primary': 'bg-primary text-white hover:bg-opacity-80 focus-visible:outline-primary-light',

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React from 'react';
 import {useEffect, useState} from 'react';
 import {type DropdownItem} from '~/utils/components/base/dropdown';
-import Button from '~/utils/components/base/button';
+import Button from '~/utils/components/base/buttons/button';
 import {useComponentSettingsMutation, useEventPagesMutation, useGetPages} from '~/utils/services/EventPageService';
 import {type EventPage, type ComponentSettings, type EditableData} from '~/utils/types/page';
 import Input from '~/utils/components/base/input';

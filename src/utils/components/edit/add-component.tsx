@@ -223,7 +223,7 @@ const SettingsComponentCallout = <T extends SettingsComponentSettings>({data, on
 
 const EditableHeader: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
 	const settings = useParseSettings(data.properties, HeaderSettingsSchema, {level: 2});
-	const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null})
+	const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: data.properties})
 	const icons: ButtonIcon[] = [
 		<PopoverIcon icon={AdjustIcon} key={0}>
 			<HeaderSettingsComponent settings={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}/>
@@ -249,7 +249,7 @@ const ParagraphSettingsCallout: EditableComponent<SettingsComponentSettings> = (
 }
 const EditableParagraph: React.ComponentType<EditableDataComponent> = ({onDelete, onEdit, data}) => {
 	const settings = useParseSettings(data.properties, SettingsComponentSettingsSchema, {});
-	const onBlur = (e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: null});
+	const onBlur = (e: React.FocusEvent<HTMLParagraphElement>) => e.target.innerHTML !== data?.content && onEdit({content: e.target.innerHTML, properties: data.properties});
 	const icons: ButtonIcon[] = [
 		<PopoverIcon icon={AdjustIcon} key={0}>
 			<ParagraphSettingsCallout data={settings} onEdit={settings => onEdit({content: data.content, properties: JSON.stringify(settings)})}/>
