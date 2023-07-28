@@ -122,43 +122,12 @@ export const pageRouter = createTRPCRouter({
 	createSetting: criticalProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
-			const setting: ComponentSettings = await ctx.prisma.componentSettings.create({
-				data: {
-					data: {create: input.data},
-					component: input.component,
-					order: input.order,
-					page: {
-						connect: {id: input.pageId}
-					}
-				},
-				include: {
-					data: true
-				}
-			}) as ComponentSettings;
-
-			return setting;
+			return await createSetting(input, ctx.prisma);
 		}),
 	updateSetting: criticalProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
-			const setting: ComponentSettings = await ctx.prisma.componentSettings.update({
-				data: {
-					data: {update: input.data},
-					component: input.component,
-					order: input.order,
-					page: {
-						connect: {id: input.pageId}
-					}
-				},
-				include: {
-					data: true
-				},
-				where: {
-					id: input.id
-				}
-			}) as ComponentSettings
-
-			return setting;
+			return await updateSetting(input, ctx.prisma);
 		}),
 	updateSettingOrder: criticalProcedure
 		.input(z.array(z.object({id: z.number(), order: z.number()})))
@@ -185,3 +154,42 @@ export const pageRouter = createTRPCRouter({
 			});
 		}),
 });
+
+export const createSetting = async (input: ComponentSettings, db: Db) => {
+	const setting: ComponentSettings = await db.componentSettings.create({
+		data: {
+			data: {create: input.data},
+			component: input.component,
+			order: input.order,
+			page: {
+				connect: {id: input.pageId}
+			}
+		},
+		include: {
+			data: true
+		}
+	}) as ComponentSettings;
+
+	return setting;
+}
+
+export const updateSetting = async (input: ComponentSettings, db: Db) => {
+	const setting: ComponentSettings = await db.componentSettings.update({
+		data: {
+			data: {update: input.data},
+			component: input.component,
+			order: input.order,
+			page: {
+				connect: {id: input.pageId}
+			}
+		},
+		include: {
+			data: true
+		},
+		where: {
+			id: input.id
+		}
+	}) as ComponentSettings
+
+	return setting;
+}

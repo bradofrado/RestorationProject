@@ -2,11 +2,12 @@ import { Action, ActionComponentAdd, ActionComponentEdit, ActionError, ActionTyp
 import {useComponentSettingsMutation} from '~/utils/services/EventPageService';
 import {EventPage, ComponentSettings} from '~/utils/types/page';
 import {useChangeProperty} from '~/utils/utils';
+import { api } from "../api";
 
 export const useCreateAction = () => {
-    return {
-        mutate: (action: Action) => undefined
-    }
+    const createAction = api.action.createAction.useMutation();
+    
+    return createAction;
 }
 
 const usePageAction = (pages: EventPage[]) => {

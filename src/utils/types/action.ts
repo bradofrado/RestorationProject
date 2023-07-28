@@ -39,6 +39,7 @@ type ActionBase = {
 	id?: number
 }
 
+
 export type ActionComponentEdit = {
 	scope: ActionScope.Component,
 	type: ActionType.Edit,
@@ -51,5 +52,7 @@ export type ActionComponentAdd = {
 	payload: ComponentSettings
 }
 
+export type ActionComponent = ActionComponentEdit | ActionComponentAdd;
 
-export type Action = ActionComponentEdit | ActionComponentAdd
+
+export type Action = ActionComponent
