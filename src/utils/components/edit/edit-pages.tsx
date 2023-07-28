@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {type DropdownItem} from '~/utils/components/base/dropdown';
 import Button from '~/utils/components/base/buttons/button';
 import {useComponentSettingsMutation, useEventPagesMutation, useGetPages} from '~/utils/services/EventPageService';
@@ -10,26 +10,16 @@ import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import AddComponent, { type EditableComponentType } from '~/utils/components/edit/add-component';
 import {type ComponentType, CustomComponents} from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
+import { type Action, ActionScope, ActionType } from '~/utils/types/action';
+import { useCreateAction } from '~/utils/services/action-service';
 
 export type EditPagesProps = {
 	id: string | undefined,
 	setId: (id: string | undefined) => void
 }
-export const EditPages = ({setId}: EditPagesProps) => {
-	const [currPage, setCurrPage] = useState<EventPage>();
-	const {create, update, deletem} = useEventPagesMutation();
-	const {create: createSetting, update: updateSetting, deletem: deleteSetting, reorder: reorderSetting} = useComponentSettingsMutation();
+export const EditPages = ({}: EditPagesProps) => {
 	const query = useGetPages();
-
-	let pages: EventPage[] | null = null;
-
-	useEffect(() => {
-		const data = create.data || update.data;
-		if (data) {
-			setId(data.id);
-		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [create.data, update.data])
+	const createAction = useCreateAction();
 
 	if (query.isLoading) {
 		return <div>Loading...</div>
@@ -38,12 +28,28 @@ export const EditPages = ({setId}: EditPagesProps) => {
 	if (query.isError) {
 		return <div>Error: {query.error.message}</div>
 	}
+
+	const onAction = (action: Action) => {
+		createAction.mutate(action);
+	}
 	
-	pages = query.data;
+	return <>
+		<EditPagesRender pages={query.data} onAction={onAction}/>
+	</>
+}
+
+type EditPagesRenderProps = {
+	pages: EventPage[],
+	onAction: (action: Action) => void
+}
+const EditPagesRender = ({pages, onAction}: EditPagesRenderProps) => {
+	const [currPage, setCurrPage] = useState<EventPage>();
+	const {create, update, deletem} = useEventPagesMutation();
+	const {deletem: deleteSetting, reorder: reorderSetting} = useComponentSettingsMutation();
+
 	const items: DropdownItem<string>[] = pages.map(page => ({name: page.url, id: page.id }));
 
 	const onChange = (item: DropdownItem<string>, index: number) => {
-		setId(item.id);
 		setCurrPage(pages && pages[index] || undefined);
 	}
 
@@ -76,7 +82,6 @@ export const EditPages = ({setId}: EditPagesProps) => {
 	const onSave = (isNew: boolean) => {
 		if (currPage) {
 			isNew ? create.mutate(currPage) : update.mutate(currPage)
-			setId(currPage.id);
 			alert("Page saved!")
 		}
 	}
@@ -85,7 +90,6 @@ export const EditPages = ({setId}: EditPagesProps) => {
 		if (currPage && !isNew) {
 			deletem.mutate(currPage.id);
 			setCurrPage(undefined);
-			setId(undefined);
 		}
 	}
 
@@ -111,8 +115,10 @@ export const EditPages = ({setId}: EditPagesProps) => {
 							<Button as={Link} href={`/${currPage.url}`} className="ml-1">Go</Button>
 						</div>
 						<EditablePage page={currPage} setPage={setCurrPage} isNew={isNew} 
-							createSetting={createSetting.mutate} updateSetting={updateSetting.mutate} 
-							deleteSetting={deleteSetting.mutate} reorderSettings={reorderSetting.mutate}
+							createSetting={setting => onAction({type: ActionType.Add, scope: ActionScope.Component, payload: setting})} 
+							updateSetting={setting => onAction({type: ActionType.Edit, scope: ActionScope.Component, payload: setting})} 
+							deleteSetting={deleteSetting.mutate} 
+							reorderSettings={reorderSetting.mutate}
 						/>
 						</>}
 					</>}
