@@ -84,7 +84,7 @@ const createPage = async ({input, db}: {input: EventPage, db: Db}) => {
 export const pageRouter = createTRPCRouter({
 	getPages: publicProcedure
 		.query(async ({ ctx }) => {
-			ctx.logger.info('GetPages', ctx.session?.user);
+			await ctx.logger.info('GetPages', ctx.session?.user);
 
 			const pages = await ctx.prisma.page.findMany({
 				include: { settings: {include: {data: true }}},
@@ -98,13 +98,13 @@ export const pageRouter = createTRPCRouter({
 	getPage: publicProcedure
 		.input(z.string())
 		.query(async ({ input, ctx }) => {
-			ctx.logger.info(`GetPage ${input}`, ctx.session?.user);
+			await ctx.logger.info(`GetPage ${input}`, ctx.session?.user);
 			
 			return await getPage({input, db: ctx.prisma})
 		}),
 	getPageNames: publicProcedure
 		.query(async ({ctx}) => {
-			ctx.logger.info('GetPageNames', ctx.session?.user);
+			await ctx.logger.info('GetPageNames', ctx.session?.user);
 
 			const pages = await ctx.prisma.page.findMany({
 				select: {url: true}
@@ -117,21 +117,21 @@ export const pageRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			input.id = ''; //autogenerate an id
 
-			ctx.logger.info(`CreatePage: ${JSON.stringify(input)}`, ctx.session.user);
+			await ctx.logger.info(`CreatePage: ${JSON.stringify(input)}`, ctx.session.user);
 
 			return await createPage({input, db: ctx.prisma})
 		}),
 	deletePage: editableProcedure
 		.input(z.string())
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`DeletePage: ${input}`, ctx.session.user);
+			await ctx.logger.info(`DeletePage: ${input}`, ctx.session.user);
 
 			await deletePage({input, db: ctx.prisma})
 		}),
 	updatePage: editableProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`UpdatePage: ${JSON.stringify(input)}`, ctx.session.user);
+			await ctx.logger.info(`UpdatePage: ${JSON.stringify(input)}`, ctx.session.user);
 
 			const page = await ctx.prisma.page.update({
 				data: {
@@ -152,7 +152,7 @@ export const pageRouter = createTRPCRouter({
 	createSetting: editableProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`CreateSetting: ${JSON.stringify(input)}`, ctx.session.user);
+			await ctx.logger.info(`CreateSetting: ${JSON.stringify(input)}`, ctx.session.user);
 
 			const setting = await ctx.prisma.componentSettings.create({
 				data: {
@@ -173,7 +173,7 @@ export const pageRouter = createTRPCRouter({
 	updateSetting: editableProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`UpdateSetting: ${JSON.stringify(input)}`, ctx.session.user);
+			await ctx.logger.info(`UpdateSetting: ${JSON.stringify(input)}`, ctx.session.user);
 
 			const setting = await ctx.prisma.componentSettings.update({
 				data: {
@@ -197,7 +197,7 @@ export const pageRouter = createTRPCRouter({
 	updateSettingOrder: editableProcedure
 		.input(z.array(z.object({id: z.number(), order: z.number()})))
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`UpdateSettingOrder: ${JSON.stringify(input)}`, ctx.session.user);
+			await ctx.logger.info(`UpdateSettingOrder: ${JSON.stringify(input)}`, ctx.session.user);
 
 			for (const inputItem of input) {
 				if (inputItem.id < 0) continue;
@@ -214,7 +214,7 @@ export const pageRouter = createTRPCRouter({
 	deleteSetting: editableProcedure
 		.input(z.number())
 		.mutation(async ({ctx, input}) => {
-			ctx.logger.info(`DeleteSetting: ${input}`, ctx.session.user);
+			await ctx.logger.info(`DeleteSetting: ${input}`, ctx.session.user);
 			
 			await ctx.prisma.componentSettings.update({
 				data: {

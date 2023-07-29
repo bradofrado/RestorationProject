@@ -11,10 +11,10 @@ export const logTypeSchema = z.enum(['WARN', 'ERROR', 'INFO']) satisfies z.Schem
 export type LoggingType = z.infer<typeof logTypeSchema>;
 
 export const logSchema = z.object({
-    user: userSchema.optional(),
+    user: userSchema.nullable(),
     date: z.date(),
     id: z.number(),
     type: logTypeSchema,
     message: z.string()
-}) satisfies z.Schema<ReplaceWithName<Omit<Prisma.LoggingGetPayload<typeof loggingArgs>, 'userId'>, 'user', {user?: User}>>
+}) satisfies z.Schema<ReplaceWithName<Omit<Prisma.LoggingGetPayload<typeof loggingArgs>, 'userId'>, 'user', {user: User | null}>>
 export type Log = z.infer<typeof logSchema>

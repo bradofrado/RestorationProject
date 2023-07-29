@@ -7,6 +7,7 @@ export const authRouter = createTRPCRouter({
     signup: publicProcedure
         .input(signupSchema)
         .mutation(async ({input, ctx}): Promise<User> => {
+            await ctx.logger.info(`Signup: ${JSON.stringify(input)}`);
             return await signup({input, db: ctx.prisma});
         }),
 })

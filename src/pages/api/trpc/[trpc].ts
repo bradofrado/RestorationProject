@@ -15,7 +15,7 @@ export default createNextApiHandler({
             `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
           );
         }
-      : ({path, error, ctx}) => {
-        ctx?.logger.error(`TRPC failed on ${path ?? '<no-path>'}: ${error.message}`, ctx.session?.user);
+      : async ({path, error, ctx}) => {
+        await ctx?.logger.error(`TRPC failed on ${path ?? '<no-path>'} with stack ${error.stack || '<no-stack>'}: ${error.message}`, ctx.session?.user);
       },
 });

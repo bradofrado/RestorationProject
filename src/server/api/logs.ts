@@ -2,7 +2,7 @@ import {type Log, type LoggingType} from '~/utils/types/logger';
 import { type User } from "~/utils/types/auth";
 import { type LoggerDAO } from '../dao/LogDAO';
 
-type LogMethod = (message: string, user: User | undefined) => void
+type LogMethod = (message: string, user?: User) => Promise<void>
 
 export interface ILogger {
     info: LogMethod,
@@ -13,7 +13,7 @@ export interface ILogger {
 export class MainLogger implements ILogger {
     constructor(private loggerDAO: LoggerDAO) {}
 
-    private createLog(type: LoggingType, message: string, user: User | undefined): Log {
+    private createLog(type: LoggingType, message: string, user: User | null): Log {
         return {
             date: new Date(),
             message,
@@ -22,30 +22,30 @@ export class MainLogger implements ILogger {
             id: -1
         }
     }
-    public info(message: string, user: User | undefined) {
+    public async info(message: string, user?: User) {
         console.log(message);
-        void this.loggerDAO.create(this.createLog('INFO', message, user));
+        await this.loggerDAO.create(this.createLog('INFO', message, user ?? null));
     }
-    public error(message: string, user: User | undefined) {
+    public async error(message: string, user?: User) {
         console.error(message);
-        void this.loggerDAO.create(this.createLog('ERROR', message, user));
+        await this.loggerDAO.create(this.createLog('ERROR', message, user ?? null));
     }
-    public warn(message: string, user: User | undefined) {
+    public async warn(message: string, user?: User) {
         console.warn(message);
-        void this.loggerDAO.create(this.createLog('WARN', message, user));
+        await this.loggerDAO.create(this.createLog('WARN', message, user ?? null));
     }
     
 }
 
 export class EmptyLogger implements ILogger {
     public info() {
-        return undefined;
+        return Promise.resolve();
     }
     public error() {
-        return undefined;
+        return Promise.resolve();
     }
     public warn() {
-        return undefined;
+        return Promise.resolve();
     }
     
 }
