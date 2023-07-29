@@ -18,10 +18,14 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 
 import { getServerAuthSession } from "~/server/auth";
+import { env } from "~/env.mjs";
 
 type CreateContextOptions = {
   session: Session | null;
 };
+
+const loggerDAO = new PrismaLoggerDAO(prisma);
+const logger = env.NODE_ENV == 'production' ? new MainLogger(loggerDAO) : new EmptyLogger();
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -36,7 +40,8 @@ type CreateContextOptions = {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-		prisma: prisma
+		prisma: prisma,
+    logger: logger
   };
 };
 
@@ -70,6 +75,8 @@ import { ZodError } from "zod";
 import { prisma } from "../db";
 import {type UserRole} from '~/utils/types/auth';
 import { isNotRole } from "~/utils/utils";
+import { PrismaLoggerDAO } from "../dao/LogDAO";
+import { EmptyLogger, MainLogger } from "./logs";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,

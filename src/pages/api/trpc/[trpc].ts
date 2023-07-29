@@ -15,5 +15,7 @@ export default createNextApiHandler({
             `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
           );
         }
-      : undefined,
+      : ({path, error, ctx}) => {
+        ctx?.logger.error(`TRPC failed on ${path ?? '<no-path>'}: ${error.message}`, ctx.session?.user);
+      },
 });

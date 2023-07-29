@@ -20,4 +20,11 @@ export const loginSchema = z.object({
 }) satisfies z.Schema<Pick<UserDB, 'email' | 'password'>>;
 export type Login = z.infer<typeof loginSchema>;
 
-export type User = Pick<UserDB, 'email' | 'name' | 'image' | 'id'> & {role: UserRole}
+export const userSchema = z.object({
+    email: z.string(),
+    name: z.string(),
+    image: z.string().nullable().optional(),
+    id: z.string(),
+    role: userRoleSchema
+}) satisfies z.Schema<Pick<UserDB, 'email' | 'name' | 'id'> & {role: UserRole, image?: string | null}>
+export type User = z.infer<typeof userSchema>
