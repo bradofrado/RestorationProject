@@ -98,3 +98,9 @@ export const isNotRole = <T,>(desiredRole: UserRole, transform?: (obj: T) => Use
 	}
 	return role != desiredRole && role != 'admin';
 }
+
+export const exclude = <T extends Pick<T, K>, K extends keyof T>(user: T, ...keys: K[]): Omit<T, K> => {
+	return Object.fromEntries(
+	  Object.entries<T>(user).filter(([key]) => !keys.includes(key as K))
+	) as Omit<T, K>
+  }

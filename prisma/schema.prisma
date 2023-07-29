@@ -69,6 +69,7 @@ model Page {
   description String
   settings    ComponentSettings[]
   categories  TimelineCategory[]
+  isDeleted   Boolean             @default(false)
 }
 
 model ComponentSettings {
@@ -78,6 +79,7 @@ model ComponentSettings {
   page           Page?        @relation(fields: [pageId], references: [id], onDelete: Cascade)
   pageId         String?
   order          Int          @default(0)
+  isDeleted   Boolean         @default(false)
 }
 
 model EditableData {
@@ -95,6 +97,7 @@ model TimelineCategory {
   pageId            String?
   color             String?
   items             TimelineItem[]
+  isDeleted   Boolean             @default(false)
 }
 
 model TimelineItem {
@@ -106,4 +109,5 @@ model TimelineItem {
   links       String
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
+  isDeleted   Boolean             @default(false)
 }

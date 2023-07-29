@@ -1,9 +1,10 @@
 import { createTRPCRouter, editableProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import {type RestorationTimelineItem, type TimelineCategoryName, isTimelineCategory, type TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema, type PrismaTimelineItem, type PrismaTimelineCategory, TimelineCategoryArgs} from '~/utils/types/timeline';
+import {type RestorationTimelineItem, type TimelineCategoryName, type TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema, type PrismaTimelineItem, type PrismaTimelineCategory, TimelineCategoryArgs} from '~/utils/types/timeline';
 import { z } from "zod";
 import { type Prisma } from "@prisma/client";
 import { type Db } from '~/server/db';
+import { exclude } from "~/utils/utils";
 
 const getCategoryDeprecated = (categoryName: TimelineCategoryName) => {
 	const category = categories.find(x => x.name == categoryName);
@@ -40,27 +41,31 @@ const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryI
 }
 
 const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTimelineItem => {
-	return {...item, links: item.links.split(',').filter(x => x != '')}
+	return exclude({...item, links: item.links.split(',').filter(x => x != '')}, 'isDeleted')
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
-	const items = sortTimelineItems(category.items.map(translatePrismaToTimelineItem))
-	return TimelineCategorySchema.parse({...category, items});
+	const items = sortTimelineItems(category.items.filter(x => !x.isDeleted).map(translatePrismaToTimelineItem))
+	return TimelineCategorySchema.parse(exclude({...category, items}, 'isDeleted'));
 	
 }
 
 const getCategories = async (db: Db): Promise<TimelineCategory[]> => {
 	const dbCategories: PrismaTimelineCategory[] = await db.timelineCategory.findMany({
-		include: TimelineCategoryArgs.include
+		include: TimelineCategoryArgs.include,
+		where: {
+			isDeleted: false
+		}
 	});
 
 	return dbCategories.map(category => translatePrismaToTimelineCategory(category));
 }
 
 const getCategory = async ({db, name}: {db: Db, name: string}) => {
-	const dbCategory: PrismaTimelineCategory | null = await db.timelineCategory.findUnique({
+	const dbCategory: PrismaTimelineCategory | null = await db.timelineCategory.findFirst({
 		where: {
-			name: name
+			name: name,
+			isDeleted: false
 		},
 		include: TimelineCategoryArgs.include
 	});
@@ -73,17 +78,7 @@ const getCategory = async ({db, name}: {db: Db, name: string}) => {
 
 export const timelineRouter = createTRPCRouter({
 	getItems: publicProcedure
-		.input((val: unknown) => {
-			if (val === undefined) {
-				return val;
-			}
-
-			if (typeof val == 'string' && isTimelineCategory(val)) {
-				return val;
-			}
-
-			throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: `Invalid item ${typeof val}`});
-		})
+		.input(z.string())
 		.query(({input}) => {
 			if (input) {
 				const category = getCategoryDeprecated(input);
@@ -147,7 +142,10 @@ export const timelineRouter = createTRPCRouter({
 	deleteCategory: editableProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
-			await ctx.prisma.timelineCategory.delete({
+			await ctx.prisma.timelineCategory.update({
+				data: {
+					isDeleted: true
+				},
 				where: {
 					id: input
 				}
@@ -177,7 +175,10 @@ export const timelineRouter = createTRPCRouter({
 	deleteTimeline: editableProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
-			await ctx.prisma.timelineItem.delete({
+			await ctx.prisma.timelineItem.update({
+				data: {
+					isDeleted: true
+				},
 				where: {
 					id: input
 				}
