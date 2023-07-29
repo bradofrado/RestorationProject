@@ -28,14 +28,14 @@ export const RestorationTimelineItemSchema = z.object({
 	text: z.string(),
 	links: z.array(z.string()),
 	categoryId: z.number().nullable()
-}) satisfies z.Schema<PrismaTimelineItemWithLinksArray>
+}) satisfies z.Schema<Omit<PrismaTimelineItemWithLinksArray, 'isDeleted'>>
 export type RestorationTimelineItem = z.infer<typeof RestorationTimelineItemSchema>
 export type TimelineItemStandalone =  Omit<RestorationTimelineItem & TimelineAttributes, "date"> & {
 	date: Date
 };
 
 export const TimelineCategoryArgs = {
-	include: {items: TimelineItemArgs}
+	include: {items: TimelineItemArgs},
 } satisfies Prisma.TimelineCategoryArgs
 
 export type PrismaTimelineCategory = Prisma.TimelineCategoryGetPayload<typeof TimelineCategoryArgs>;
@@ -46,7 +46,7 @@ export const TimelineCategorySchema = z.object({
 	pageId: z.string().nullable(),
 	color: HexColorSchema,
 	items: z.array(RestorationTimelineItemSchema),
-}) satisfies z.Schema<Replace<PrismaTimelineCategory, "items", RestorationTimelineItem[]> & TimelineAttributes>
+}) satisfies z.Schema<Replace<Omit<PrismaTimelineCategory, 'isDeleted'>, "items", RestorationTimelineItem[]> & TimelineAttributes>
 
 export type TimelineCategory = z.infer<typeof TimelineCategorySchema>
 

@@ -1,9 +1,10 @@
-import { createTRPCRouter, criticalProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, editableProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import {type RestorationTimelineItem, type TimelineCategoryName, isTimelineCategory, type TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema, type PrismaTimelineItem, type PrismaTimelineCategory, TimelineCategoryArgs} from '~/utils/types/timeline';
+import {type RestorationTimelineItem, type TimelineCategoryName, type TimelineCategory, TimelineCategorySchema, RestorationTimelineItemSchema, type PrismaTimelineItem, type PrismaTimelineCategory, TimelineCategoryArgs} from '~/utils/types/timeline';
 import { z } from "zod";
 import { type Prisma } from "@prisma/client";
 import { type Db } from '~/server/db';
+import { exclude } from "~/utils/utils";
 
 const getCategoryDeprecated = (categoryName: TimelineCategoryName) => {
 	const category = categories.find(x => x.name == categoryName);
@@ -40,27 +41,31 @@ const translateTimelineItemToPrisma = (input: RestorationTimelineItem, categoryI
 }
 
 const translatePrismaToTimelineItem = (item: PrismaTimelineItem): RestorationTimelineItem => {
-	return {...item, links: item.links.split(',').filter(x => x != '')}
+	return exclude({...item, links: item.links.split(',').filter(x => x != '')}, 'isDeleted')
 }
 
 const translatePrismaToTimelineCategory = (category: PrismaTimelineCategory): TimelineCategory => {
-	const items = sortTimelineItems(category.items.map(translatePrismaToTimelineItem))
-	return TimelineCategorySchema.parse({...category, items});
+	const items = sortTimelineItems(category.items.filter(x => !x.isDeleted).map(translatePrismaToTimelineItem))
+	return TimelineCategorySchema.parse(exclude({...category, items}, 'isDeleted'));
 	
 }
 
 const getCategories = async (db: Db): Promise<TimelineCategory[]> => {
 	const dbCategories: PrismaTimelineCategory[] = await db.timelineCategory.findMany({
-		include: TimelineCategoryArgs.include
+		include: TimelineCategoryArgs.include,
+		where: {
+			isDeleted: false
+		}
 	});
 
 	return dbCategories.map(category => translatePrismaToTimelineCategory(category));
 }
 
 const getCategory = async ({db, name}: {db: Db, name: string}) => {
-	const dbCategory: PrismaTimelineCategory | null = await db.timelineCategory.findUnique({
+	const dbCategory: PrismaTimelineCategory | null = await db.timelineCategory.findFirst({
 		where: {
-			name: name
+			name: name,
+			isDeleted: false
 		},
 		include: TimelineCategoryArgs.include
 	});
@@ -73,18 +78,10 @@ const getCategory = async ({db, name}: {db: Db, name: string}) => {
 
 export const timelineRouter = createTRPCRouter({
 	getItems: publicProcedure
-		.input((val: unknown) => {
-			if (val === undefined) {
-				return val;
-			}
-
-			if (typeof val == 'string' && isTimelineCategory(val)) {
-				return val;
-			}
-
-			throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: `Invalid item ${typeof val}`});
-		})
-		.query(({input}) => {
+		.input(z.string())
+		.query(async ({ctx, input}) => {
+			await ctx.logger.warn(`DEPRECATED getItems: ${input}`, ctx.session?.user);
+			
 			if (input) {
 				const category = getCategoryDeprecated(input);
 				return category.items;
@@ -100,16 +97,23 @@ export const timelineRouter = createTRPCRouter({
 	getCategory: publicProcedure
 		.input(z.string())
 		.query(async ({input, ctx}) => {
+			await ctx.logger.info(`GetCategory: ${input}`, ctx.session?.user);
+
 			return await getCategory({name: input, db: ctx.prisma});
 		}),
 	getCategories: publicProcedure
 		.query(async ({ctx}) => {
+			await ctx.logger.info(`GetCategories`, ctx.session?.user);
+			
 			const categories = await getCategories(ctx.prisma);
+
 			return categories;
 		}),
-	createCategory: criticalProcedure
+	createCategory: editableProcedure
 		.input(TimelineCategorySchema)
 		.mutation(async ({input, ctx}) => {
+			await ctx.logger.info(`CreateCategory: ${JSON.stringify(input)}`, ctx.session.user);
+
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.create({
 				data: {
 					name: input.name,
@@ -124,9 +128,11 @@ export const timelineRouter = createTRPCRouter({
 			
 			return translatePrismaToTimelineCategory(dbCategory);
 		}),
-	updateCategory: criticalProcedure
+	updateCategory: editableProcedure
 		.input(TimelineCategorySchema)
 		.mutation(async ({input, ctx}) => {
+			await ctx.logger.info(`UpdateCategory: ${JSON.stringify(input)}`, ctx.session.user);
+
 			const dbCategory: PrismaTimelineCategory = await ctx.prisma.timelineCategory.update({
 				data: {
 					name: input.name,
@@ -144,27 +150,36 @@ export const timelineRouter = createTRPCRouter({
 			
 			return translatePrismaToTimelineCategory(dbCategory);
 		}),
-	deleteCategory: criticalProcedure
+	deleteCategory: editableProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
-			await ctx.prisma.timelineCategory.delete({
+			await ctx.logger.info(`DeleteCategory: ${input}`, ctx.session.user);
+			
+			await ctx.prisma.timelineCategory.update({
+				data: {
+					isDeleted: true
+				},
 				where: {
 					id: input
 				}
 			})
 		}),
-	createTimeline: criticalProcedure
+	createTimeline: editableProcedure
 		.input(RestorationTimelineItemSchema)
 		.mutation(async ({input, ctx}) => {
+			await ctx.logger.info(`CreateTimeline: ${JSON.stringify(input)}`, ctx.session.user);
+
 			const dbItem: PrismaTimelineItem = await ctx.prisma.timelineItem.create({
 				data: translateTimelineItemToPrisma(input, input.categoryId || undefined),
 			});
 
 			return translatePrismaToTimelineItem(dbItem);
 		}),
-	updateTimeline: criticalProcedure
+	updateTimeline: editableProcedure
 		.input(RestorationTimelineItemSchema)
 		.mutation(async ({input, ctx}) => {
+			await ctx.logger.info(`UpdateTimeline: ${JSON.stringify(input)}`, ctx.session.user);
+
 			const dbItem: PrismaTimelineItem = await ctx.prisma.timelineItem.update({
 				data: translateTimelineItemToPrisma(input),
 				where: {
@@ -174,10 +189,14 @@ export const timelineRouter = createTRPCRouter({
 
 			return translatePrismaToTimelineItem(dbItem);
 		}),
-	deleteTimeline: criticalProcedure
+	deleteTimeline: editableProcedure
 		.input(z.number())
 		.mutation(async ({input, ctx}) => {
-			await ctx.prisma.timelineItem.delete({
+			await ctx.logger.info(`DeleteTimeline: ${input}`, ctx.session.user);
+			await ctx.prisma.timelineItem.update({
+				data: {
+					isDeleted: true
+				},
 				where: {
 					id: input
 				}

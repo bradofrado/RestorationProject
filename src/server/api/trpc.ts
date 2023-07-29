@@ -18,10 +18,14 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 
 import { getServerAuthSession } from "~/server/auth";
+import { env } from "~/env.mjs";
 
 type CreateContextOptions = {
   session: Session | null;
 };
+
+const loggerDAO = new PrismaLoggerDAO(prisma);
+const logger = env.NODE_ENV == 'production' ? new MainLogger(loggerDAO) : new EmptyLogger();
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -36,7 +40,8 @@ type CreateContextOptions = {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-		prisma: prisma
+		prisma: prisma,
+    logger: logger
   };
 };
 
@@ -68,6 +73,10 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { prisma } from "../db";
+import {type UserRole} from '~/utils/types/auth';
+import { isNotRole } from "~/utils/utils";
+import { PrismaLoggerDAO } from "../dao/LogDAO";
+import { EmptyLogger, MainLogger } from "./logs";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -119,18 +128,18 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-const enforceUserIsAdmin = t.middleware(({ctx, next}) => {
-  if (!ctx.session || !ctx.session.user || ctx.session.user.role != 'admin') {
+
+const enforceUserIsRole = (role: UserRole) => enforceUserIsAuthed.unstable_pipe(({ctx, next}) => {
+  const userRole = ctx.session.user.role;
+  if (isNotRole(role)(userRole)) {
     throw new TRPCError({code: "UNAUTHORIZED"});
   }
 
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
+  return next({ctx});
+})
+
+const enforceUserIsAdmin = enforceUserIsRole('admin');
+const enforceUserIsEdit = enforceUserIsRole('edit');
 
 /**
  * Protected (authenticated) procedure
@@ -142,3 +151,4 @@ const enforceUserIsAdmin = t.middleware(({ctx, next}) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 export const criticalProcedure = t.procedure.use(enforceUserIsAdmin);
+export const editableProcedure = t.procedure.use(enforceUserIsEdit);

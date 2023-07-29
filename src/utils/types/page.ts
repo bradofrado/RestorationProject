@@ -1,17 +1,19 @@
 import { type Prisma } from "@prisma/client"
 import { z } from "zod"
 import { ComponentTypeSchema } from "../components/edit/add-component"
+import { type Replace } from "../utils"
 
 const data = {
 	select: {content: true, properties: true}
 } satisfies Prisma.EditableDataArgs
 
 const settingsWithData ={
-	include: {data: data}
+	include: {data: data},
 } satisfies Prisma.ComponentSettingsArgs
 
 const pageWithSettings = {
-	include: { settings: settingsWithData}
+	include: { settings: settingsWithData},
+
 } satisfies Prisma.PageArgs
 
 export const EditableDataSchema = z.object({
@@ -20,20 +22,22 @@ export const EditableDataSchema = z.object({
 }) satisfies z.Schema<Prisma.EditableDataGetPayload<typeof data>>
 export type EditableData = z.infer<typeof EditableDataSchema>
 
+export type PrismaComponentSettings = Prisma.ComponentSettingsGetPayload<typeof settingsWithData>;
 export const ComponentSettingsSchema = z.object({
 	id: z.number(),
 	pageId: z.string(),
 	component: ComponentTypeSchema,
 	data: EditableDataSchema,
 	order: z.number()
-}) satisfies z.Schema<Prisma.ComponentSettingsGetPayload<typeof settingsWithData>>
+}) satisfies z.Schema<Omit<PrismaComponentSettings, 'isDeleted'>>
 export type ComponentSettings = z.infer<typeof ComponentSettingsSchema>
 
+export type PrismaPage = Prisma.PageGetPayload<typeof pageWithSettings>
 export const PageSchema = z.object({
 	id: z.string(),
 	title: z.string(),
 	description: z.string(),
 	settings: z.array(ComponentSettingsSchema),
 	url: z.string(),
-}) satisfies z.Schema<Prisma.PageGetPayload<typeof pageWithSettings>>
+}) satisfies z.Schema<Replace<Omit<PrismaPage, 'isDeleted'>, 'settings', ComponentSettings[]>>
 export type EventPage = z.infer<typeof PageSchema>

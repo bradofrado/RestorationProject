@@ -44,14 +44,15 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
+  name          String
+  email         String   @unique
   emailVerified DateTime?
   password      String
   image         String?
   role          String @default("user")
   accounts      Account[]
   sessions      Session[]
+  logs          Logging[]
 }
 
 model VerificationToken {
@@ -62,6 +63,20 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum LoggingType {
+  INFO
+  WARN
+  ERROR
+}
+model Logging {
+  id      Int       @id @default(autoincrement())
+  date    DateTime
+  user    User?      @relation(fields: [userId], references: [id])
+  userId  String?
+  type    LoggingType
+  message String
+}
+
 model Page {
   id          String              @id @default(uuid())
 	url         String							@unique
@@ -69,6 +84,7 @@ model Page {
   description String
   settings    ComponentSettings[]
   categories  TimelineCategory[]
+  isDeleted   Boolean             @default(false)
 }
 
 model ComponentSettings {
@@ -78,6 +94,7 @@ model ComponentSettings {
   page           Page?        @relation(fields: [pageId], references: [id], onDelete: Cascade)
   pageId         String?
   order          Int          @default(0)
+  isDeleted   Boolean         @default(false)
 }
 
 model EditableData {
@@ -95,6 +112,7 @@ model TimelineCategory {
   pageId            String?
   color             String?
   items             TimelineItem[]
+  isDeleted   Boolean             @default(false)
 }
 
 model TimelineItem {
@@ -106,4 +124,5 @@ model TimelineItem {
   links       String
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
+  isDeleted   Boolean             @default(false)
 }

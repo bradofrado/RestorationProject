@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { type HexColor } from './types/colors';
 import { z } from 'zod';
+import { type UserRole, userRoleSchema } from './types/auth';
 
 export const DateFormat = {
 	fullText: (date: Date) => {
@@ -85,7 +86,21 @@ export type Replace<T, K extends keyof T, Q> = ReplaceWithName<T, K, Record<K, Q
 
 export type IfElse<PROPERTY extends string, IF, ELSE> = (Record<PROPERTY, true> & IF) | (Partial<Record<PROPERTY, false>> & ELSE)
 
-
 export const getClass = (...strings: (string | undefined)[]) => {
     return strings.filter(x => !!x).join(' ');
 }
+
+export const isNotRole = <T,>(desiredRole: UserRole, transform?: (obj: T) => UserRole) => (obj: T | UserRole) => {
+	const result = userRoleSchema.safeParse(obj);
+	const role: UserRole | Error = result.success ? result.data : !!!transform ? Error("must provide transform method") : transform(obj as T);
+	if (role instanceof Error) {
+		throw role;
+	}
+	return role != desiredRole && role != 'admin';
+}
+
+export const exclude = <T extends Pick<T, K>, K extends keyof T>(user: T, ...keys: K[]): Omit<T, K> => {
+	return Object.fromEntries(
+	  Object.entries<T>(user).filter(([key]) => !keys.includes(key as K))
+	) as Omit<T, K>
+  }

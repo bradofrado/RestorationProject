@@ -1,9 +1,5 @@
 import { api } from "../api";
 
-export const useGetItems = () => {
-	return api.timeline.getItems.useQuery();
-}
-
 export const useGetCategory = (category: string) => {
 	return api.timeline.getCategory.useQuery(category);
 }
