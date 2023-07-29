@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {type User as UserDB} from '@prisma/client'
 
-const roles = ['admin', 'user'] as const;
+const roles = ['admin', 'user', 'edit'] as const;
 export type UserRole = typeof roles[number];
 export const userRoleSchema = z.custom<UserRole>((val: unknown) => {
     return typeof val == 'string' && (roles as ReadonlyArray<string>).includes(val);

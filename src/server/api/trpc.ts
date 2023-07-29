@@ -68,6 +68,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { prisma } from "../db";
+import {type UserRole} from '~/utils/types/auth';
+import { isNotRole } from "~/utils/utils";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -119,18 +121,18 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-const enforceUserIsAdmin = t.middleware(({ctx, next}) => {
-  if (!ctx.session || !ctx.session.user || ctx.session.user.role != 'admin') {
+
+const enforceUserIsRole = (role: UserRole) => enforceUserIsAuthed.unstable_pipe(({ctx, next}) => {
+  const userRole = ctx.session.user.role;
+  if (isNotRole(role)(userRole)) {
     throw new TRPCError({code: "UNAUTHORIZED"});
   }
 
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
+  return next({ctx});
+})
+
+const enforceUserIsAdmin = enforceUserIsRole('admin');
+const enforceUserIsEdit = enforceUserIsRole('edit');
 
 /**
  * Protected (authenticated) procedure
@@ -142,3 +144,4 @@ const enforceUserIsAdmin = t.middleware(({ctx, next}) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 export const criticalProcedure = t.procedure.use(enforceUserIsAdmin);
+export const editableProcedure = t.procedure.use(enforceUserIsEdit);

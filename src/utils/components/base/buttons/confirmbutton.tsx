@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Button, { type ButtonProps } from "./button"
-import Modal, { ButtonInfo } from "../modal";
+import Modal, { type ButtonInfo } from "../modal";
 
 type ConfirmButtonPropsInner = {
     onConfirm: () => void,

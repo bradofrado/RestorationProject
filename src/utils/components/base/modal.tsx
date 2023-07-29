@@ -1,6 +1,6 @@
 import { Transition, Dialog } from "@headlessui/react"
 import { Fragment } from "react"
-import Button, { ButtonType } from "./buttons/button"
+import Button from "./buttons/button"
 
 export interface ButtonInfo {
     mode?: 'primary' | 'secondary',

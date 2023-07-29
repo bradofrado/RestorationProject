@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   createTRPCRouter,
-  criticalProcedure,
+  editableProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 import { type Db } from "~/server/db";
@@ -89,18 +89,18 @@ export const pageRouter = createTRPCRouter({
 
 			return pages.map(x => x.url);
 		}),
-	createPage: criticalProcedure
+	createPage: editableProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
 			input.id = ''; //autogenerate an id
 			return await createPage({input, db: ctx.prisma})
 		}),
-	deletePage: criticalProcedure
+	deletePage: editableProcedure
 		.input(z.string())
 		.mutation(async ({ctx, input}) => {
 			await deletePage({input, db: ctx.prisma})
 		}),
-	updatePage: criticalProcedure
+	updatePage: editableProcedure
 		.input(PageSchema)
 		.mutation(async ({ctx, input}) => {
 			const page: EventPage = await ctx.prisma.page.update({
@@ -119,7 +119,7 @@ export const pageRouter = createTRPCRouter({
 
 			return page;
 		}),
-	createSetting: criticalProcedure
+	createSetting: editableProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
 			const setting: ComponentSettings = await ctx.prisma.componentSettings.create({
@@ -138,7 +138,7 @@ export const pageRouter = createTRPCRouter({
 
 			return setting;
 		}),
-	updateSetting: criticalProcedure
+	updateSetting: editableProcedure
 		.input(ComponentSettingsSchema)
 		.mutation(async ({ctx, input}) => {
 			const setting: ComponentSettings = await ctx.prisma.componentSettings.update({
@@ -160,7 +160,7 @@ export const pageRouter = createTRPCRouter({
 
 			return setting;
 		}),
-	updateSettingOrder: criticalProcedure
+	updateSettingOrder: editableProcedure
 		.input(z.array(z.object({id: z.number(), order: z.number()})))
 		.mutation(async ({ctx, input}) => {
 			for (const inputItem of input) {
@@ -175,7 +175,7 @@ export const pageRouter = createTRPCRouter({
 				})
 			}
 		}),
-	deleteSetting: criticalProcedure
+	deleteSetting: editableProcedure
 		.input(z.number())
 		.mutation(async ({ctx, input}) => {
 			await ctx.prisma.componentSettings.delete({

@@ -3,14 +3,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import TabControl, { type TabItem } from "~/utils/components/base/tab";
-import { requireRole } from "~/utils/components/page/protected-routes-hoc";
+import {requireRole, defaultGetServerProps} from '~/utils/components/page/protected-routes-hoc';
 import { EditPages } from "~/utils/components/edit/edit-pages";
 import { EditTimelineItems } from "~/utils/components/edit/edit-timeline-items";
 import { Layout } from "~/utils/components/page/layout";
 
-export const getServerSideProps = requireRole('admin')(() => {
-	return new Promise((resolve) => resolve({props: {}}));
-});
+export const getServerSideProps = requireRole('edit')(defaultGetServerProps);
 
 const Edit_page: NextPage = () => {
 	const router = useRouter();
