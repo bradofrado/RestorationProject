@@ -32,6 +32,9 @@ jobs:
       - name: "📦 install dependencies"
         uses: bahmutov/npm-install@v1
 
+      - name: "generate prisma types"
+        run: npx prisma generate
+
       - name: "🔍 run tests"
         run: npm run test --if-present
 
