@@ -20,9 +20,6 @@ const config = {
   },
   experimental: {
     forceSwcTransforms: true,
-    swcPlugins: true ? [
-			['harmony-ai-plugin', {rootDir: new URL('.', import.meta.url).pathname}]
-		] : []
   },
 };
 export default config;

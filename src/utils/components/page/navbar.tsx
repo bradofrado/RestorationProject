@@ -7,7 +7,7 @@ export const Navbar = () => {
     return <>
         <div className="flex justify-between items-center h-20">
             <div>
-                <Link href="/">Witnesses of the Restoration</Link>
+                <Link href="/">Closer to Christ</Link>
             </div>
             <div className="">
                {data?.user ? <ProfileButton/> :

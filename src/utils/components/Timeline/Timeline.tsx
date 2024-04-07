@@ -180,7 +180,7 @@ type TimelineCategoryFilterProps<T extends keyof TimelineCategory> = {
 	onChange: (key: TimelineCategory[T]) => void,
 	filterKey: T
 }
-const TimelineCategoryFilter = <T extends keyof TimelineCategory>({categories, filtered, onChange, filterKey}: TimelineCategoryFilterProps<T>) => {
+export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({categories, filtered, onChange, filterKey}: TimelineCategoryFilterProps<T>) => {
 	
 	return <>
 		{categories.map((category, i) => <Button key={i} mode={filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'} backgroundColor={category.color} onClick={() => onChange(category[filterKey])}>{category.name}</Button>)}

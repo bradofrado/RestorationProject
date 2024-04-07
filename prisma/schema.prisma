@@ -122,6 +122,8 @@ model TimelineItem {
   subcategory String?
   text        String
   links       String
+  x           Float?
+  y           Float?
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
   isDeleted   Boolean             @default(false)

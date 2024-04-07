@@ -27,7 +27,9 @@ export const RestorationTimelineItemSchema = z.object({
 	subcategory: z.string().nullable(),
 	text: z.string(),
 	links: z.array(z.string()),
-	categoryId: z.number().nullable()
+	categoryId: z.number().nullable(),
+	x: z.number().nullable(),
+	y: z.number().nullable()
 }) satisfies z.Schema<Omit<PrismaTimelineItemWithLinksArray, 'isDeleted'>>
 export type RestorationTimelineItem = z.infer<typeof RestorationTimelineItemSchema>
 export type TimelineItemStandalone =  Omit<RestorationTimelineItem & TimelineAttributes, "date"> & {

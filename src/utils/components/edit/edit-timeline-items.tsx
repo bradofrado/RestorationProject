@@ -17,6 +17,11 @@ import { type EditableDeleteableComponentProps } from './editable';
 import { DirtyComponent, defaultDirtyProps } from './dirty-component';
 import {DraggableComponent, DroppableContext} from '~/utils/components/base/draggable-list';
 import { DragMoveIcon } from '../icons/icons';
+import Modal from '../base/modal';
+import Button from '../base/buttons/button';
+import { HexColor } from '~/utils/types/colors';
+
+type Position = {x: number, y: number};
 
 export const EditTimelineItems = () => {
 	const [category, setCategory] = useState<TimelineCategory>();
@@ -111,7 +116,9 @@ export const EditTimelineItems = () => {
 			endDate: null, 
 			links: [], 
 			subcategory: null, 
-			categoryId: category.id
+			categoryId: category.id,
+			x: null,
+			y: null
 		});
 		changeProperty(category, "items", copy);
 	}
@@ -149,7 +156,7 @@ export const EditTimelineItems = () => {
 								data: item,
 								onEdit: (item: RestorationTimelineItem) => saveItem(item, i)
 							}
-							return isNew ? <AddRemoveItem {...props}/> : <DirtyComponent id={`${item.id}`} index={i} {...defaultDirtyProps(item.id < 0)} as={AddRemoveItem} {...props} dataTestId={`dirty-component-${item.id}`}/>
+							return isNew ? <AddRemoveItem {...props} category={category}/> : <DirtyComponent id={`${item.id}`} index={i} {...defaultDirtyProps(item.id < 0)} as={AddRemoveItem} {...props} category={category} dataTestId={`dirty-component-${item.id}`}/>
 						}}
 					</AddRemove>
 					
@@ -160,9 +167,12 @@ export const EditTimelineItems = () => {
 	</>
 }
 
-type EditRestorationItemProps = EditableDeleteableComponentProps<RestorationTimelineItem>
-const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorationItemProps) => {
+type EditRestorationItemProps = EditableDeleteableComponentProps<RestorationTimelineItem> & {
+	category: TimelineCategory
+}
+const EditRestorationItem = ({data: propItem, onEdit: onSaveProp, category}: EditRestorationItemProps) => {
 	const changePropertyItem = useChangeProperty<RestorationTimelineItem>(onSaveProp);
+	const [show, setShow] = useState(false);
 
 	const onLinkChange = (value: string, i: number) => {
 		const links = propItem.links;
@@ -193,6 +203,21 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 		changePropertyItem(newItem, "endDate", null);
 	}
 
+	const onEditLocationClick = () => {
+		setShow(true);
+	}
+
+	const pos: Position | undefined = propItem.x !== null && propItem.y !== null ? {x: propItem.x, y: propItem.y} : undefined;
+
+	const onLocationEdit = (value: Position | undefined) => {
+		if (value && value !== pos) {
+			const newItem = changePropertyItem(propItem, 'x', value.x);
+			changePropertyItem(newItem, 'y', value.y);
+		}
+		setShow(false);
+	}
+
+	
 	return <>
 		<Panel className="my-1" role="editable-timeline-item">
 			<Input include={Label} label="Text" type="textarea" value={propItem.text} inputClass="w-full" onChange={value => changePropertyItem(propItem, "text", value)}/>
@@ -214,6 +239,38 @@ const EditRestorationItem = ({data: propItem, onEdit: onSaveProp}: EditRestorati
 					)}
 				</AddRemove>
 			</Label>
+			<Label label="Location">
+				<Button onClick={onEditLocationClick} mode={pos ? 'primary' : 'secondary'}>Edit</Button>
+			</Label>
 		</Panel>
+		<Modal isOpen={show} header="" buttons={[]}>
+			<EditLocationMap key={propItem.id} value={pos} onChange={onLocationEdit} background={category.color}/>
+		</Modal>
 	</>
+}
+
+interface EditLocationMapProps {
+	value: Position | undefined,
+	onChange: (value: Position | undefined) => void;
+	background: HexColor
+}
+const EditLocationMap: React.FunctionComponent<EditLocationMapProps> = ({onChange, value, background}) => {
+	const [pos, setPos] = useState<Position | undefined>(value)
+	const onImageClick: React.MouseEventHandler<HTMLImageElement> = (e) => {
+		const target = e.currentTarget.getBoundingClientRect();
+		const x = e.clientX - target.left;
+		const y = e.clientY - target.top;
+
+		setPos({x: x / target.width, y: y / target.height})
+	}
+
+	return (<>
+		<div className="relative" onClick={onImageClick}>
+			{pos ? <div className="h-3 w-3 rounded-full absolute -translate-x-1/2 -translate-y-1/2" style={{left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, backgroundColor: background}}/> : null}
+			<img src="/map-israel.gif" />
+		</div>
+		<div className="flex items-center justify-end">
+			<Button onClick={() => onChange(pos)}>Done</Button>
+		</div>
+	</>);
 }
