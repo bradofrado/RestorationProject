@@ -42,7 +42,7 @@ export const Map: React.FunctionComponent<MapProps> = ({categories}) => {
             <div className="flex justify-start">
                 <EventList items={filtered} hoveredId={hoveredItem?.id}/>
                 <div className="relative h-fit">
-                    {items.map(item => item.x && item.y ? <div className={`h-3 w-3 rounded-full absolute -translate-x-1/2 -translate-y-1/2 transition-all ease-in-out hover:cursor-pointer ${filteredIds.includes(item.id) ? 'scale-[200%]' : 'hover:scale-[150%]'}`} style={{left: `${item.x * 100}%`, top: `${item.y * 100}%`, backgroundColor: item.category.color}} onMouseEnter={() => setHoveredItem(item)} onMouseLeave={() => setHoveredItem(undefined)} onClick={() => onSelect(item)}>    
+                    {items.map(item => item.x && item.y ? <div key={item.id} className={`h-3 w-3 rounded-full absolute -translate-x-1/2 -translate-y-1/2 transition-all ease-in-out hover:cursor-pointer ${filteredIds.includes(item.id) ? 'scale-[200%]' : 'hover:scale-[150%]'}`} style={{left: `${item.x * 100}%`, top: `${item.y * 100}%`, backgroundColor: item.category.color}} onMouseEnter={() => setHoveredItem(item)} onMouseLeave={() => setHoveredItem(undefined)} onClick={() => onSelect(item)}>    
                         </div> : null)}
                     <img src="/map-israel.gif" />
                 </div>
@@ -58,7 +58,7 @@ const EventList: React.FunctionComponent<{items: (RestorationTimelineItem & {cat
     const {annotate} = useAnnotationLink();
     return (
         <div className="flex flex-col gap-2 flex-1">
-            {items.map(item => item.x && item.y ? <div className="flex items-center justify-start gap-2">
+            {items.map(item => item.x && item.y ? <div key={item.id} className="flex items-center justify-start gap-2">
                 <div className="h-3 w-3 rounded-full" style={{backgroundColor: item.category.color}}/>
                 <div className={`text-sm ${item.id === hoveredId ? 'font-semibold' : ''}`}>{item.text} {item.links.map((link, i) => <Annotation key={i} link={link} id={annotate(link)}/>)}</div>
             </div> : null)}
