@@ -1,36 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./timeline.css";
+@import './timeline.css';
 
 :root {
-	--container-size: 500px;
-	--circle-size: calc(500px / 14);
-	--item-size: calc(var(--container-size) / 4);
-	 --primary-color: theme('colors.primary.DEFAULT');
-	--secondary-color: theme('colors.secondary.DEFAULT');
-	--restoration-item-size: 200px;
+  --container-size: 500px;
+  --circle-size: calc(500px / 14);
+  --item-size: calc(var(--container-size) / 4);
+  --primary-color: theme('colors.primary.DEFAULT');
+  --secondary-color: theme('colors.secondary.DEFAULT');
+  --restoration-item-size: 200px;
 }
 
 @media (max-width: 600px) {
-	:root {
-		--container-size: 400px;
-		--restoration-item-size: 150px;
-	}
+  :root {
+    --container-size: 400px;
+    --restoration-item-size: 150px;
+  }
 }
 
 .timeline-container {
-	display: flex;
-	position: relative;
-	height: var(--container-size);
-	width: 100%;
-	overflow: auto;
-	-webkit-user-select: none;
+  display: flex;
+  position: relative;
+  height: var(--container-size);
+  width: 100%;
+  overflow: auto;
+  -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
-	-ms-overflow-style: none;
+  -ms-overflow-style: none;
   scrollbar-width: none;
-	cursor: grab;
+  cursor: grab;
 }
 
 .timeline-container::-webkit-scrollbar {
@@ -38,87 +38,89 @@
 }
 
 .timeline-container::after {
-	background-color: var(--primary-color);
-	content: '';
-	position: absolute;
-	bottom: calc(50% - 2px);
-	width: 100%;
-	height: 4px;
+  background-color: var(--primary-color);
+  content: '';
+  position: absolute;
+  bottom: calc(50% - 2px);
+  width: 100%;
+  height: 4px;
 }
 
 .timeline-item {
-	display: flex;
-	/* align-self: flex-start; */
-	flex-direction: column;
-	/* position: relative; */
-	color: var(--secondary-color);
-	text-align: center;
-	--bom-color: var(--secondary-color);
+  display: flex;
+  /* align-self: flex-start; */
+  flex-direction: column;
+  /* position: relative; */
+  color: var(--secondary-color);
+  text-align: center;
+  --bom-color: var(--secondary-color);
 }
 
 .timeline-item-content {
-	width: var(--item-size);
-	height: calc(var(--container-size) / 2);
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  width: var(--item-size);
+  height: calc(var(--container-size) / 2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.timeline-item-content, .timeline-item.below .timeline-item-content:first-child {
-	border-top: 2px solid var(--primary-color);
-	border-bottom: 0px;
+.timeline-item-content,
+.timeline-item.below .timeline-item-content:first-child {
+  border-top: 2px solid var(--primary-color);
+  border-bottom: 0px;
 }
 
-.timeline-item-content:first-child, .timeline-item.below .timeline-item-content:nth-child(2) {
-	border-top: 0;
-	border-bottom: 2px solid var(--primary-color);
+.timeline-item-content:first-child,
+.timeline-item.below .timeline-item-content:nth-child(2) {
+  border-top: 0;
+  border-bottom: 2px solid var(--primary-color);
 }
 
 .timeline-item.below .timeline-item-content:first-of-type {
-	/* align-self: flex-end; */
-	order: 1;
+  /* align-self: flex-end; */
+  order: 1;
 }
 
 .timeline-item.below .restoration-item {
-	align-self: flex-start;
+  align-self: flex-start;
 }
 
 .restoration-item {
-	border-radius: 20px;
-	background-color: var(--bom-color);
-	color: var(--secondary-color);
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	padding: 15px;
-	align-self: flex-end;
-	display: flex;
-	max-height: var(--restoration-item-size);
-	-ms-overflow-style: none;
-  	scrollbar-width: none;
-	width: var(--restoration-item-size);
+  border-radius: 20px;
+  background-color: var(--bom-color);
+  color: var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 15px;
+  align-self: flex-end;
+  display: flex;
+  max-height: var(--restoration-item-size);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  width: var(--restoration-item-size);
 }
 
 /* width */
 .restoration-item p::-webkit-scrollbar {
-	width: 5px;
+  width: 5px;
 }
 
 /* Track */
 .restoration-item p::-webkit-scrollbar-track {
-	background-color: var(--bom-color);
-	border-radius: 5px;
+  background-color: var(--bom-color);
+  border-radius: 5px;
 }
 
 /* Handle */
 .restoration-item p::-webkit-scrollbar-thumb {
-	background-color: var(--secondary-color);
-	border-radius: 5px;
+  background-color: var(--secondary-color);
+  border-radius: 5px;
 }
 
 /* Handle on hover */
 .restoration-item p::-webkit-scrollbar-thumb:hover {
-	background: #555;
+  background: #555;
 }
 
 /* .restoration-item::-webkit-scrollbar {
@@ -126,79 +128,81 @@
   } */
 
 .timeline-item:hover .restoration-item {
-	display: flex;
-	cursor: pointer;
+  display: flex;
+  cursor: pointer;
 }
-
 
 .timeline-item-connector::before {
-	content: '';
-	background-color: var(--primary-color);
-	position: absolute;
-	right: calc(50% - 2px);
-	top: 32%;
-	width: 4px;
-	height: 18%;
+  content: '';
+  background-color: var(--primary-color);
+  position: absolute;
+  right: calc(50% - 2px);
+  top: 32%;
+  width: 4px;
+  height: 18%;
 }
 
-
 .timeline-item.below .timeline-item-connector::before {
-	top: auto;
-	bottom: 32%;
+  top: auto;
+  bottom: 32%;
 }
 
 .date-indicator {
-	background-color: var(--secondary-color);
-	color: var(--primary-color);
-	border-radius: 50%;
-	border: 4px solid var(--primary-color);
-	width: calc(2 * var(--circle-size));
-	height: calc(2 * var(--circle-size));
-	display: flex;
-	align-items: center;
-	text-align: center;
-	justify-content: center;
-	z-index: 10;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border-radius: 50%;
+  border: 4px solid var(--primary-color);
+  width: calc(2 * var(--circle-size));
+  height: calc(2 * var(--circle-size));
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  z-index: 10;
 }
 
 .timeline-item.absolute .date-indicator {
-	border-color: var(--bom-color);
-	color: var(--bom-color);
+  border-color: var(--bom-color);
+  color: var(--bom-color);
 }
 
 .timeline-item.absolute .timeline-item-connector::before {
-	background-color: var(--bom-color);
+  background-color: var(--bom-color);
 }
 
 .timeline-item .circle {
-	background-color: var(--primary-color);
-	display: flex;
-	align-items: center;
-	border-radius: 50%;
-	position: absolute;
-	right: calc(50% - (var(--circle-size) / 2));
-	bottom: calc((var(--container-size) - var(--circle-size)) / 2);
-	width: var(--circle-size);
-	height: var(--circle-size);
-	z-index: 100;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  position: absolute;
+  right: calc(50% - (var(--circle-size) / 2));
+  bottom: calc((var(--container-size) - var(--circle-size)) / 2);
+  width: var(--circle-size);
+  height: var(--circle-size);
+  z-index: 100;
 }
 
 .timeline-item .circle.small {
-	right: calc(50% - (var(--circle-size) / 4));
-	bottom: calc(-1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size)));
-	width: var(--circle-size) / 2;
-	height: var(--circle-size) / 2;
+  right: calc(50% - (var(--circle-size) / 4));
+  bottom: calc(
+    -1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size))
+  );
+  width: var(--circle-size) / 2;
+  height: var(--circle-size) / 2;
 }
 
 .timeline-item .circle > * {
-	width: 100%;
+  width: 100%;
 }
 
 .timeline-item.below .circle {
-	bottom: auto;
-	top: calc((var(--container-size) - var(--circle-size)) / 2);
+  bottom: auto;
+  top: calc((var(--container-size) - var(--circle-size)) / 2);
 }
 
 .timeline-item.below .circle.small {
-	top: calc(-1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size)));;
+  top: calc(
+    -1 * var(--circle-size) / 4 - (var(--container-size) / 2 - var(--item-size))
+  );
 }

@@ -1,15 +1,63 @@
-import { useRef } from "react";
-import { useRangeCalendarState } from "@react-stately/calendar";
-import { useRangeCalendar } from "@react-aria/calendar";
-import { useLocale } from "@react-aria/i18n";
-import { CalendarDate, createCalendar, getDayOfWeek, getLocalTimeZone, getWeeksInMonth, isSameDay } from "@internationalized/date";
-import { type CalendarState, type DateFieldState, type DatePickerStateOptions, DateSegment, type OverlayTriggerState, type RangeCalendarState, useCalendarState, useDateFieldState, useDatePickerState, useDateRangePickerState } from "react-stately";
-import { type AriaButtonProps, type AriaCalendarGridProps, type AriaDialogProps, type AriaPopoverProps, type CalendarProps, type DateValue, DismissButton, Overlay, type RangeCalendarProps, mergeProps, useButton, useCalendar, useCalendarCell, useCalendarGrid, useDateField, useDatePicker, useDateRangePicker, useDateSegment, useDialog, useFocusRing, usePopover, type DateRange } from "react-aria";
-import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationIcon } from "@heroicons/react/outline";
-import React from "react";
-import {type DatePickerProps} from '@react-types/datepicker';
+import { useRef } from 'react';
+import { useRangeCalendarState } from '@react-stately/calendar';
+import { useRangeCalendar } from '@react-aria/calendar';
+import { useLocale } from '@react-aria/i18n';
+import {
+  CalendarDate,
+  createCalendar,
+  getDayOfWeek,
+  getLocalTimeZone,
+  getWeeksInMonth,
+  isSameDay,
+} from '@internationalized/date';
+import {
+  type CalendarState,
+  type DateFieldState,
+  type DatePickerStateOptions,
+  type DateSegment,
+  type OverlayTriggerState,
+  type RangeCalendarState,
+  useCalendarState,
+  useDateFieldState,
+  useDatePickerState,
+  useDateRangePickerState,
+} from 'react-stately';
+import {
+  type AriaButtonProps,
+  type AriaCalendarGridProps,
+  type AriaDialogProps,
+  type AriaPopoverProps,
+  type CalendarProps,
+  type DateValue,
+  DismissButton,
+  Overlay,
+  type RangeCalendarProps,
+  mergeProps,
+  useButton,
+  useCalendar,
+  useCalendarCell,
+  useCalendarGrid,
+  useDateField,
+  useDatePicker,
+  useDateRangePicker,
+  useDateSegment,
+  useDialog,
+  useFocusRing,
+  usePopover,
+  type DateRange,
+} from 'react-aria';
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExclamationIcon,
+} from '@heroicons/react/outline';
+import React from 'react';
+import { type DatePickerProps } from '@react-types/datepicker';
 
-export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>) => {
+export const DatePicker = <T extends DateValue>(
+  props: DatePickerStateOptions<T>
+) => {
   const state = useDatePickerState(props);
   const ref = useRef<HTMLDivElement>(null);
   const {
@@ -18,7 +66,7 @@ export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>
     fieldProps,
     buttonProps,
     dialogProps,
-    calendarProps
+    calendarProps,
   } = useDatePicker(props, state, ref);
 
   return (
@@ -26,15 +74,15 @@ export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>
       <span {...labelProps} className="text-sm text-gray-800">
         {props.label}
       </span>
-      <div {...groupProps} ref={ref} className="flex group">
-        <div className="bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-primary group-focus-within:group-hover:border-primary p-1 relative flex items-center">
+      <div {...groupProps} ref={ref} className="group flex">
+        <div className="relative flex items-center rounded-l-md border border-gray-300 bg-white p-1 pr-10 transition-colors group-focus-within:border-primary group-hover:border-gray-400 group-focus-within:group-hover:border-primary">
           <DateField {...fieldProps} />
-          {state.validationState === "invalid" && (
-            <ExclamationIcon className="w-6 h-6 text-red-500 absolute right-1" />
+          {state.validationState === 'invalid' && (
+            <ExclamationIcon className="absolute right-1 h-6 w-6 text-red-500" />
           )}
         </div>
         <FieldButton {...buttonProps} isPressed={state.isOpen}>
-          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-primary" />
+          <CalendarIcon className="h-5 w-5 text-gray-700 group-focus-within:text-primary" />
         </FieldButton>
       </div>
       {state.isOpen && (
@@ -46,23 +94,39 @@ export const DatePicker = <T extends DateValue>(props: DatePickerStateOptions<T>
       )}
     </div>
   );
-}
+};
 
 type DateRangePickerProps = {
-  start: Date | null,
-  end: Date | null,
-  onChange: (start: Date, end?: Date) => void
-}
+  start: Date | null;
+  end: Date | null;
+  onChange: (start: Date, end?: Date) => void;
+};
 export const DateRangePicker = (props: DateRangePickerProps) => {
   const options = {
-    value: props.start && props.end ? {
-      start: new CalendarDate(props.start.getFullYear(), props.start.getMonth() + 1, props.start.getDate()),
-      end: new CalendarDate(props.end.getFullYear(), props.end.getMonth() + 1, props.end.getDate()),
-    } : null,
-    onChange: (range: DateRange) => {
-      props.onChange(range?.start.toDate(getLocalTimeZone()), range?.end?.toDate(getLocalTimeZone()))
-    }
-  }
+    value:
+      props.start && props.end
+        ? {
+            start: new CalendarDate(
+              props.start.getFullYear(),
+              props.start.getMonth() + 1,
+              props.start.getDate()
+            ),
+            end: new CalendarDate(
+              props.end.getFullYear(),
+              props.end.getMonth() + 1,
+              props.end.getDate()
+            ),
+          }
+        : null,
+    onChange: (range: DateRange | null) => {
+      if (range) {
+        props.onChange(
+          range.start.toDate(getLocalTimeZone()),
+          range.end?.toDate(getLocalTimeZone())
+        );
+      }
+    },
+  };
   const state = useDateRangePickerState(options);
   const ref = useRef<HTMLDivElement>(null);
   const {
@@ -72,7 +136,7 @@ export const DateRangePicker = (props: DateRangePickerProps) => {
     endFieldProps,
     buttonProps,
     dialogProps,
-    calendarProps
+    calendarProps,
   } = useDateRangePicker(options, state, ref);
 
   return (
@@ -80,19 +144,19 @@ export const DateRangePicker = (props: DateRangePickerProps) => {
       {/* <span {...labelProps} className="text-sm text-gray-800">
         {props.label}
       </span> */}
-      <div {...groupProps} ref={ref} className="flex group">
-        <div className="flex bg-white border border-gray-300 group-hover:border-gray-400 transition-colors rounded-l-md pr-10 group-focus-within:border-primary group-focus-within:group-hover:border-primary p-1 relative">
+      <div {...groupProps} ref={ref} className="group flex">
+        <div className="relative flex rounded-l-md border border-gray-300 bg-white p-1 pr-10 transition-colors group-focus-within:border-primary group-hover:border-gray-400 group-focus-within:group-hover:border-primary">
           <DateField {...startFieldProps} />
           <span aria-hidden="true" className="px-2">
             –
           </span>
           <DateField {...endFieldProps} />
-          {state.validationState === "invalid" && (
-            <ExclamationIcon className="w-6 h-6 text-red-500 absolute right-1" />
+          {state.validationState === 'invalid' && (
+            <ExclamationIcon className="absolute right-1 h-6 w-6 text-red-500" />
           )}
         </div>
         <FieldButton {...buttonProps} isPressed={state.isOpen}>
-          <CalendarIcon className="w-5 h-5 text-gray-700 group-focus-within:text-primary" />
+          <CalendarIcon className="h-5 w-5 text-gray-700 group-focus-within:text-primary" />
         </FieldButton>
       </div>
       {state.isOpen && (
@@ -104,14 +168,14 @@ export const DateRangePicker = (props: DateRangePickerProps) => {
       )}
     </div>
   );
-}
+};
 
 export const DateField = <T extends DateValue>(props: DatePickerProps<T>) => {
   const { locale } = useLocale();
   const state = useDateFieldState({
     ...props,
     locale,
-    createCalendar
+    createCalendar,
   });
 
   const ref = useRef<HTMLDivElement>(null);
@@ -124,9 +188,15 @@ export const DateField = <T extends DateValue>(props: DatePickerProps<T>) => {
       ))}
     </div>
   );
-}
+};
 
-function DateSegment({ segment, state }: {segment: DateSegment, state: DateFieldState}) {
+function DateSegment({
+  segment,
+  state,
+}: {
+  segment: DateSegment;
+  state: DateFieldState;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const { segmentProps } = useDateSegment(segment, state, ref);
 
@@ -137,10 +207,12 @@ function DateSegment({ segment, state }: {segment: DateSegment, state: DateField
       style={{
         ...segmentProps.style,
         minWidth:
-          segment.maxValue != null ? `${String(segment.maxValue).length}ch` : undefined
+          segment.maxValue != null
+            ? `${String(segment.maxValue).length}ch`
+            : undefined,
       }}
-      className={`px-0.5 box-content tabular-nums text-right outline-none rounded-sm focus:bg-primary focus:text-white group ${
-        !segment.isEditable ? "text-gray-500" : "text-gray-800"
+      className={`group box-content rounded-sm px-0.5 text-right tabular-nums outline-none focus:bg-primary focus:text-white ${
+        !segment.isEditable ? 'text-gray-500' : 'text-gray-800'
       }`}
     >
       {/* Always reserve space for the placeholder, to prevent layout shift when editing. */}
@@ -148,14 +220,14 @@ function DateSegment({ segment, state }: {segment: DateSegment, state: DateField
         aria-hidden="true"
         className="block w-full text-center italic text-gray-500 group-focus:text-white"
         style={{
-          visibility: segment.isPlaceholder ? undefined : "hidden",
-          height: segment.isPlaceholder ? "" : 0,
-          pointerEvents: "none"
+          visibility: segment.isPlaceholder ? undefined : 'hidden',
+          height: segment.isPlaceholder ? '' : 0,
+          pointerEvents: 'none',
         }}
       >
         {segment.placeholder}
       </span>
-      {segment.isPlaceholder ? "" : segment.text}
+      {segment.isPlaceholder ? '' : segment.text}
     </div>
   );
 }
@@ -165,20 +237,21 @@ export const Calendar = <T extends DateValue>(props: CalendarProps<T>) => {
   const state = useCalendarState({
     ...props,
     locale,
-    createCalendar
+    createCalendar,
   });
 
   const ref = useRef<HTMLDivElement>(null);
-  const { calendarProps, prevButtonProps, nextButtonProps, title } = useCalendar(
-    props,
-    state,
-    //ref
-  );
+  const { calendarProps, prevButtonProps, nextButtonProps, title } =
+    useCalendar(
+      props,
+      state
+      //ref
+    );
 
   return (
     <div {...calendarProps} ref={ref} className="inline-block text-gray-800">
       <div className="flex items-center pb-4">
-        <h2 className="flex-1 font-bold text-xl ml-2">{title}</h2>
+        <h2 className="ml-2 flex-1 text-xl font-bold">{title}</h2>
         <CalendarButton {...prevButtonProps}>
           <ChevronLeftIcon className="h-6 w-6" />
         </CalendarButton>
@@ -189,28 +262,26 @@ export const Calendar = <T extends DateValue>(props: CalendarProps<T>) => {
       <CalendarGrid state={state} />
     </div>
   );
-}
+};
 
-export const RangeCalendar = <T extends DateValue>(props: RangeCalendarProps<T>) => {
+export const RangeCalendar = <T extends DateValue>(
+  props: RangeCalendarProps<T>
+) => {
   const { locale } = useLocale();
   const state = useRangeCalendarState({
     ...props,
     locale,
-    createCalendar
+    createCalendar,
   });
 
   const ref = useRef<HTMLDivElement>(null);
-  const {
-    calendarProps,
-    prevButtonProps,
-    nextButtonProps,
-    title
-  } = useRangeCalendar(props, state, ref);
+  const { calendarProps, prevButtonProps, nextButtonProps, title } =
+    useRangeCalendar(props, state, ref);
 
   return (
     <div {...calendarProps} ref={ref} className="inline-block">
       <div className="flex items-center pb-4">
-        <h2 className="flex-1 font-bold text-xl ml-2">{title}</h2>
+        <h2 className="ml-2 flex-1 text-xl font-bold">{title}</h2>
         <CalendarButton {...prevButtonProps}>
           <ChevronLeftIcon className="h-6 w-6" />
         </CalendarButton>
@@ -221,11 +292,11 @@ export const RangeCalendar = <T extends DateValue>(props: RangeCalendarProps<T>)
       <CalendarGrid state={state} />
     </div>
   );
-}
+};
 
 type CalendarGridProps = {
-  state: CalendarState | RangeCalendarState
-} & AriaCalendarGridProps
+  state: CalendarState | RangeCalendarState;
+} & AriaCalendarGridProps;
 export const CalendarGrid = ({ state, ...props }: CalendarGridProps) => {
   const { locale } = useLocale();
   const { gridProps, headerProps, weekDays } = useCalendarGrid(props, state);
@@ -261,12 +332,12 @@ export const CalendarGrid = ({ state, ...props }: CalendarGridProps) => {
       </tbody>
     </table>
   );
-}
+};
 
 type CalendarCellProps = {
-  date: CalendarDate,
-  state: CalendarState | RangeCalendarState
-}
+  date: CalendarDate;
+  state: CalendarState | RangeCalendarState;
+};
 export function CalendarCell({ state, date }: CalendarCellProps) {
   const ref = useRef<HTMLDivElement>(null);
   const {
@@ -276,17 +347,19 @@ export function CalendarCell({ state, date }: CalendarCellProps) {
     isOutsideVisibleRange,
     isDisabled,
     formattedDate,
-    isInvalid
+    isInvalid,
   } = useCalendarCell({ date }, state, ref);
 
   // The start and end date of the selected range will have
   // an emphasized appearance.
-  const isSelectionStart = 'highlightedRange' in state && state.highlightedRange
-    ? isSameDay(date, state.highlightedRange.start)
-    : isSelected;
-  const isSelectionEnd = 'highlightedRange' in state && state.highlightedRange
-    ? isSameDay(date, state.highlightedRange.end)
-    : isSelected;
+  const isSelectionStart =
+    'highlightedRange' in state && state.highlightedRange
+      ? isSameDay(date, state.highlightedRange.start)
+      : isSelected;
+  const isSelectionEnd =
+    'highlightedRange' in state && state.highlightedRange
+      ? isSameDay(date, state.highlightedRange.end)
+      : isSelected;
 
   // We add rounded corners on the left for the first day of the month,
   // the first day of each week, and the start date of the selection.
@@ -307,43 +380,49 @@ export function CalendarCell({ state, date }: CalendarCellProps) {
   return (
     <td
       {...cellProps}
-      className={`py-0.5 relative ${isFocusVisible ? "z-10" : "z-0"}`}
+      className={`relative py-0.5 ${isFocusVisible ? 'z-10' : 'z-0'}`}
     >
       <div
         {...mergeProps(buttonProps, focusProps)}
         ref={ref}
         hidden={isOutsideVisibleRange}
-        className={`w-10 h-10 outline-none group ${
-          isRoundedLeft ? "rounded-l-full" : ""
-        } ${isRoundedRight ? "rounded-r-full" : ""} ${
-          isSelected ? (isInvalid ? "bg-red-300" : "bg-primary bg-opacity-30") : ""
-        } ${isDisabled ? "disabled" : ""}`}
+        className={`group h-10 w-10 outline-none ${
+          isRoundedLeft ? 'rounded-l-full' : ''
+        } ${isRoundedRight ? 'rounded-r-full' : ''} ${
+          isSelected
+            ? isInvalid
+              ? 'bg-red-300'
+              : 'bg-primary bg-opacity-30'
+            : ''
+        } ${isDisabled ? 'disabled' : ''}`}
       >
         <div
-          className={`w-full h-full rounded-full flex items-center justify-center ${
-            isDisabled && !isInvalid ? "text-gray-400" : ""
+          className={`flex h-full w-full items-center justify-center rounded-full ${
+            isDisabled && !isInvalid ? 'text-gray-400' : ''
           } ${
             // Focus ring, visible while the cell has keyboard focus.
             isFocusVisible
-              ? "ring-2 group-focus:z-2 ring-primary ring-offset-2"
-              : ""
+              ? 'group-focus:z-2 ring-2 ring-primary ring-offset-2'
+              : ''
           } ${
             // Darker selection background for the start and end.
             isSelectionStart || isSelectionEnd
               ? isInvalid
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-primary text-white hover:bg-primary hover:bg-opacity-90"
-              : ""
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-primary text-white hover:bg-primary hover:bg-opacity-90'
+              : ''
           } ${
             // Hover state for cells in the middle of the range.
             isSelected && !isDisabled && !(isSelectionStart || isSelectionEnd)
               ? isInvalid
-                ? "hover:bg-red-400"
-                : "hover:bg-primary hover:bg-opacity-30"
-              : ""
+                ? 'hover:bg-red-400'
+                : 'hover:bg-primary hover:bg-opacity-30'
+              : ''
           } ${
             // Hover state for non-selected cells.
-            !isSelected && !isDisabled ? "hover:bg-opacity-10 hover:bg-primary" : ""
+            !isSelected && !isDisabled
+              ? 'hover:bg-primary hover:bg-opacity-10'
+              : ''
           } cursor-default`}
         >
           {formattedDate}
@@ -365,17 +444,19 @@ export function Dialog({ children, ...props }: DialogProps) {
   );
 }
 
-type PopoverProps = React.PropsWithChildren<Omit<AriaPopoverProps, 'popoverRef'> & {
-  state: OverlayTriggerState
-}>
+type PopoverProps = React.PropsWithChildren<
+  Omit<AriaPopoverProps, 'popoverRef'> & {
+    state: OverlayTriggerState;
+  }
+>;
 export const Popover = (props: PopoverProps) => {
   const ref = React.useRef<HTMLDivElement>(null);
-  const {children, state} = props;
+  const { children, state } = props;
 
   const { popoverProps, underlayProps } = usePopover(
     {
       ...props,
-      popoverRef: ref
+      popoverRef: ref,
     },
     state
   );
@@ -386,7 +467,7 @@ export const Popover = (props: PopoverProps) => {
       <div
         {...popoverProps}
         ref={ref}
-        className="absolute top-full bg-white border border-gray-300 rounded-md shadow-lg mt-2 p-8 z-10"
+        className="absolute top-full z-10 mt-2 rounded-md border border-gray-300 bg-white p-8 shadow-lg"
       >
         <DismissButton onDismiss={state.close.bind(state)} />
         {children}
@@ -394,7 +475,7 @@ export const Popover = (props: PopoverProps) => {
       </div>
     </Overlay>
   );
-}
+};
 
 export function CalendarButton(props: AriaButtonProps<'button'>) {
   const ref = useRef<HTMLButtonElement>(null);
@@ -404,10 +485,10 @@ export function CalendarButton(props: AriaButtonProps<'button'>) {
     <button
       {...mergeProps(buttonProps, focusProps)}
       ref={ref}
-      className={`p-2 rounded-full ${props.isDisabled ? "text-gray-400" : ""} ${
-        !props.isDisabled ? "hover:opacity-10 active:opacity-20" : ""
+      className={`rounded-full p-2 ${props.isDisabled ? 'text-gray-400' : ''} ${
+        !props.isDisabled ? 'hover:opacity-10 active:opacity-20' : ''
       } outline-none ${
-        isFocusVisible ? "ring-2 ring-offset-2 ring-primary" : ""
+        isFocusVisible ? 'ring-2 ring-primary ring-offset-2' : ''
       }`}
     >
       {props.children}
@@ -416,8 +497,8 @@ export function CalendarButton(props: AriaButtonProps<'button'>) {
 }
 
 type FieldProps = AriaButtonProps<'button'> & {
-  isPressed: boolean
-}
+  isPressed: boolean;
+};
 export function FieldButton(props: FieldProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const { buttonProps, isPressed } = useButton(props, ref);
@@ -425,10 +506,10 @@ export function FieldButton(props: FieldProps) {
     <button
       {...buttonProps}
       ref={ref}
-      className={`px-2 -ml-px border transition-colors rounded-r-md group-focus-within:border-primary group-focus-within:group-hover:border-primary outline-none ${
+      className={`-ml-px rounded-r-md border px-2 outline-none transition-colors group-focus-within:border-primary group-focus-within:group-hover:border-primary ${
         isPressed || props.isPressed
-          ? "bg-gray-200 border-gray-400"
-          : "bg-gray-50 border-gray-300 group-hover:border-gray-400"
+          ? 'border-gray-400 bg-gray-200'
+          : 'border-gray-300 bg-gray-50 group-hover:border-gray-400'
       }`}
     >
       {props.children}

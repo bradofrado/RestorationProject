@@ -1,13 +1,13 @@
-import { type GetServerSidePropsContext } from "next";
+import { type GetServerSidePropsContext } from 'next';
 import {
   getServerSession,
   type NextAuthOptions,
   type DefaultSession,
-} from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "./db";
-import { type UserRole, loginSchema } from "~/utils/types/auth";
-import { login } from "./dao/authDAO";
+} from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { prisma } from './db';
+import { type UserRole, loginSchema } from '~/utils/types/auth';
+import { login } from './dao/authDAO';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -15,7 +15,7 @@ import { login } from "./dao/authDAO";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
@@ -27,10 +27,9 @@ declare module "next-auth" {
   interface User {
     // ...other properties
     role: UserRole;
-    email: string,
-    name: string
+    email: string;
+    name: string;
   }
-
 }
 
 /**
@@ -60,19 +59,19 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     CredentialsProvider({
-      name: "Credientials",
+      name: 'Credientials',
       credentials: {
-        email: { label: "Email", type: "text"},
-        password: { label: "Password", type: "password"}
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials || !loginSchema.safeParse(credentials).success) {
           return null;
         }
 
-        const user = await login({input: credentials, db: prisma});
+        const user = await login({ input: credentials, db: prisma });
         console.log(user);
-        
+
         return user;
       },
     }),
@@ -90,9 +89,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: 15 * 24 * 30 * 60, // 15 days
   },
   pages: {
-    signIn: "/login",
-    newUser: "/signup"
-  }
+    signIn: '/login',
+    newUser: '/signup',
+  },
 };
 
 /**
@@ -101,8 +100,8 @@ export const authOptions: NextAuthOptions = {
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
+  req: GetServerSidePropsContext['req'];
+  res: GetServerSidePropsContext['res'];
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };

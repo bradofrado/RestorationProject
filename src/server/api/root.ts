@@ -1,8 +1,8 @@
-import { createTRPCRouter } from "~/server/api/trpc";
-import { homeRouter } from "~/server/api/routers/home";
-import { pageRouter } from "./routers/page";
-import { timelineRouter } from "./routers/timeline";
-import { authRouter } from "./routers/auth";
+import { createTRPCRouter } from '~/server/api/trpc';
+import { homeRouter } from '~/server/api/routers/home';
+import { pageRouter } from './routers/page';
+import { timelineRouter } from './routers/timeline';
+import { authRouter } from './routers/auth';
 
 /**
  * This is the primary router for your server.
@@ -11,9 +11,9 @@ import { authRouter } from "./routers/auth";
  */
 export const appRouter = createTRPCRouter({
   home: homeRouter,
-	page: pageRouter,
-	timeline: timelineRouter,
-	auth: authRouter
+  page: pageRouter,
+  timeline: timelineRouter,
+  auth: authRouter,
 });
 
 // export type definition of API
