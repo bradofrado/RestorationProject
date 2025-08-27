@@ -94,7 +94,9 @@ export const NumberInput = <T extends React.ElementType>({
       return;
     }
 
-    onChange && onChange(number);
+    if (onChange) {
+      onChange(number);
+    }
   };
   const props = {
     className: `${

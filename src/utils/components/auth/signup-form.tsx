@@ -40,7 +40,9 @@ export const SignupForm = ({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    validate() && onSubmitProps({ name, email, password });
+    if (validate()) {
+      onSubmitProps({ name, email, password });
+    }
   };
   return (
     <>

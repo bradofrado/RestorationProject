@@ -1,4 +1,4 @@
-import { NextFont } from 'next/dist/compiled/@next/font';
+import { type NextFont } from 'next/dist/compiled/@next/font';
 import {
   Inter,
   Roboto,
@@ -102,5 +102,15 @@ export const fonts: Font[] = [
     id: mulish.className,
     name: 'Mulish',
     font: mulish,
+  },
+  {
+    id: corben.className,
+    name: 'Corben',
+    font: corben,
+  },
+  {
+    id: nobile.className,
+    name: 'Nobile',
+    font: nobile,
   },
 ];

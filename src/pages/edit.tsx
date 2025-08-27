@@ -23,9 +23,11 @@ const Edit_page: NextPage = () => {
   }
 
   const setRoute = (id: string | undefined) => {
-    id
-      ? void router.push(`${router.basePath}?id=${id}`)
-      : void router.push(`${router.basePath}`);
+    if (id) {
+      void router.push(`${router.basePath}?id=${id}`);
+    } else {
+      void router.push(`${router.basePath}`);
+    }
   };
 
   const tabItems: TabItem[] = [

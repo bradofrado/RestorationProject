@@ -284,7 +284,9 @@ const addAndDeleteItemToPage = async ({
   expect(allItems.length).toBe(page.settings.length + 1);
   const newComponent = allItems[allItems.length - 1] as HTMLElement;
 
-  callback && (await callback({ newComponent, ...rest }));
+  if (callback) {
+    await callback({ newComponent, ...rest });
+  }
 
   expect(getByRole(newComponent, typeToRole[type])).toBeInTheDocument();
 

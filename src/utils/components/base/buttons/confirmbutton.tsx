@@ -21,7 +21,9 @@ const ConfirmButton = <C extends React.ElementType>(
   };
   const onCancelClick = () => {
     setIsOpen(false);
-    onCancel && onCancel();
+    if (onCancel) {
+      onCancel();
+    }
   };
   const onOk = () => {
     setIsOpen(false);

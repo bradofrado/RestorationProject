@@ -6,6 +6,7 @@ import {
 import { type User, userSchema } from './auth';
 import { type ReplaceWithName } from '../utils';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- ok
 const loggingArgs = {
   include: { user: true },
 };

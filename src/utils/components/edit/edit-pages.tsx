@@ -102,7 +102,11 @@ export const EditPages = ({ setId }: EditPagesProps) => {
 
   const onSave = (isNew: boolean) => {
     if (currPage) {
-      isNew ? create.mutate(currPage) : update.mutate(currPage);
+      if (isNew) {
+        create.mutate(currPage);
+      } else {
+        update.mutate(currPage);
+      }
       setId(currPage.id);
       alert('Page saved!');
     }
@@ -236,9 +240,13 @@ const EditablePage = ({
       throw new Error('Cannot update setting');
     }
     if (setting.id >= 0) {
-      !isNew && updateSetting(setting);
+      if (!isNew) {
+        updateSetting(setting);
+      }
     } else {
-      !isNew && createSetting(setting);
+      if (!isNew) {
+        createSetting(setting);
+      }
     }
   };
 
@@ -252,7 +260,9 @@ const EditablePage = ({
     if (!setting) {
       throw new Error('Cannot delete setting');
     }
-    !isNew && setting.id >= 0 && deleteSetting(setting.id);
+    if (!isNew && setting.id >= 0) {
+      deleteSetting(setting.id);
+    }
   };
 
   const onReorder = (items: EditableComponentType[]) => {
@@ -267,7 +277,9 @@ const EditablePage = ({
       }
     };
     const page = editSettings(updateComponents);
-    !isNew && reorderSettings(page.settings);
+    if (!isNew) {
+      reorderSettings(page.settings);
+    }
   };
 
   const settings = page.settings; //.slice().sort((a, b) => a.order - b.order);

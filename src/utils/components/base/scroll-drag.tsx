@@ -30,13 +30,17 @@ const ScrollDrag: React.FC<ScrollDragProps> = (props: ScrollDragProps) => {
       x: e.clientX,
     });
     setIsScrolling(true);
-    ref.current && (ref.current.style.cursor = 'grabbing');
-    ref.current && (ref.current.style.userSelect = 'none');
+    if (ref.current) {
+      ref.current.style.cursor = 'grabbing';
+      ref.current.style.userSelect = 'none';
+    }
   };
 
   const onMouseUp = () => {
     setIsScrolling(false);
-    ref.current && (ref.current.style.cursor = 'grab');
+    if (ref.current) {
+      ref.current.style.cursor = 'grab';
+    }
     ref.current?.style.removeProperty('user-select');
   };
 
@@ -45,7 +49,9 @@ const ScrollDrag: React.FC<ScrollDragProps> = (props: ScrollDragProps) => {
       // How far the mouse has been moved
       const dx = e.clientX - pos.x;
 
-      ref.current && (ref.current.scrollLeft = pos.left - dx);
+      if (ref.current) {
+        ref.current.scrollLeft = pos.left - dx;
+      }
     }
   };
   return (

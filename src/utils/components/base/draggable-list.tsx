@@ -174,7 +174,9 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
   const onReorder = (newItems: T[]) => {
     setItems(newItems.map((x) => x.id));
     setIsDirty(true);
-    onReordering && onReordering();
+    if (onReordering) {
+      onReordering();
+    }
   };
 
   const onSave = () => {
@@ -204,7 +206,7 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
       <div className="relative my-2">
         {isDirty && (
           <div
-            className="absolute top-0 left-0 h-full w-full rounded-xl bg-primary-light opacity-50"
+            className="absolute left-0 top-0 h-full w-full rounded-xl bg-primary-light opacity-50"
             data-testid="dirty-state-delete"
           ></div>
         )}

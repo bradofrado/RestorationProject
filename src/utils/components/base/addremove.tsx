@@ -89,7 +89,9 @@ const AddRemoveItem = <T extends React.ElementType>({
       handler: onDelete,
     },
   ];
-  iconsProp && icons.push(...iconsProp);
+  if (iconsProp) {
+    icons.push(...iconsProp);
+  }
   return (
     <Editable icons={icons} editable="false">
       {children || <Component {...rest} />}

@@ -261,8 +261,7 @@ const EditableList: React.ElementType<EditableDataComponent> = ({
   if (query.isLoading || query.isError) {
     return <></>;
   }
-  const type: TimelineCategoryName | 'custom' =
-    data != null ? data.content : 'custom';
+  const type: TimelineCategoryName = data != null ? data.content : 'custom';
   const dropdownItems: DropdownItem<string>[] = [
     {
       name: 'Custom',

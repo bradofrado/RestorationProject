@@ -71,7 +71,7 @@ export const jsonParse = <T>(schema: z.ZodType<T>) =>
   z.string().transform((str, ctx): z.infer<typeof schema> => {
     try {
       return schema.parse(JSON.parse(str));
-    } catch (e) {
+    } catch {
       ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
       return z.NEVER;
     }

@@ -32,7 +32,9 @@ const Dropdown = <T,>({
 
   const onClick = (item: DropdownItem<T>, index: number) => {
     setValue(item);
-    onChange && onChange(item, index);
+    if (onChange) {
+      onChange(item, index);
+    }
   };
 
   return (
@@ -42,7 +44,7 @@ const Dropdown = <T,>({
           <Menu.Button className={className}>
             {initialValue && value ? value?.name : children}{' '}
             {chevron && (
-              <ChevronDown className="ml-2 -mr-1 h-4 w-4" aria-hidden="true" />
+              <ChevronDown className="-mr-1 ml-2 h-4 w-4" aria-hidden="true" />
             )}
           </Menu.Button>
         </div>

@@ -17,7 +17,9 @@ const CondensedTimeline: React.FC<CondensedTimelineProps> = ({
 }: CondensedTimelineProps) => {
   const ref = useRef<HTMLUListElement>(null);
   useEffect(() => {
-    color && ref.current?.style.setProperty('--bom-color', color);
+    if (color) {
+      ref.current?.style.setProperty('--bom-color', color);
+    }
   }, [color]);
   return (
     <>

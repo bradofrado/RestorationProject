@@ -83,7 +83,11 @@ export const EditTimelineItems = () => {
       return;
     }
 
-    isNew ? create.mutate(category) : update.mutate(category);
+    if (isNew) {
+      create.mutate(category);
+    } else {
+      update.mutate(category);
+    }
   };
 
   const onClear = () => {
@@ -120,7 +124,9 @@ export const EditTimelineItems = () => {
 
     const copy = category.items.slice();
     copy.splice(i, 1);
-    item.id > 0 && deleteItem.mutate(item.id);
+    if (item.id > 0) {
+      deleteItem.mutate(item.id);
+    }
     changeProperty(category, 'items', copy);
   };
 
@@ -148,7 +154,11 @@ export const EditTimelineItems = () => {
     if (!category) return;
     const copy = category.items.slice();
     copy[i] = item;
-    item.id < 0 ? createItem.mutate(item) : updateItem.mutate(item);
+    if (item.id < 0) {
+      createItem.mutate(item);
+    } else {
+      updateItem.mutate(item);
+    }
     changeProperty(category, 'items', copy);
   };
 
@@ -267,8 +277,9 @@ const EditRestorationItem = ({
 
   const onDateChange = (start: Date, end?: Date) => {
     const newItem = changePropertyItem(propItem, 'date', start);
-    end && changePropertyItem(newItem, 'endDate', end);
-    end && changePropertyItem(newItem, 'endDate', end);
+    if (end) {
+      changePropertyItem(newItem, 'endDate', end);
+    }
   };
 
   const onDateRemove = () => {

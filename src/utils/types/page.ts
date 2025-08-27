@@ -11,6 +11,7 @@ const settingsWithData = {
   include: { data: data },
 } satisfies Prisma.ComponentSettingsDefaultArgs;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- ok
 const pageWithSettings = {
   include: { settings: settingsWithData },
 } satisfies Prisma.PageDefaultArgs;
