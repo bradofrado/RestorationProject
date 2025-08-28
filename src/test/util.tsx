@@ -52,6 +52,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 2,
@@ -66,6 +67,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 3,
@@ -80,6 +82,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 4,
@@ -94,6 +97,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 5,
@@ -108,6 +112,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 6,
@@ -122,6 +127,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 7,
@@ -136,6 +142,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 8,
@@ -150,6 +157,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
     ],
   },
@@ -172,6 +180,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 10,
@@ -186,6 +195,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 11,
@@ -200,6 +210,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 12,
@@ -212,6 +223,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
       {
         id: 13,
@@ -224,6 +236,7 @@ export const categories: TimelineCategory[] = [
         type: 'EXACT',
         x: null,
         y: null,
+        mapImage: null,
       },
     ],
   },

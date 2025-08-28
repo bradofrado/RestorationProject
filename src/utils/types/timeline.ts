@@ -47,6 +47,7 @@ export const RestorationTimelineItemSchema = z.object({
   type: z.nativeEnum(TimelineDateType),
   x: z.number().nullable(),
   y: z.number().nullable(),
+  mapImage: z.string().nullable(),
 }) satisfies z.Schema<Omit<PrismaTimelineItemWithLinksArray, 'isDeleted'>>;
 export type RestorationTimelineItem = z.infer<
   typeof RestorationTimelineItemSchema

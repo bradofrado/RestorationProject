@@ -125,6 +125,7 @@ model TimelineItem {
   links       String
   x           Float?
   y           Float?
+  mapImage    String?
   type        TimelineDateType
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?

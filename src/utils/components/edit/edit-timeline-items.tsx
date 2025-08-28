@@ -30,10 +30,12 @@ import {
   DroppableContext,
 } from '~/utils/components/base/draggable-list';
 import { DragMoveIcon } from '../icons/icons';
-import { TimelineDateType } from '@prisma/client';
 import Modal from '../base/modal';
 import Button from '../base/buttons/button';
-import { HexColor } from '~/utils/types/colors';
+import { type HexColor } from '~/utils/types/colors';
+import { MapSelector } from '../base/map-selector';
+import { type MapImage, maps } from '~/utils/types/maps';
+import Image from 'next/image';
 
 type Position = { x: number; y: number };
 
@@ -153,6 +155,7 @@ export const EditTimelineItems = () => {
       type: 'EXACT',
       x: null,
       y: null,
+      mapImage: null,
     });
     changeProperty(category, 'items', copy);
   };
@@ -304,17 +307,28 @@ const EditRestorationItem = ({
   };
 
   const pos: Position | undefined =
-    propItem.x !== null && propItem.y !== null
+    propItem.x != null && propItem.y != null
       ? { x: propItem.x, y: propItem.y }
       : undefined;
 
-  const onLocationEdit = (value: Position | undefined) => {
-    if (value && value !== pos) {
-      const newItem = changePropertyItem(propItem, 'x', value.x);
-      changePropertyItem(newItem, 'y', value.y);
+  const onLocationEdit = (value: EditLocationValue) => {
+    if (value.pos && value.pos !== pos) {
+      let newItem = changePropertyItem(propItem, 'x', value.pos.x);
+      newItem = changePropertyItem(newItem, 'y', value.pos.y);
+      changePropertyItem(newItem, 'mapImage', value.mapImage);
+    } else {
+      changePropertyItem(propItem, 'mapImage', value.mapImage);
     }
     setShow(false);
   };
+
+  const onLocationRemove = () => {
+    let newItem = changePropertyItem(propItem, 'x', null);
+    newItem = changePropertyItem(newItem, 'y', null);
+    changePropertyItem(newItem, 'mapImage', null);
+  };
+
+  const mapImage = maps.find((m) => m.name === propItem.mapImage);
 
   return (
     <>
@@ -375,37 +389,67 @@ const EditRestorationItem = ({
           </AddRemove>
         </Label>
         <Label label="Location">
-          <Button
-            onClick={onEditLocationClick}
-            mode={pos ? 'primary' : 'secondary'}
-          >
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <RemoveField
+              value={!!propItem.x || !!propItem.y}
+              onRemove={onLocationRemove}
+            >
+              <>
+                {propItem.x != null && <span>x: {propItem.x}</span>}
+                {propItem.y != null && <span>y: {propItem.y}</span>}
+              </>
+            </RemoveField>
+            <Button
+              onClick={onEditLocationClick}
+              mode={pos ? 'primary' : 'secondary'}
+            >
+              Edit
+            </Button>
+          </div>
+          {mapImage ? (
+            <Image
+              src={mapImage.image}
+              alt={mapImage.name}
+              width={100}
+              height={100}
+            />
+          ) : null}
         </Label>
       </Panel>
-      <Modal isOpen={show} header="" buttons={[]}>
+      <Modal isOpen={show} header="" buttons={[]} size="lg">
         <EditLocationMap
           key={propItem.id}
-          value={pos}
+          value={{ pos, mapImage: propItem.mapImage || '' }}
           onChange={onLocationEdit}
           background={category.color}
+          onClose={() => setShow(false)}
         />
       </Modal>
     </>
   );
 };
 
+interface EditLocationValue {
+  pos: Position | undefined;
+  mapImage: string;
+}
+
 interface EditLocationMapProps {
-  value: Position | undefined;
-  onChange: (value: Position | undefined) => void;
+  value: EditLocationValue;
+  onChange: (value: EditLocationValue) => void;
+  onClose: () => void;
   background: HexColor;
 }
 const EditLocationMap: React.FunctionComponent<EditLocationMapProps> = ({
   onChange,
   value,
   background,
+  onClose,
 }) => {
-  const [pos, setPos] = useState<Position | undefined>(value);
+  const [mapImage, setMapImage] = useState<MapImage | undefined>(
+    maps.find((m) => m.name === value.mapImage)
+  );
+  const [pos, setPos] = useState<Position | undefined>(value.pos);
   const onImageClick: React.MouseEventHandler<HTMLImageElement> = (e) => {
     const target = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - target.left;
@@ -416,21 +460,45 @@ const EditLocationMap: React.FunctionComponent<EditLocationMapProps> = ({
 
   return (
     <>
-      <div className="relative" onClick={onImageClick}>
-        {pos ? (
-          <div
-            className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{
-              left: `${pos.x * 100}%`,
-              top: `${pos.y * 100}%`,
-              backgroundColor: background,
+      {maps.length > 1 ? (
+        <Label label="Map">
+          <MapSelector
+            value={mapImage?.name ?? ''}
+            onChange={(value) => {
+              setMapImage(value);
             }}
           />
-        ) : null}
-        <img src="/map-israel.gif" />
-      </div>
+        </Label>
+      ) : null}
+      <Label label="Location">
+        <div className="relative" onClick={onImageClick}>
+          {pos ? (
+            <div
+              className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                left: `${pos.x * 100}%`,
+                top: `${pos.y * 100}%`,
+                backgroundColor: background,
+              }}
+            />
+          ) : null}
+          {mapImage ? (
+            <Image
+              src={mapImage.image}
+              alt={mapImage.name}
+              fill
+              style={{ position: undefined }}
+            />
+          ) : null}
+        </div>
+      </Label>
       <div className="flex items-center justify-end">
-        <Button onClick={() => onChange(pos)}>Done</Button>
+        <Button mode="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={() => onChange({ pos, mapImage: value.mapImage })}>
+          Save
+        </Button>
       </div>
     </>
   );

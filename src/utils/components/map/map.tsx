@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
-  RestorationTimelineItem,
-  TimelineCategory,
+  type RestorationTimelineItem,
+  type TimelineCategory,
 } from '~/utils/types/timeline';
 import { TimelineCategoryFilter } from '../Timeline/Timeline';
 import { Annotation } from '../Timeline/CondensedTimeline';
@@ -9,11 +9,16 @@ import {
   AnnotationLinkProvider,
   useAnnotationLink,
 } from '../edit/add-component';
+import { MapSelector } from '../base/map-selector';
+import { maps, type MapImage } from '~/utils/types/maps';
+import Image from 'next/image';
+import Label from '../base/label';
 
 interface MapProps {
   categories: TimelineCategory[];
 }
 export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
+  const [mapImage, setMapImage] = useState<MapImage | undefined>(undefined);
   const [hoveredItem, setHoveredItem] = useState<RestorationTimelineItem>();
   const [filteredCategories, setFilteredCategories] = useState<
     TimelineCategory['id'][]
@@ -56,9 +61,9 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
 
   return (
     <AnnotationLinkProvider>
-      <div className="flex justify-start">
+      <div className="grid grid-cols-4 gap-4">
         <EventList items={filtered} hoveredId={hoveredItem?.id} />
-        <div className="relative h-fit">
+        <div className="relative col-span-2 h-fit">
           {items.map((item) =>
             item.x && item.y ? (
               <div
@@ -79,15 +84,26 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
               ></div>
             ) : null
           )}
-          <img src="/map-israel.gif" />
+          {mapImage ? (
+            <Image src={mapImage.image} alt={mapImage.name} />
+          ) : (
+            <div className="h-full w-full bg-gray-200" />
+          )}
         </div>
         <div>
-          <TimelineCategoryFilter
-            categories={categories}
-            filtered={filteredCategories}
-            onChange={onCategoryClick}
-            filterKey="id"
-          />
+          <Label label="Categories">
+            <TimelineCategoryFilter
+              categories={categories}
+              filtered={filteredCategories}
+              onChange={onCategoryClick}
+              filterKey="id"
+            />
+          </Label>
+          {maps.length > 1 ? (
+            <Label label="Maps">
+              <MapSelector value={mapImage?.name} onChange={setMapImage} />
+            </Label>
+          ) : null}
         </div>
       </div>
     </AnnotationLinkProvider>
