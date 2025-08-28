@@ -8,20 +8,20 @@ const Index: NextPage = () => {
       <h1 className="my-10 text-center text-4xl font-extrabold tracking-tight text-gray-800 sm:text-[5rem] sm:leading-[1]">
         Witnesses of the Restoration
       </h1>
-      <Button
-        as={Link}
-        href="/map"
-        className="px-3 py-3 font-bold sm:text-base"
-      >
-        Go to map
-      </Button>
-      <div className="flex">
+      <div className="flex gap-2">
         <Button
           as={Link}
           href="/timeline"
           className="px-3 py-3 font-bold sm:text-base"
         >
           Go to timeline
+        </Button>
+        <Button
+          as={Link}
+          href="/map"
+          className="px-3 py-3 font-bold sm:text-base"
+        >
+          Go to map
         </Button>
       </div>
     </div>

@@ -458,7 +458,7 @@ const EditLocationMap: React.FunctionComponent<EditLocationMapProps> = ({
   onClose,
 }) => {
   const [mapImage, setMapImage] = useState<MapImage | undefined>(
-    maps.find((m) => m.name === value.mapImage)
+    maps.find((m) => m.name === value.mapImage) ?? maps[0]
   );
   const [pos, setPos] = useState<Position | undefined>(value.pos);
   const onImageClick: React.MouseEventHandler<HTMLImageElement> = (e) => {

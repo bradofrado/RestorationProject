@@ -18,7 +18,7 @@ interface MapProps {
   categories: TimelineCategory[];
 }
 export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
-  const [mapImage, setMapImage] = useState<MapImage | undefined>(undefined);
+  const [mapImage, setMapImage] = useState<MapImage | undefined>(maps[0]);
   const [hoveredItem, setHoveredItem] = useState<RestorationTimelineItem>();
   const [filteredCategories, setFilteredCategories] = useState<
     TimelineCategory['id'][]
