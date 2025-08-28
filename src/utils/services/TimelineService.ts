@@ -4,8 +4,10 @@ export const useGetCategory = (category: string) => {
   return api.timeline.getCategory.useQuery(category);
 };
 
-export const useGetCategories = () => {
-  return api.timeline.getCategories.useQuery();
+export const useGetCategories = (
+  options: { includeDeleted?: boolean } = {}
+) => {
+  return api.timeline.getCategories.useQuery(options);
 };
 
 export const useCategoryMutations = () => {

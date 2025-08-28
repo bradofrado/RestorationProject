@@ -50,7 +50,7 @@ export const EditTimelineItems = () => {
     deletem: deleteItem,
   } = useTimelineMutations();
   const pageQuery = useGetPages();
-  const categoryQuery = useGetCategories();
+  const categoryQuery = useGetCategories({ includeDeleted: true });
   useEffect(() => {
     if (create.data != undefined) {
       setCategory(create.data);
@@ -71,7 +71,7 @@ export const EditTimelineItems = () => {
   const categories = categoryQuery.data;
   const categoriesGroup = groupByDistinct(categories, 'id');
   const categoryNames: DropdownItem<number>[] = categories.map((x) => ({
-    name: x.name,
+    name: x.isDeleted ? `[Deleted] ${x.name}` : x.name,
     id: x.id,
   }));
 
@@ -104,8 +104,8 @@ export const EditTimelineItems = () => {
 
   const onDelete = (isNew: boolean) => {
     if (category && !isNew) {
-      deletem.mutate(category.id);
-      setCategory(undefined);
+      deletem.mutate({ id: category.id, isDeleted: !category.isDeleted });
+      setCategory({ ...category, isDeleted: !category.isDeleted });
     }
   };
 

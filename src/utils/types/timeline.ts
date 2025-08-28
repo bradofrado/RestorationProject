@@ -73,6 +73,7 @@ export const TimelineCategorySchema = z.object({
   pageId: z.string().nullable(),
   color: HexColorSchema,
   items: z.array(RestorationTimelineItemSchema),
+  isDeleted: z.boolean().optional(),
 }) satisfies z.Schema<
   Replace<
     Omit<PrismaTimelineCategory, 'isDeleted'>,
