@@ -37,7 +37,7 @@
     "@types/react-beautiful-dnd": "^13.1.4",
     "argon2": "^0.30.3",
     "dayjs": "^1.11.7",
-    "harmony-ai-editor": "^0.8.0",
+    "harmony-ai-editor": "^0.10.2",
     "harmony-ai-plugin": "^0.1.6",
     "jest": "^29.5.0",
     "next": "^13.2.1",

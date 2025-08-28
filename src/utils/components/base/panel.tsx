@@ -14,7 +14,7 @@ const Panel = ({ children, className, disabled = false, role }: PanelProps) => {
         role={role}
       >
         {disabled && (
-          <div className="absolute top-0 left-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"></div>
+          <div className="absolute left-0 top-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"></div>
         )}
         {children}
       </div>

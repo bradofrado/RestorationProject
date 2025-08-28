@@ -354,7 +354,7 @@ type TimelineCategoryFilterProps<T extends keyof TimelineCategory> = {
   onChange: (key: TimelineCategory[T]) => void;
   filterKey: T;
 };
-const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
+export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
   categories,
   filtered,
   onChange,

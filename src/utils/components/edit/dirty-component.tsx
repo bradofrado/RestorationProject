@@ -86,7 +86,7 @@ export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({
     <div className="relative" data-testid={dataTestId}>
       {dirtyState.state && dirtyState.type == 'delete' && (
         <div
-          className="absolute top-0 left-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"
+          className="absolute left-0 top-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"
           data-testid="dirty-state-delete"
         ></div>
       )}
@@ -97,7 +97,7 @@ export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({
         {...rest}
       />
       {dirtyState.state && (
-        <div className="relative z-10 my-1 mx-4 text-right">
+        <div className="relative z-10 mx-4 my-1 text-right">
           {showCancel && (
             <Button className="mx-1" mode="secondary" onClick={onCancel}>
               Cancel

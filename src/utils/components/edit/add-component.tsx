@@ -596,7 +596,9 @@ export type DataComponentType = {
 
 const AnnotationLinkContext = React.createContext<Record<string, number>>({});
 
-const AnnotationLinkProvider = ({ children }: React.PropsWithChildren) => {
+export const AnnotationLinkProvider = ({
+  children,
+}: React.PropsWithChildren) => {
   const annotationLinks = {};
 
   return (

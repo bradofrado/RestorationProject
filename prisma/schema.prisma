@@ -123,6 +123,9 @@ model TimelineItem {
   subcategory String?
   text        String
   links       String
+  x           Float?
+  y           Float?
+  mapImage    String?
   type        TimelineDateType
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
