@@ -36,6 +36,7 @@ import { type HexColor } from '~/utils/types/colors';
 import { MapSelector } from '../base/map-selector';
 import { type MapImage, maps } from '~/utils/types/maps';
 import Image from 'next/image';
+import { TimelineDateType } from '@prisma/client';
 
 type Position = { x: number; y: number };
 
@@ -349,6 +350,16 @@ const EditRestorationItem = ({
               onChange={onDateChange}
             />
           </RemoveField>
+        </Label>
+        <Label label="Date Type" className="my-1">
+          <Dropdown
+            items={Object.values(TimelineDateType).map((type) => ({
+              name: type,
+              id: type,
+            }))}
+            initialValue={propItem.type}
+            onChange={(value) => changePropertyItem(propItem, 'type', value.id)}
+          />
         </Label>
         <Input
           include={Label}
