@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import Button from '~/utils/components/base/buttons/button';
 import {
@@ -33,7 +35,12 @@ export const DroppableComponent = ({
   }
 
   return (
-    <Droppable {...props}>
+    <Droppable
+      isDropDisabled={false}
+      isCombineEnabled={false}
+      ignoreContainerClipping={false}
+      {...props}
+    >
       {(provided) => (
         <div
           ref={provided.innerRef}

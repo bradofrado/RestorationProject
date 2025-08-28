@@ -1,8 +1,10 @@
-import { type GetServerSideProps, type GetServerSidePropsContext } from 'next';
+import { type GetServerSideProps } from 'next';
 import { type Session } from 'next-auth';
+import { type FC } from 'react';
 import { getServerAuthSession } from '~/server/auth';
 import { type UserRole } from '~/utils/types/auth';
 import { isNotRole } from '~/utils/utils';
+import { redirect as redirectNext } from 'next/navigation';
 
 type RequireRouteProps = {
   redirect: string;
@@ -10,21 +12,16 @@ type RequireRouteProps = {
 };
 export const requireRoute =
   ({ redirect, check }: RequireRouteProps) =>
-  (func: GetServerSideProps) =>
-  async (ctx: GetServerSidePropsContext) => {
-    const session = await getServerAuthSession(ctx);
+  (Component: FC<{ session: Session }>) =>
+    async function ComponentWithSession() {
+      const session = await getServerAuthSession();
 
-    if (!session?.user || (check && check(session))) {
-      return {
-        redirect: {
-          destination: redirect, // login path
-          permanent: false,
-        },
-      };
-    }
+      if (!session?.user || (check && check(session))) {
+        redirectNext(redirect);
+      }
 
-    return await func(ctx);
-  };
+      return <Component session={session} />;
+    };
 
 export const requireAuth = requireRoute({ redirect: '/login' });
 

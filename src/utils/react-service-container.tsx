@@ -1,5 +1,6 @@
-/* eslint-disable */
+'use client';
 
+/* eslint-disable */
 import React, { useContext } from 'react';
 
 const UNINSTANTIATED = Symbol.for('uninstantiated');

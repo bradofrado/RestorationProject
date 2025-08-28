@@ -12,8 +12,12 @@ import {
 } from '~/utils/types/timeline';
 import { z } from 'zod';
 import { type Prisma } from '@prisma/client';
-import { type Db } from '~/server/db';
-import { exclude } from '~/utils/utils';
+import {
+  getCategories,
+  getCategory,
+  translatePrismaToTimelineCategory,
+  translatePrismaToTimelineItem,
+} from '~/server/dao/categoriesDAO';
 
 const getCategoryDeprecated = (categoryName: TimelineCategoryName) => {
   const category = categories.find((x) => x.name == categoryName);
@@ -25,22 +29,6 @@ const getCategoryDeprecated = (categoryName: TimelineCategoryName) => {
   }
 
   return category;
-};
-
-const sortTimelineItems = (
-  items: RestorationTimelineItem[]
-): RestorationTimelineItem[] => {
-  return items.slice().sort((a, b) => {
-    if (!a.date) {
-      return -1;
-    }
-
-    if (!b.date) {
-      return 1;
-    }
-
-    return a.date.valueOf() - b.date.valueOf();
-  });
 };
 
 const translateTimelineItemToPrisma = (
@@ -59,71 +47,6 @@ const translateTimelineItemToPrisma = (
     y: input.y,
     mapImage: input.mapImage,
   };
-};
-
-const translatePrismaToTimelineItem = (
-  item: PrismaTimelineItem
-): RestorationTimelineItem => {
-  return exclude(
-    { ...item, links: item.links.split(',').filter((x) => x != '') },
-    'isDeleted'
-  );
-};
-
-const translatePrismaToTimelineCategory = (
-  category: PrismaTimelineCategory,
-  includeDeleted = false
-): TimelineCategory => {
-  const items = sortTimelineItems(
-    category.items
-      .filter((x) => !x.isDeleted)
-      .map(translatePrismaToTimelineItem)
-  );
-  return TimelineCategorySchema.parse(
-    includeDeleted
-      ? { ...category, items }
-      : exclude({ ...category, items }, 'isDeleted')
-  );
-};
-
-const getCategories = async (
-  db: Db,
-  includeDeleted = false
-): Promise<TimelineCategory[]> => {
-  const dbCategories: PrismaTimelineCategory[] =
-    await db.timelineCategory.findMany({
-      include: TimelineCategoryArgs.include,
-      ...(!includeDeleted
-        ? {
-            where: {
-              isDeleted: false,
-            },
-          }
-        : undefined),
-    });
-
-  return dbCategories.map((category) =>
-    translatePrismaToTimelineCategory(category, includeDeleted)
-  );
-};
-
-const getCategory = async ({ db, name }: { db: Db; name: string }) => {
-  const dbCategory: PrismaTimelineCategory | null =
-    await db.timelineCategory.findFirst({
-      where: {
-        name: name,
-        isDeleted: false,
-      },
-      include: TimelineCategoryArgs.include,
-    });
-  if (dbCategory == null) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: `Invalid input ${name}`,
-    });
-  }
-
-  return translatePrismaToTimelineCategory(dbCategory);
 };
 
 export const timelineRouter = createTRPCRouter({

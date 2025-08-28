@@ -1,3 +1,5 @@
+'use client';
+
 import dayjs from 'dayjs';
 import ScrollDrag from '../base/scroll-drag';
 import {
@@ -98,6 +100,9 @@ export const Timeline: React.FC<TimelineProps> = ({
 
   const convertToTimelineItems = useCallback(
     (items: TimelineItemStandalone[]) => {
+      if (typeof window === 'undefined') {
+        return [];
+      }
       const style = getComputedStyle(document.body);
       const containerSize = style.getPropertyValue('--container-size');
       const offset =

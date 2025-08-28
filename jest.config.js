@@ -1,4 +1,10 @@
-module.exports = {
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  dir: './',
+});
+
+module.exports = createJestConfig({
   // The root of your source code, typically /src
   // `<rootDir>` is a token Jest substitutes
   roots: ['<rootDir>/src'],
@@ -22,4 +28,4 @@ module.exports = {
     '^~/(.*)$': '<rootDir>/src/$1',
   },
   testTimeout: 15000,
-};
+});

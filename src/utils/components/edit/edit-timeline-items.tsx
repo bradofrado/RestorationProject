@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import Dropdown from '~/utils/components/base/dropdown';
 import {
@@ -239,6 +241,7 @@ export const EditTimelineItems = () => {
                         <AddRemoveItem {...props} category={category} />
                       ) : (
                         <DirtyComponent
+                          key={`${item.id}`}
                           id={`${item.id}`}
                           index={i}
                           {...defaultDirtyProps(item.id < 0)}

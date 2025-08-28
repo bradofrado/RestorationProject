@@ -1,5 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
 import { type DropdownItem } from '~/utils/components/base/dropdown';
 import Button from '~/utils/components/base/buttons/button';
@@ -23,12 +25,10 @@ import {
   CustomComponents,
 } from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
+import { useRouter } from 'next/navigation';
 
-export type EditPagesProps = {
-  id: string | undefined;
-  setId: (id: string | undefined) => void;
-};
-export const EditPages = ({ setId }: EditPagesProps) => {
+export const EditPages = () => {
+  const router = useRouter();
   const [currPage, setCurrPage] = useState<EventPage>();
   const { create, update, deletem } = useEventPagesMutation();
   const {
@@ -40,6 +40,13 @@ export const EditPages = ({ setId }: EditPagesProps) => {
   const query = useGetPages();
 
   let pages: EventPage[] | null = null;
+
+  const setId = useCallback(
+    (id: string | undefined) => {
+      router.push(`/edit?id=${id}`);
+    },
+    [router]
+  );
 
   useEffect(() => {
     const data = create.data || update.data;

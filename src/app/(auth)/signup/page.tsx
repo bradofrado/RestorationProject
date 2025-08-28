@@ -1,3 +1,5 @@
+'use client';
+
 import { type NextPage } from 'next';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';

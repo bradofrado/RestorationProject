@@ -1,13 +1,13 @@
-import { type GetServerSidePropsContext } from 'next';
 import {
-  getServerSession,
   type NextAuthOptions,
   type DefaultSession,
+  getServerSession,
 } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './db';
 import { type UserRole, loginSchema } from '~/utils/types/auth';
 import { login } from './dao/authDAO';
+import { GetServerSidePropsContext } from 'next';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -99,9 +99,6 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext['req'];
-  res: GetServerSidePropsContext['res'];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
+export const getServerAuthSession = () => {
+  return getServerSession(authOptions);
 };

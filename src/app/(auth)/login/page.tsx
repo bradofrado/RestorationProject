@@ -1,3 +1,5 @@
+'use client';
+
 import { type NextPage } from 'next';
 import { LoginForm } from '~/utils/components/auth/login-form';
 import Header from '~/utils/components/base/header';
@@ -5,7 +7,7 @@ import { Hyperlink } from '~/utils/components/base/hyperlink';
 import { signIn } from 'next-auth/react';
 import { type Login } from '~/utils/types/auth';
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const Login_page: NextPage = () => {
   const router = useRouter();
