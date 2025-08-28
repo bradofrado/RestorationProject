@@ -7,7 +7,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './db';
 import { type UserRole, loginSchema } from '~/utils/types/auth';
 import { login } from './dao/authDAO';
-import { GetServerSidePropsContext } from 'next';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

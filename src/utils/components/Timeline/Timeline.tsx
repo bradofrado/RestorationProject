@@ -232,7 +232,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       }
 
       const timeItems: TimelineItem[] = [];
-      for (const [date, items] of Object.entries(itemsByDate)) {
+      for (const [_, items] of Object.entries(itemsByDate)) {
         const item = items[0]?.item;
         const index = items[0]?.index;
         if (!item) continue;
