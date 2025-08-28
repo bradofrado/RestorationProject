@@ -1,21 +1,21 @@
-import { Tab } from '@headlessui/react'
+import { Tab } from '@headlessui/react';
 
 function classNames(...classes: (string | undefined)[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(' ');
 }
 
 export interface TabItem {
-	label: string,
-	component: React.ReactElement,
-	className?: string
+  label: string;
+  component: React.ReactElement;
+  className?: string;
 }
 
 type TabControlProps = {
-	items: TabItem[],
-  className?: string
-}
+  items: TabItem[];
+  className?: string;
+};
 
-export default function TabControl({items, className}: TabControlProps) {
+export default function TabControl({ items, className }: TabControlProps) {
   return (
     <div className={className}>
       <Tab.Group>
@@ -39,21 +39,21 @@ export default function TabControl({items, className}: TabControlProps) {
         </Tab.List>
         <Tab.Panels className="mt-2">
           {items.map((item, idx) => {
-						return (
-							<Tab.Panel
-								key={idx}
-								className={classNames(
-									'rounded-xl p-3',
-									item.className,
-									'ring-white ring-opacity-60 ring-offset-2 ring-offset-primary focus:outline-none focus:ring-2'
-								)}
-							>
-								{item.component}
-							</Tab.Panel>
-						)
-					})}
+            return (
+              <Tab.Panel
+                key={idx}
+                className={classNames(
+                  'rounded-xl p-3',
+                  item.className,
+                  'ring-white ring-opacity-60 ring-offset-2 ring-offset-primary focus:outline-none focus:ring-2'
+                )}
+              >
+                {item.component}
+              </Tab.Panel>
+            );
+          })}
         </Tab.Panels>
       </Tab.Group>
     </div>
-  )
+  );
 }

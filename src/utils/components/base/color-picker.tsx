@@ -1,10 +1,16 @@
-import {useColorArea, useColorSlider} from '@react-aria/color';
-import {type Color, type ColorAreaProps, useColorAreaState, useColorSliderState, parseColor} from '@react-stately/color';
-import {useFocusRing} from '@react-aria/focus';
+import { useColorArea, useColorSlider } from '@react-aria/color';
+import {
+  type Color,
+  type ColorAreaProps,
+  useColorAreaState,
+  useColorSliderState,
+  parseColor,
+} from '@react-stately/color';
+import { useFocusRing } from '@react-aria/focus';
 import React, { Fragment } from 'react';
 import { VisuallyHidden, useLocale } from 'react-aria';
-import {type ColorSliderProps} from '@react-types/color';
-import {type HexColor, HexColorSchema} from '~/utils/types/colors';
+import { type ColorSliderProps } from '@react-types/color';
+import { type HexColor, HexColorSchema } from '~/utils/types/colors';
 import Popover from './popover';
 import Input from './input';
 
@@ -13,17 +19,19 @@ const FOCUSED_THUMB_SIZE = 28;
 const THUMB_SIZE = 20;
 const BORDER_RADIUS = 4;
 
-const getHslaColor = <T extends Color | HexColor>(value: PickerColor<T>): Color => {
-  return typeof value == 'string' ? parseColor(value).toFormat('hsla') : value; 
-}
+const getHslaColor = <T extends Color | HexColor>(
+  value: PickerColor<T>
+): Color => {
+  return typeof value == 'string' ? parseColor(value).toFormat('hsla') : value;
+};
 
 const colorToHex = (value: Color): HexColor => {
   return HexColorSchema.parse(value.toString('hexa'));
-}
+};
 
 const hexToColor = (value: HexColor): Color => {
   return parseColor(value);
-}
+};
 
 type PickerColor<T extends Color | HexColor> = T;
 
@@ -36,13 +44,10 @@ function ColorArea(props: ColorAreaProps) {
 
   const { isDisabled } = props;
 
-  const {
-    colorAreaProps,
-    gradientProps,
-    xInputProps,
-    yInputProps,
-    thumbProps
-  } = useColorArea({ ...props, inputXRef, inputYRef, containerRef }, state);
+  const { colorAreaProps, xInputProps, yInputProps, thumbProps } = useColorArea(
+    { ...props, inputXRef, inputYRef, containerRef },
+    state
+  );
 
   const { focusProps, isFocusVisible } = useFocusRing();
 
@@ -56,17 +61,15 @@ function ColorArea(props: ColorAreaProps) {
         height: SIZE,
         borderRadius: BORDER_RADIUS,
         opacity: isDisabled ? 0.3 : undefined,
-        margin: 'auto'
+        margin: 'auto',
       }}
     >
       <div
-        {...gradientProps}
         style={{
           backgroundColor: isDisabled ? 'rgb(142, 142, 142)' : undefined,
-          ...gradientProps.style,
           borderRadius: BORDER_RADIUS,
           height: SIZE,
-          width: SIZE
+          width: SIZE,
         }}
       />
       <div
@@ -82,7 +85,7 @@ function ColorArea(props: ColorAreaProps) {
           boxSizing: 'border-box',
           height: isFocusVisible ? FOCUSED_THUMB_SIZE + 4 : THUMB_SIZE,
           transform: 'translate(-50%, -50%)',
-          width: isFocusVisible ? FOCUSED_THUMB_SIZE + 4 : THUMB_SIZE
+          width: isFocusVisible ? FOCUSED_THUMB_SIZE + 4 : THUMB_SIZE,
         }}
       >
         <input ref={inputXRef} {...xInputProps} {...focusProps} />
@@ -93,52 +96,56 @@ function ColorArea(props: ColorAreaProps) {
 }
 
 type ColorSwatchProps<T extends Color | HexColor> = {
-  value: PickerColor<T>,
-  onClick?: () => void,
-  className?: string
-} & React.ComponentPropsWithoutRef<'div'>
-function ColorSwatch <T extends Color | HexColor>(props: ColorSwatchProps<T>) {
-  const {
-    value,
-    ...otherProps
-  } = props;
+  value: PickerColor<T>;
+  onClick?: () => void;
+  className?: string;
+} & React.ComponentPropsWithoutRef<'div'>;
+function ColorSwatch<T extends Color | HexColor>(props: ColorSwatchProps<T>) {
+  const { value, ...otherProps } = props;
   const color = getHslaColor(value);
 
   const valueString = color.toString('css');
   return (
     <div
       role="img"
-      className={`inline-block rounded-sm relative w-10 h-10 overflow-hidden ${props.className || ''}`}
+      className={`relative inline-block h-10 w-10 overflow-hidden rounded-sm ${
+        props.className || ''
+      }`}
       aria-label={valueString}
       {...otherProps}
       onClick={props.onClick}
     >
-      <div className="absolute w-full h-full bg-white" />
+      <div className="absolute h-full w-full bg-white" />
       <div
-        className="absolute w-full h-full"
+        className="absolute h-full w-full"
         style={{
-          backgroundColor: valueString
-        }} />
+          backgroundColor: valueString,
+        }}
+      />
     </div>
   );
 }
 
-function ColorSlider(props: ColorSliderProps & {preview?: boolean}) {
+function ColorSlider(props: ColorSliderProps & { preview?: boolean }) {
   const { locale } = useLocale();
   const state = useColorSliderState({ ...props, locale });
   const trackRef = React.useRef(null);
   const inputRef = React.useRef(null);
 
   // Default label to the channel name in the current locale
-  const label = props.label || state.value.getChannelName(props.channel, locale);
+  const label =
+    props.label || state.value.getChannelName(props.channel, locale);
 
   const { trackProps, thumbProps, inputProps, labelProps, outputProps } =
-    useColorSlider({
-      ...props,
-      label,
-      trackRef,
-      inputRef
-    }, state);
+    useColorSlider(
+      {
+        ...props,
+        label,
+        trackRef,
+        inputRef,
+      },
+      state
+    );
 
   const { focusProps, isFocusVisible } = useFocusRing();
 
@@ -148,27 +155,32 @@ function ColorSlider(props: ColorSliderProps & {preview?: boolean}) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
       }}
     >
       {/* Create a flex container for the label and output element. */}
       <div style={{ display: 'flex', alignSelf: 'stretch' }}>
         <label {...labelProps}>{label}</label>
-        {props.preview && <output {...outputProps} style={{ flex: '1 0 auto', textAlign: 'end' }}>
-          {state.value.formatChannelValue(props.channel, locale)}
-        </output>}
+        {props.preview && (
+          <output
+            {...outputProps}
+            style={{ flex: '1 0 auto', textAlign: 'end' }}
+          >
+            {state.value.formatChannelValue(props.channel, locale)}
+          </output>
+        )}
       </div>
       {/* The track element holds the visible track line and the thumb. */}
       <div
-        className="w-full rounded-sm relative"
+        className="relative w-full rounded-sm"
         {...trackProps}
         ref={trackRef}
         style={{
-          height: FOCUSED_THUMB_SIZE
+          height: FOCUSED_THUMB_SIZE,
         }}
       >
         <style>
-        {`.color-slider-track-background,
+          {`.color-slider-track-background,
         .color-slider-thumb-background {
           background-size: 16px 16px;
           background-position:
@@ -184,29 +196,29 @@ function ColorSlider(props: ColorSliderProps & {preview?: boolean}) {
             linear-gradient(45deg, rgb(188, 188, 188) 25.5%, transparent 25.5%);
         }`}
         </style>
-        <div className="w-full rounded-sm absolute h-full color-slider-track-background"></div>
+        <div className="color-slider-track-background absolute h-full w-full rounded-sm"></div>
         <div
-          className="w-full rounded-sm absolute h-full"
+          className="absolute h-full w-full rounded-sm"
           style={{
-            ...trackProps.style
+            ...trackProps.style,
           }}
-        >
-        </div>
+        ></div>
         <div
-          className={`absolute top-[14px] box-border rounded-[50%] border-white border-2 w-5 h-5${isFocusVisible ? ' w-6 h-6' : ''}`}
+          className={`absolute top-[14px] box-border w-5 rounded-[50%] border-2 border-white h-5${
+            isFocusVisible ? ' h-6 w-6' : ''
+          }`}
           {...thumbProps}
           style={{
-            ...thumbProps.style
+            ...thumbProps.style,
           }}
         >
-          <div className="color-slider-thumb-background w-full h-full absolute rounded-[50%]"></div>
+          <div className="color-slider-thumb-background absolute h-full w-full rounded-[50%]"></div>
           <div
-            className="absolute rounded-[50%] w-full h-full"
+            className="absolute h-full w-full rounded-[50%]"
             style={{
-              background: state.getDisplayColor().toString('css')
+              background: state.getDisplayColor().toString('css'),
             }}
-          >
-          </div>
+          ></div>
           <VisuallyHidden>
             <input ref={inputRef} {...inputProps} {...focusProps} />
           </VisuallyHidden>
@@ -217,50 +229,49 @@ function ColorSlider(props: ColorSliderProps & {preview?: boolean}) {
 }
 
 type ColorPickerProps<T extends Color | HexColor> = {
-  value: PickerColor<T>,
-  onChange: (color: PickerColor<T>) => void,
-  className?: string
-}
+  value: PickerColor<T>;
+  onChange: (color: PickerColor<T>) => void;
+  className?: string;
+};
 type ColorPickerFullProps<T extends Color | HexColor> = {
-  preview?: boolean | "true" | "false",
-  defaultColors?: HexColor[]
+  preview?: boolean | 'true' | 'false';
+  defaultColors?: HexColor[];
 } & ColorPickerProps<T>;
-export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, preview=true, defaultColors}: ColorPickerFullProps<T>) => {
+export const ColorPickerFull = <T extends Color | HexColor>({
+  value,
+  onChange,
+  preview = true,
+  defaultColors,
+}: ColorPickerFullProps<T>) => {
   const color = getHslaColor(value);
   const isHex = typeof value == 'string';
 
-  const [
-    hChannel,
-    sChannel,
-    lChannel
-  ] = color.getColorChannels();
+  const [hChannel, sChannel, lChannel] = color.getColorChannels();
 
   const onColorChange = (color: Color) => {
     const value = (isHex ? colorToHex(color) : color) as T;
     onChange(value);
-  }
+  };
 
   const onInput = (value: string) => {
     try {
-      onColorChange(hexToColor(HexColorSchema.parse(value)))
-    } catch {
-
-    }
-  }
+      onColorChange(hexToColor(HexColorSchema.parse(value)));
+    } catch {}
+  };
   return (
     <>
       <div
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '1rem'
+          gap: '1rem',
         }}
       >
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '1rem'
+            gap: '1rem',
           }}
         >
           <div className="flex flex-row">
@@ -270,58 +281,88 @@ export const ColorPickerFull = <T extends Color | HexColor>({value, onChange, pr
               xChannel={sChannel}
               yChannel={lChannel}
             />
-            {defaultColors && <div className="flex flex-col ml-1 gap-1">
-              {defaultColors.map((color, i) => <ColorSwatch value={color} key={i} onClick={() => onColorChange(hexToColor(color))}/>)}
-            </div>}
+            {defaultColors && (
+              <div className="ml-1 flex flex-col gap-1">
+                {defaultColors.map((color, i) => (
+                  <ColorSwatch
+                    value={color}
+                    key={i}
+                    onClick={() => onColorChange(hexToColor(color))}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          <Input className="w-full" value={colorToHex(color)} onBlur={onInput} />
+          <Input
+            className="w-full"
+            value={colorToHex(color)}
+            onBlur={onInput}
+          />
           <ColorSlider
             channel={hChannel}
             value={color}
             onChange={onColorChange}
           />
-          <ColorSlider
-            channel="alpha"
-            value={color}
-            onChange={onColorChange}
-          />
+          <ColorSlider channel="alpha" value={color} onChange={onColorChange} />
         </div>
-        {(preview == true || preview == "true") && <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem'
-          }}
-        >
+        {(preview == true || preview == 'true') && (
           <div
             style={{
               display: 'flex',
-              gap: '6px'
+              flexDirection: 'column',
+              gap: '1rem',
             }}
           >
-            <ColorSwatch
-              value={color.withChannelValue('alpha', 1)}
-              aria-label={`current color swatch: ${color.toString('rgb')}`}
-            />
-            <ColorSwatch
-              value={color}
-              aria-label={`current color swatch with alpha channel: ${
-                color.toString('rgba')
-              }`}
-            />
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+              }}
+            >
+              <ColorSwatch
+                value={color.withChannelValue('alpha', 1)}
+                aria-label={`current color swatch: ${color.toString('rgb')}`}
+              />
+              <ColorSwatch
+                value={color}
+                aria-label={`current color swatch with alpha channel: ${color.toString(
+                  'rgba'
+                )}`}
+              />
+            </div>
           </div>
-        </div>}
+        )}
       </div>
     </>
   );
-}
+};
 
-const ColorPicker = <T extends Color | HexColor>({value, onChange, className, defaultColors}: ColorPickerProps<T> & {defaultColors?: HexColor[]}) => {
-  return <>
-    <Popover className={className} button={<ColorSwatch value={value} aria-label={`current color swatch: ${value.toString('rgb')}`}/>}>
-      <ColorPickerFull value={value} onChange={onChange} preview="false" defaultColors={defaultColors}/>    
-    </Popover>
-  </>
-}
+const ColorPicker = <T extends Color | HexColor>({
+  value,
+  onChange,
+  className,
+  defaultColors,
+}: ColorPickerProps<T> & { defaultColors?: HexColor[] }) => {
+  return (
+    <>
+      <Popover
+        className={className}
+        button={
+          <ColorSwatch
+            value={value}
+            aria-label={`current color swatch: ${value.toString('rgb')}`}
+          />
+        }
+      >
+        <ColorPickerFull
+          value={value}
+          onChange={onChange}
+          preview="false"
+          defaultColors={defaultColors}
+        />
+      </Popover>
+    </>
+  );
+};
 
 export default ColorPicker;

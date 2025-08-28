@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
+  provider   = "prisma-client-js"
+  engineType = "binary"
 }
 
 datasource db {
@@ -45,11 +45,11 @@ model Session {
 model User {
   id            String    @id @default(cuid())
   name          String
-  email         String   @unique
+  email         String    @unique
   emailVerified DateTime?
   password      String
   image         String?
-  role          String @default("user")
+  role          String    @default("user")
   accounts      Account[]
   sessions      Session[]
   logs          Logging[]
@@ -68,10 +68,11 @@ enum LoggingType {
   WARN
   ERROR
 }
+
 model Logging {
-  id      Int       @id @default(autoincrement())
+  id      Int         @id @default(autoincrement())
   date    DateTime
-  user    User?      @relation(fields: [userId], references: [id])
+  user    User?       @relation(fields: [userId], references: [id])
   userId  String?
   type    LoggingType
   message String
@@ -79,8 +80,8 @@ model Logging {
 
 model Page {
   id          String              @id @default(uuid())
-	url         String							@unique
-	title       String
+  url         String              @unique
+  title       String
   description String
   settings    ComponentSettings[]
   categories  TimelineCategory[]
@@ -88,35 +89,35 @@ model Page {
 }
 
 model ComponentSettings {
-  id             Int       @id @default(autoincrement())
-  component      String
-	data           EditableData?
-  page           Page?        @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  pageId         String?
-  order          Int          @default(0)
-  isDeleted   Boolean         @default(false)
+  id        Int           @id @default(autoincrement())
+  component String
+  data      EditableData?
+  page      Page?         @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  pageId    String?
+  order     Int           @default(0)
+  isDeleted Boolean       @default(false)
 }
 
 model EditableData {
-  id                Int              @id @default(autoincrement())
-  content           String
-  properties        String?
-  settings ComponentSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
-	settingsId 				Int @unique
+  id         Int               @id @default(autoincrement())
+  content    String
+  properties String?
+  settings   ComponentSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+  settingsId Int               @unique
 }
 
 model TimelineCategory {
-  id                Int     @id @default(autoincrement())
-  name              String  @unique
-  page              Page?    @relation(fields: [pageId], references: [id])
-  pageId            String?
-  color             String?
-  items             TimelineItem[]
-  isDeleted   Boolean             @default(false)
+  id        Int            @id @default(autoincrement())
+  name      String         @unique
+  page      Page?          @relation(fields: [pageId], references: [id])
+  pageId    String?
+  color     String?
+  items     TimelineItem[]
+  isDeleted Boolean        @default(false)
 }
 
 model TimelineItem {
-  id          Int @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   date        DateTime?
   endDate     DateTime?
   subcategory String?
@@ -124,7 +125,14 @@ model TimelineItem {
   links       String
   x           Float?
   y           Float?
+  type        TimelineDateType
   category    TimelineCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
-  isDeleted   Boolean             @default(false)
+  isDeleted   Boolean           @default(false)
+}
+
+enum TimelineDateType {
+  EXACT
+  ESTIMATE_MONTH
+  ESTIMATE_YEAR
 }

@@ -1,8 +1,8 @@
 /* eslint-disable */
 
-import React, { useContext } from "react";
+import React, { useContext } from 'react';
 
-const UNINSTANTIATED = Symbol.for("uninstantiated");
+const UNINSTANTIATED = Symbol.for('uninstantiated');
 
 export type ServiceFor<T> = T extends new (...args: any[]) => infer R ? R : any;
 
@@ -55,7 +55,7 @@ export class ServiceContainerRegistry {
           `[react-service-container] Provider for ${String(
             serviceToken
           )} threw an error. ` +
-            "Please check the error output below for more information."
+            'Please check the error output below for more information.'
         );
         throw err;
       }
@@ -72,12 +72,12 @@ export class ServiceContainerRegistry {
         serviceToken
       )}. ` +
       'Think of this as a "missing variable" error. Ensure that in one of your parent ' +
-      "service containers, you have configured your providers array to provide a value for this type.";
+      'service containers, you have configured your providers array to provide a value for this type.';
     throw new Error(errorMsg);
   }
 
   add<T>(provider: Provider<T>) {
-    if (!("provide" in provider)) {
+    if (!('provide' in provider)) {
       const errorMsg =
         `[react-service-container] Missing "provide" key in object with key(s): ${stringifyKeys(
           provider
@@ -94,18 +94,18 @@ export class ServiceContainerRegistry {
 
       let init;
       switch (true) {
-        case "useValue" in provider:
+        case 'useValue' in provider:
           const value = (provider as UseValueProvider<T>).useValue;
           init = () => value;
           break;
-        case "useClass" in provider:
+        case 'useClass' in provider:
           const Ctor = (provider as UseClassProvider<T>).useClass;
           init = () => new Ctor();
           break;
-        case "useFactory" in provider:
+        case 'useFactory' in provider:
           init = (provider as UseFactoryProvider<T>).useFactory;
           break;
-        case "useExisting" in provider:
+        case 'useExisting' in provider:
           const resolvedAlias = (provider as UseExistingProvider<T>)
             .useExisting;
           init = () => {
@@ -116,10 +116,10 @@ export class ServiceContainerRegistry {
                 `[react-service-container] Failed alias lookup for useExisting provider ${String(
                   provider
                 )}. ` +
-                "It looks like you passed a token to `useExisting` that was not registered as a provider. " +
-                "Ensure that the token given is registered *before* the alias is referenced. " +
-                "If the value reference by the alias is provided within the same providers array as the alias, " +
-                "ensure that it comes before the alias in the providers array.";
+                'It looks like you passed a token to `useExisting` that was not registered as a provider. ' +
+                'Ensure that the token given is registered *before* the alias is referenced. ' +
+                'If the value reference by the alias is provided within the same providers array as the alias, ' +
+                'ensure that it comes before the alias in the providers array.';
               throw new Error(errorMessage);
             }
           };
@@ -128,7 +128,7 @@ export class ServiceContainerRegistry {
           const errorMsg =
             `[create-service-container] Provider missing proper use* value in key(s): ${stringifyKeys(
               provider,
-              (k) => k !== "provide"
+              (k) => k !== 'provide'
             )}. ` +
             'Possible values are: ["useValue", "useClass", "useFactory", "useExisting"]';
           throw new Error(errorMsg);
@@ -144,12 +144,11 @@ export class ServiceContainerRegistry {
 
 export type ServiceContainerRegistryReadonlyProxy = Pick<
   ServiceContainerRegistry,
-  "get"
+  'get'
 >;
 
-export const ServiceContainerContext = React.createContext<ServiceContainerRegistryReadonlyProxy | null>(
-  null
-);
+export const ServiceContainerContext =
+  React.createContext<ServiceContainerRegistryReadonlyProxy | null>(null);
 
 export type ServiceContainerProps = React.PropsWithChildren<{
   providers: Providers;
@@ -173,10 +172,10 @@ export function useService<T, R = ServiceFor<T>>(serviceToken: T): R {
   const container = useContext(ServiceContainerContext);
   if (!container) {
     const errorMsg =
-      "[react-service-container] Could not find service container context. It looks like you may have used the useService() hook " +
-      "in a component that is not a child of a <ServiceContainer>...</>. Take a look at your component tree " +
-      "and ensure that somewhere in the hierarchy before this component is rendered, there is a <ServiceContainer> " +
-      "available";
+      '[react-service-container] Could not find service container context. It looks like you may have used the useService() hook ' +
+      'in a component that is not a child of a <ServiceContainer>...</>. Take a look at your component tree ' +
+      'and ensure that somewhere in the hierarchy before this component is rendered, there is a <ServiceContainer> ' +
+      'available';
     throw new Error(errorMsg);
   }
   return container.get<T, R>(serviceToken);
@@ -213,11 +212,11 @@ function addProviders(
 
 function normalize(providers: Providers): Providers {
   return providers.map((provider) => {
-    const assumeClassShorthand = typeof provider === "function";
+    const assumeClassShorthand = typeof provider === 'function';
     if (assumeClassShorthand) {
       return {
         provide: provider,
-        useClass: provider as UseClassProvider<any>["useClass"],
+        useClass: provider as UseClassProvider<any>['useClass'],
       };
     }
     return provider;
@@ -228,5 +227,5 @@ function stringifyKeys(obj: {}, filter = (k: string) => true) {
   return Object.keys(obj)
     .filter(filter)
     .map((k) => `"${k}"`)
-    .join(", ");
+    .join(', ');
 }

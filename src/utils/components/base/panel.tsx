@@ -1,16 +1,25 @@
 import React from 'react';
 type PanelProps = {
-	className?: string,
-	disabled?: boolean,
-	role?: string
-} & React.PropsWithChildren
-const Panel = ({children, className, disabled=false, role}: PanelProps) => {
-	return <>
-		<div className={`${className || ''} bg-white relative shadow-md rounded-xl p-3 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2`} role={role}>
-			{disabled && <div className="absolute top-0 left-0 h-full w-full opacity-50 bg-red-200 rounded-xl z-10"></div>}
-			{children}
-		</div>
-	</>
-}
+  className?: string;
+  disabled?: boolean;
+  role?: string;
+} & React.PropsWithChildren;
+const Panel = ({ children, className, disabled = false, role }: PanelProps) => {
+  return (
+    <>
+      <div
+        className={`${
+          className || ''
+        } relative rounded-xl bg-white p-3 shadow-md ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2`}
+        role={role}
+      >
+        {disabled && (
+          <div className="absolute left-0 top-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"></div>
+        )}
+        {children}
+      </div>
+    </>
+  );
+};
 
 export default Panel;
