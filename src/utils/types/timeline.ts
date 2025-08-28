@@ -30,6 +30,12 @@ type PrismaTimelineItemWithLinksArray = Replace<
   'links',
   string[]
 >;
+export const RestorationTimelineItemDateTypeSchema =
+  z.nativeEnum(TimelineDateType);
+export type RestorationTimelineItemDateType = z.infer<
+  typeof RestorationTimelineItemDateTypeSchema
+>;
+
 export const RestorationTimelineItemSchema = z.object({
   id: z.number(),
   date: z.date().nullable(),

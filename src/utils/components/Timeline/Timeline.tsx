@@ -6,11 +6,14 @@ import {
   useRef,
   useEffect,
   useState,
+  useMemo,
+  useCallback,
 } from 'react';
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
 import React from 'react';
 import {
+  type RestorationTimelineItemDateType,
   type TimelineCategory,
   type TimelineItemStandalone,
 } from '~/utils/types/timeline';
@@ -19,6 +22,10 @@ import Button from '../base/buttons/button';
 import Label from '../base/label';
 import Header from '../base/header';
 import { Annotation } from './CondensedTimeline';
+
+const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+type EstimateTypes = Exclude<RestorationTimelineItemDateType, 'EXACT'>;
 
 export interface TimelineProps {
   categories: TimelineCategory[];
@@ -45,9 +52,6 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     return prev;
   }, []);
-  if (query.isLoading || query.isError || items.length == 0) {
-    return <>Loading</>;
-  }
 
   const getUrl = query.data;
 
@@ -68,8 +72,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   const firstDate = unfilteredSorted[0]?.date as Date;
 
   const yearDiff = lastDate.getFullYear() - firstDate.getFullYear() + 1;
-  const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  const monthItems = (() => {
+  const monthMarkers = useMemo(() => {
     let timeItems: TimelineItem[] = [];
     const firstYear = firstDate.getFullYear();
 
@@ -91,89 +94,177 @@ export const Timeline: React.FC<TimelineProps> = ({
     }
 
     return timeItems.slice().sort((a, b) => a.x - b.x);
-  })();
+  }, [firstDate, yearDiff]);
 
-  const timeItems = (() => {
-    const style = getComputedStyle(document.body);
-    const containerSize = style.getPropertyValue('--container-size');
-    const offset =
-      Number(containerSize.substring(0, containerSize.length - 2)) / 4;
-    const firstYear = firstDate.getFullYear();
-    const getYearOffset = (year: number) => {
-      return year * months.length * offset;
-    };
-    const getMonthOffset = (month: number) => {
-      return month * offset;
-    };
-    const getDayOffset = (day: number) => {
-      return (day / 31.0) * offset;
-    };
-    let currDate: Date | null = null;
-    let currDateCount = 0;
-    const timeItems: TimelineItem[] = [];
-    for (let i = 0; i < sorted.length; i++) {
-      const item = sorted[i];
-      if (!item) continue;
+  const convertToTimelineItems = useCallback(
+    (items: TimelineItemStandalone[]) => {
+      const style = getComputedStyle(document.body);
+      const containerSize = style.getPropertyValue('--container-size');
+      const offset =
+        Number(containerSize.substring(0, containerSize.length - 2)) / 4;
+      const firstYear = firstDate.getFullYear();
+      const getYearOffset = (year: number) => {
+        return year * months.length * offset;
+      };
+      const getMonthOffset = (month: number) => {
+        return month * offset;
+      };
+      const getDayOffset = (day: number) => {
+        return (day / 31.0) * offset;
+      };
+      let currDate: Date | null = null;
+      let currDateCount = 0;
 
-      if (
-        !currDate ||
-        item.date.getFullYear() != currDate.getFullYear() ||
-        item.date.getMonth() - currDate.getMonth() > 1
-      ) {
-        currDate = item.date;
-        currDateCount = 0;
-      } else {
-        currDateCount++;
+      const estimateItems = items.reduce<
+        Record<EstimateTypes, Record<string, TimelineItemStandalone[]>>
+      >(
+        (prev, curr) => {
+          if (curr.type === 'ESTIMATE_YEAR') {
+            const year = curr.date.getFullYear();
+            const currItems = prev['ESTIMATE_YEAR'][year];
+            if (!currItems) {
+              prev['ESTIMATE_YEAR'][year] = [curr];
+            } else {
+              currItems.push(curr);
+            }
+            return prev;
+          } else if (curr.type === 'ESTIMATE_MONTH') {
+            const year = curr.date.getFullYear();
+            const month = curr.date.getMonth();
+            const key = `${year}-${month}`;
+            const currItems = prev['ESTIMATE_MONTH'][key];
+            if (!currItems) {
+              prev['ESTIMATE_MONTH'][key] = [curr];
+            } else {
+              currItems.push(curr);
+            }
+            return prev;
+          }
+
+          return prev;
+        },
+        {
+          ESTIMATE_YEAR: {},
+          ESTIMATE_MONTH: {},
+        }
+      );
+
+      for (const [type, typeItems] of Object.entries(estimateItems)) {
+        for (const [key, items] of Object.entries(typeItems)) {
+          const { dateStep, startDate } = (() => {
+            if (type === 'ESTIMATE_YEAR') {
+              const year = parseInt(key);
+              const startYearDate = new Date(year, 0, 1);
+              const endYearDate = new Date(year + 1, 0, 1);
+              return {
+                dateStep:
+                  (endYearDate.getTime() - startYearDate.getTime()) /
+                  (items.length + 1),
+                startDate: startYearDate,
+              };
+            } else if (type === 'ESTIMATE_MONTH') {
+              const [year, month] = key.split('-').map(Number);
+              if (year === undefined || month === undefined) {
+                throw new Error(`Invalid month key: ${key}`);
+              }
+              const startMonthDate = new Date(year, month, 1);
+              const endMonthDate = new Date(year, month + 1, 1);
+              return {
+                dateStep:
+                  (endMonthDate.getTime() - startMonthDate.getTime()) /
+                  (items.length + 1),
+                startDate: startMonthDate,
+              };
+            }
+            throw new Error(`Invalid type: ${type}`);
+          })();
+          items.forEach((item, i) => {
+            const newDate = new Date(startDate);
+            newDate.setTime(newDate.getTime() + (i + 1) * dateStep);
+            item.date = newDate;
+          });
+        }
       }
 
-      if (item.color == undefined) {
-        throw new Error(`item ${item.date.toDateString()} does not have color`);
-      }
+      const timeItems: TimelineItem[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item) continue;
 
-      const hoverState =
-        item.text.length > offset
-          ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow'
-          : '';
+        if (
+          !currDate ||
+          item.date.getFullYear() != currDate.getFullYear() ||
+          item.date.getMonth() - currDate.getMonth() > 1
+        ) {
+          currDate = item.date;
+          currDateCount = 0;
+        } else {
+          currDateCount++;
+        }
 
-      timeItems.push({
-        date: dayjs(item.date).format('MMM D'),
-        x:
-          getYearOffset(item.date.getFullYear() - firstYear) +
-          getMonthOffset(item.date.getMonth()) +
-          getDayOffset(item.date.getDate()),
-        below: currDateCount % 2 === 0,
-        content: (
-          <div
-            data-testid="timeline-item"
-            className={`restoration-item group overflow-hidden hover:z-20 focus:z-20 ${hoverState} absolute h-[200px] transition-width ease-in-out`}
-          >
-            <div className="flex h-full flex-col justify-center">
-              <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
-                {item.text}{' '}
-                {item.links.map((link, i) => (
-                  <Annotation key={i} link={link} id={i + 1} />
-                ))}
-              </p>
-            </div>
-            {item.pageId && (
-              <div className="flex h-5 justify-around">
-                <Link
-                  className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
-                  href={`/${getUrl(item.pageId)}`}
-                >
-                  More
-                </Link>
+        if (item.color == undefined) {
+          throw new Error(
+            `item ${item.date.toDateString()} does not have color`
+          );
+        }
+
+        const hoverState =
+          item.text.length > offset
+            ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow'
+            : '';
+
+        const date =
+          item.type === 'EXACT'
+            ? dayjs(item.date).format('MMM D')
+            : item.type === 'ESTIMATE_YEAR'
+            ? `~ ${dayjs(item.date).format('YYYY')}`
+            : `~ ${dayjs(item.date).format('MMM')}`;
+        timeItems.push({
+          date,
+          x:
+            getYearOffset(item.date.getFullYear() - firstYear) +
+            getMonthOffset(item.date.getMonth()) +
+            getDayOffset(item.date.getDate()),
+          below: currDateCount % 2 === 0,
+          content: (
+            <div
+              data-testid="timeline-item"
+              className={`restoration-item group overflow-hidden hover:z-20 focus:z-20 ${hoverState} absolute h-[200px] transition-width ease-in-out`}
+            >
+              <div className="flex h-full flex-col justify-center">
+                <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
+                  {item.text}{' '}
+                  {item.links.map((link, i) => (
+                    <Annotation key={i} link={link} id={i + 1} />
+                  ))}
+                </p>
               </div>
-            )}
-          </div>
-        ),
-        color: item.color,
-        year: item.date.getFullYear(),
-      });
-    }
+              {item.pageId && (
+                <div className="flex h-5 justify-around">
+                  <Link
+                    className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
+                    href={`/${getUrl?.(item.pageId)}`}
+                  >
+                    More
+                  </Link>
+                </div>
+              )}
+            </div>
+          ),
+          color: item.color,
+          year: item.date.getFullYear(),
+        });
+      }
 
-    return timeItems;
-  })();
+      return timeItems;
+    },
+    [firstDate, getUrl]
+  );
+
+  const timeItems = useMemo(() => {
+    const items = convertToTimelineItems(sorted);
+    return items;
+  }, [convertToTimelineItems, sorted]);
 
   const onCategoryClick = (i: TimelineCategory['id']) => {
     const copy = filteredCategories.slice();
@@ -201,6 +292,11 @@ export const Timeline: React.FC<TimelineProps> = ({
   const categoriesWithDateItems = categories.filter(
     (x) => x.items.filter((item) => item.date).length > 0
   );
+
+  if (query.isLoading || query.isError || items.length == 0) {
+    return <>Loading</>;
+  }
+
   return (
     <>
       <div className="w-full">
@@ -212,7 +308,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           scrollPos={timeItems[scrollIndex]?.x}
         >
           <>
-            {monthItems?.map((item, i) => (
+            {monthMarkers?.map((item, i) => (
               <TimelineItemComponent {...item} key={i} />
             ))}
             {timeItems?.map((item, i) => (
@@ -309,7 +405,13 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
       >
         <div className="timeline-item-content">
           {date && (
-            <div className="date-indicator timeline-item-connector">{date}</div>
+            <div
+              className={`date-indicator timeline-item-connector ${
+                date.startsWith('~') ? 'estimate' : ''
+              }`}
+            >
+              {date}
+            </div>
           )}
         </div>
         <div className="timeline-item-content">{content}</div>

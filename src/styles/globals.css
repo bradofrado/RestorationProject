@@ -134,11 +134,11 @@
 
 .timeline-item-connector::before {
   content: '';
-  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   position: absolute;
   right: calc(50% - 2px);
   top: 32%;
-  width: 4px;
+  border-width: 2px;
   height: 18%;
 }
 
@@ -161,13 +161,18 @@
   z-index: 10;
 }
 
+.date-indicator.estimate,
+.timeline-item-connector.estimate::before {
+  border-style: dashed;
+}
+
 .timeline-item.absolute .date-indicator {
   border-color: var(--bom-color);
   color: var(--bom-color);
 }
 
 .timeline-item.absolute .timeline-item-connector::before {
-  background-color: var(--bom-color);
+  border-color: var(--bom-color);
 }
 
 .timeline-item .circle {
