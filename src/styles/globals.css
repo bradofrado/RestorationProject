@@ -5,8 +5,9 @@
 
 :root {
   --container-size: 500px;
+  --container-zoom: var(--container-size);
   --circle-size: calc(500px / 14);
-  --item-size: calc(var(--container-size) / 4);
+  --item-size: calc(var(--container-zoom) / 4);
   --primary-color: theme('colors.primary.DEFAULT');
   --secondary-color: theme('colors.secondary.DEFAULT');
   --restoration-item-size: 200px;

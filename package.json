@@ -13,7 +13,8 @@
     "test": "jest --env=jsdom",
     "test:watch": "jest --watch",
     "remote-build": "npx prisma generate && npx prisma migrate deploy && next build",
-    "compose": "docker compose -f devops/docker-compose.yml up --build -d"
+    "compose": "docker compose -f devops/docker-compose.yml up --build -d",
+    "db:seed": "pg_dump $DATABASE_URL | psql -h localhost -U postgres -d app"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",

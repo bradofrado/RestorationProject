@@ -24,10 +24,21 @@ import Button from '../base/buttons/button';
 import Label from '../base/label';
 import Header from '../base/header';
 import { Annotation } from './CondensedTimeline';
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 type EstimateTypes = Exclude<RestorationTimelineItemDateType, 'EXACT'>;
+
+const getContainerSize = () => {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+  const sizeStr = getComputedStyle(document.body).getPropertyValue(
+    '--container-zoom'
+  );
+  return Number(sizeStr.substring(0, sizeStr.length - 2));
+};
 
 export interface TimelineProps {
   categories: TimelineCategory[];
@@ -40,6 +51,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     TimelineCategory['id'][]
   >([]);
   const [scrollIndex, setScrollIndex] = useState<number>(-1);
+  const [zoom, setZoom] = useState<number>(getContainerSize());
 
   const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
     const items: TimelineItemStandalone[] = curr.items
@@ -54,8 +66,6 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     return prev;
   }, []);
-
-  const getUrl = query.data;
 
   const unfilteredSorted = items.slice().sort((a, b) => {
     if (a.date < b.date) {
@@ -77,36 +87,53 @@ export const Timeline: React.FC<TimelineProps> = ({
   const monthMarkers = useMemo(() => {
     let timeItems: TimelineItem[] = [];
     const firstYear = firstDate.getFullYear();
+    console.log(zoom);
+    const restrict = (() => {
+      if (zoom <= 50) {
+        return 0;
+      }
+
+      if (zoom <= 100) {
+        return 4;
+      }
+
+      if (zoom <= 300) {
+        return 2;
+      }
+
+      return 1;
+    })();
 
     for (let i = 0; i < yearDiff; i++) {
       timeItems = timeItems.concat(
-        months.map((m) => {
-          const item: TimelineItem = {
-            graphDate: dayjs(new Date(firstYear + i, m, 1)).format('MMM'),
-            x: 0,
-            below: false,
-            date: m === 0 ? (firstYear + i).toString() : undefined,
-            color: PrimaryColor,
-            year: firstYear + i,
-          };
+        months
+          .map((m, j) => {
+            const item: TimelineItem = {
+              graphDate: dayjs(new Date(firstYear + i, m, 1)).format('MMM'),
+              x: 0,
+              below: false,
+              date: m === 0 ? (firstYear + i).toString() : undefined,
+              color: PrimaryColor,
+              year: firstYear + i,
+              skip: m === 0 ? false : restrict === 0 || j % restrict !== 0,
+              amount: 1,
+            };
 
-          return item;
-        })
+            return item;
+          })
+          .filter((x) => x !== null)
       );
     }
 
     return timeItems.slice().sort((a, b) => a.x - b.x);
-  }, [firstDate, yearDiff]);
+  }, [firstDate, yearDiff, zoom]);
 
   const convertToTimelineItems = useCallback(
     (items: TimelineItemStandalone[]) => {
       if (typeof window === 'undefined') {
         return [];
       }
-      const style = getComputedStyle(document.body);
-      const containerSize = style.getPropertyValue('--container-size');
-      const offset =
-        Number(containerSize.substring(0, containerSize.length - 2)) / 4;
+      const offset = zoom / 4;
       const firstYear = firstDate.getFullYear();
       const getYearOffset = (year: number) => {
         return year * months.length * offset;
@@ -153,6 +180,19 @@ export const Timeline: React.FC<TimelineProps> = ({
           ESTIMATE_MONTH: {},
         }
       );
+      const itemsByDate = items.reduce<
+        Record<string, { item: TimelineItemStandalone; index: number }[]>
+      >((prev, curr, index) => {
+        const date = curr.date.toISOString();
+        const currItems = prev[date];
+        if (currItems) {
+          currItems.push({ item: curr, index });
+        } else {
+          prev[date] = [{ item: curr, index }];
+        }
+
+        return prev;
+      }, {});
 
       for (const [type, typeItems] of Object.entries(estimateItems)) {
         for (const [key, items] of Object.entries(typeItems)) {
@@ -192,8 +232,9 @@ export const Timeline: React.FC<TimelineProps> = ({
       }
 
       const timeItems: TimelineItem[] = [];
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+      for (const [date, items] of Object.entries(itemsByDate)) {
+        const item = items[0]?.item;
+        const index = items[0]?.index;
         if (!item) continue;
 
         if (
@@ -213,11 +254,6 @@ export const Timeline: React.FC<TimelineProps> = ({
           );
         }
 
-        const hoverState =
-          item.text.length > offset
-            ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow'
-            : '';
-
         const date =
           item.type === 'EXACT'
             ? dayjs(item.date).format('MMM D')
@@ -232,38 +268,21 @@ export const Timeline: React.FC<TimelineProps> = ({
             getDayOffset(item.date.getDate()),
           below: currDateCount % 2 === 0,
           content: (
-            <div
-              data-testid="timeline-item"
-              className={`restoration-item group overflow-hidden hover:z-20 focus:z-20 ${hoverState} absolute h-[200px] transition-width ease-in-out`}
-            >
-              <div className="flex h-full flex-col justify-center">
-                <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
-                  {item.text}{' '}
-                  {item.links.map((link, i) => (
-                    <Annotation key={i} link={link} id={i + 1} />
-                  ))}
-                </p>
-              </div>
-              {item.pageId && (
-                <div className="flex h-5 justify-around">
-                  <Link
-                    className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
-                    href={`/${getUrl?.(item.pageId)}`}
-                  >
-                    More
-                  </Link>
-                </div>
-              )}
-            </div>
+            <TimelineItemContent
+              items={items.map((item) => item.item)}
+              onClick={() => setScrollIndex(index ?? 0)}
+              offset={offset}
+            />
           ),
           color: item.color,
           year: item.date.getFullYear(),
+          amount: items.length,
         });
       }
 
       return timeItems;
     },
-    [firstDate, getUrl]
+    [firstDate, zoom]
   );
 
   const timeItems = useMemo(() => {
@@ -292,6 +311,32 @@ export const Timeline: React.FC<TimelineProps> = ({
     let newIndex = scrollIndex - 1;
     newIndex = newIndex < 0 ? timeItems.length - 1 : newIndex;
     setScrollIndex(newIndex);
+  };
+
+  const onZoomInClick = () => {
+    if (zoom >= 1500) {
+      return;
+    }
+
+    const currentSize = getContainerSize();
+    setZoom(currentSize + 50);
+    document.documentElement.style.setProperty(
+      '--container-zoom',
+      `${currentSize + 50}px`
+    );
+  };
+
+  const onZoomOutClick = () => {
+    if (zoom <= 50) {
+      return;
+    }
+
+    const currentSize = getContainerSize();
+    document.documentElement.style.setProperty(
+      '--container-zoom',
+      `${currentSize - 50}px`
+    );
+    setZoom(currentSize - 50);
   };
 
   const categoriesWithDateItems = categories.filter(
@@ -347,6 +392,15 @@ export const Timeline: React.FC<TimelineProps> = ({
               <Button onClick={onNextClick}>Next</Button>
             </div>
           </div>
+          <div className="space-x-2">
+            <Button mode="secondary" onClick={onZoomOutClick}>
+              -
+            </Button>
+            <span>Zoom</span>
+            <Button mode="secondary" onClick={onZoomInClick}>
+              +
+            </Button>
+          </div>
         </div>
       </div>
     </>
@@ -383,9 +437,103 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
   );
 };
 
+interface TimelineItemContentProps {
+  items: TimelineItemStandalone[];
+  onClick: () => void;
+  offset: number;
+}
+
+const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
+  items,
+  onClick,
+  offset,
+}: TimelineItemContentProps) => {
+  const [page, setPage] = useState<number>(0);
+
+  const query = useGetPageUrl();
+  const item = items[page];
+  if (!item) {
+    throw new Error('No item found');
+  }
+  const getUrl = query.data;
+  const hoverState =
+    item.text.length > offset
+      ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow'
+      : '';
+
+  const onNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (page < items.length - 1) {
+      setPage(page + 1);
+    } else {
+      setPage(0);
+    }
+  };
+  const onPreviousClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (page > 0) {
+      setPage(page - 1);
+    } else {
+      setPage(items.length - 1);
+    }
+  };
+  return (
+    <button
+      data-testid="timeline-item"
+      className={`restoration-item group overflow-hidden hover:z-20 focus:z-20 ${hoverState} absolute h-[200px] transition-width ease-in-out`}
+      onClick={onClick}
+    >
+      <div className="flex h-full flex-col justify-center">
+        <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
+          {item.text}{' '}
+          {item.links.map((link, i) => (
+            <Annotation key={i} link={link} id={i + 1} />
+          ))}
+        </p>
+      </div>
+      {item.pageId && (
+        <div className="flex h-5 justify-around">
+          <Link
+            className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
+            href={`/${getUrl?.(item.pageId)}`}
+          >
+            More
+          </Link>
+        </div>
+      )}
+
+      {items.length > 1 ? (
+        <div className="hidden group-hover:block">
+          <Button
+            className="absolute left-0 top-[50%]"
+            mode="secondary"
+            onClick={onPreviousClick}
+          >
+            <ArrowLeftIcon className="size-4" />
+          </Button>
+          <Button
+            className="absolute right-0 top-[50%]"
+            mode="secondary"
+            onClick={onNextClick}
+          >
+            <ArrowRightIcon className="size-4" />
+          </Button>
+          <div className="absolute right-2 top-0">
+            <span>
+              {page + 1} / {items.length}
+            </span>
+          </div>
+        </div>
+      ) : null}
+    </button>
+  );
+};
+
 const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { date, x, content, below, graphDate, color } = props;
+  const { date, x, content, below, graphDate, color, skip, amount } = props;
 
   let belowClass = below ? ' below' : '';
   const style: CSSProperties | undefined =
@@ -409,18 +557,25 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
         aria-label={`${x}`}
       >
         <div className="timeline-item-content">
-          {date && (
+          {date && !skip && (
             <div
               className={`date-indicator timeline-item-connector ${
                 date.startsWith('~') ? 'estimate' : ''
               }`}
             >
-              {date}
+              <div className="relative">
+                {date}
+                {amount > 1 && (
+                  <span className="absolute -right-2 -top-6 size-5 rounded-full border-2 border-rose-500 bg-white text-xs text-black">
+                    {amount}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
         <div className="timeline-item-content">{content}</div>
-        {graphDate && (
+        {graphDate && !skip && (
           <div className="circle">
             <span className="">{graphDate}</span>
           </div>
@@ -438,4 +593,6 @@ export interface TimelineItem {
   date?: string;
   color: HexColor;
   year: number;
+  skip?: boolean;
+  amount: number;
 }
