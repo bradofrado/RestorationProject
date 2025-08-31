@@ -1,7 +1,7 @@
 import { type Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { ComponentTypeSchema } from '../components/edit/add-component';
 import { type Replace } from '../utils';
+import { ComponentTypeSchema } from '../components/edit/components';
 
 const data = {
   select: { content: true, properties: true },

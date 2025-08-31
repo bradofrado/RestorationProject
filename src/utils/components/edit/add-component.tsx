@@ -60,6 +60,7 @@ import { type HexColor, HexColorSchema } from '~/utils/types/colors';
 import Paragraph, { type ParagraphProps } from '../base/paragraph';
 import { HeaderSettingsSchema } from '~/utils/components/base/header';
 import { CheckboxInput } from '~/utils/components/base/input';
+import { type ComponentType } from './components';
 
 const Placeholder = ({ children }: React.PropsWithChildren) => {
   return <div className="text-gray-400">{children}</div>;
@@ -579,13 +580,6 @@ const components = createComponents(
     component: DataList,
   }
 );
-
-const componentsTypes = components.map((x) => x.label);
-
-export type ComponentType = (typeof components)[number]['label'];
-export const ComponentTypeSchema = z.custom<ComponentType>((val) => {
-  return (componentsTypes as ReadonlyArray<string>).includes(val as string);
-});
 
 export type EditableComponentType = {
   type: ComponentType;

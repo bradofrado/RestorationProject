@@ -15,10 +15,7 @@ import {
   queryByTestId,
 } from '~/test/util';
 import userEvent from '@testing-library/user-event';
-import {
-  ListSettingsSchema,
-  type ComponentType,
-} from '~/utils/components/edit/add-component';
+import { ListSettingsSchema } from '~/utils/components/edit/add-component';
 import { type UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
 import { RenderPage } from '~/utils/components/event-page/render-page';
 import {
@@ -28,6 +25,7 @@ import {
 import { DateFormat, groupBy, jsonParse } from '~/utils/utils';
 import { EditPages } from '~/utils/components/edit/edit-pages';
 import { EditTimelineItems } from '~/utils/components/edit/edit-timeline-items';
+import { type ComponentType } from '~/utils/components/edit/components';
 
 const getCategories = () => categories;
 const getPages = () => pages;

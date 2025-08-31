@@ -20,12 +20,10 @@ import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import AddComponent, {
   type EditableComponentType,
 } from '~/utils/components/edit/add-component';
-import {
-  type ComponentType,
-  CustomComponents,
-} from '~/utils/components/edit/add-component';
+import { CustomComponents } from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
 import { useRouter } from 'next/navigation';
+import { type ComponentType } from './components';
 
 export const EditPages = () => {
   const router = useRouter();
