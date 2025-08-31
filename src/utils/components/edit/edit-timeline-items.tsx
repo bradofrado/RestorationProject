@@ -163,14 +163,16 @@ export const EditTimelineItems = () => {
     changeProperty(category, 'items', copy);
   };
 
-  const saveItem = (item: RestorationTimelineItem, i: number) => {
+  const saveItem = async (item: RestorationTimelineItem, i: number) => {
     if (!category) return;
     const copy = category.items.slice();
     copy[i] = item;
     if (item.id < 0) {
-      createItem.mutate(item);
+      const result = await createItem.mutateAsync(item);
+      copy[i] = result;
     } else {
-      updateItem.mutate(item);
+      const result = await updateItem.mutateAsync(item);
+      copy[i] = result;
     }
     changeProperty(category, 'items', copy);
   };
