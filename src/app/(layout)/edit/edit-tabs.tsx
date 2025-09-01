@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { type FC } from 'react';
+import { Suspense, type FC } from 'react';
 import TabControl, { type TabItem } from '~/utils/components/base/tab';
 import { EditPages } from '~/utils/components/edit/edit-pages';
 import { EditTimelineItems } from '~/utils/components/edit/edit-timeline-items';
@@ -25,11 +25,13 @@ export const EditTabs: FC<{ tab: 'page' | 'timeline' }> = ({ tab }) => {
       >
         &lt; Back to timeline
       </Link>
-      <TabControl
-        selectedIndex={tab === 'page' ? 0 : 1}
-        items={tabItems}
-        className="w-full px-2 py-6 sm:px-0"
-      />
+      <Suspense>
+        <TabControl
+          selectedIndex={tab === 'page' ? 0 : 1}
+          items={tabItems}
+          className="w-full px-2 py-6 sm:px-0"
+        />
+      </Suspense>
     </div>
   );
 };
