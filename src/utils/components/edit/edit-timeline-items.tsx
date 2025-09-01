@@ -422,7 +422,7 @@ const EditRestorationItem = ({
             className="flex flex-col gap-2"
           >
             {(link: string, i: number, Wrapper) => (
-              <DraggableComponent id={`${i}`} index={i}>
+              <DraggableComponent key={i} id={`${i}`} index={i}>
                 <Wrapper
                   onDelete={() => onDeleteLink(i)}
                   icons={[{ icon: DragMoveIcon }]}
