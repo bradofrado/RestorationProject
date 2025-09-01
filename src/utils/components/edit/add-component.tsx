@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Editable, {
   type EditableProps,
   type ButtonIcon,
@@ -123,47 +123,52 @@ const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({
     CondensedTimelineSettingsSchema,
     { dotColor: '#ad643a' }
   );
+
+  const icons: ButtonIcon[] = useMemo(() => {
+    const dropdownItems: DropdownItem<string>[] =
+      query.data?.map((x) => ({
+        id: x.name,
+        name: x.name,
+      })) ?? [];
+    return [
+      <DropdownIcon
+        onChange={(item) =>
+          onEdit({ content: item.id, properties: data.properties })
+        }
+        key={1}
+        items={dropdownItems}
+        icon={EditIcon}
+      />,
+      <PopoverIcon icon={AdjustIcon} key={0}>
+        <SettingsComponentCallout
+          data={settings}
+          onEdit={(settings) =>
+            onEdit({
+              content: data.content,
+              properties: JSON.stringify(settings),
+            })
+          }
+        >
+          {({ dotColor: color }, changeSetting) => (
+            <>
+              <Label label="Dot Color" sameLine>
+                <ColorPicker
+                  className="m-auto"
+                  value={color}
+                  onChange={(value) => changeSetting('dotColor', value)}
+                  defaultColors={defaultColors}
+                />
+              </Label>
+            </>
+          )}
+        </SettingsComponentCallout>
+      </PopoverIcon>,
+    ];
+  }, [query.data, settings, onEdit, data.properties, data.content]);
+
   if (query.isLoading || query.isError) {
     return <></>;
   }
-  const dropdownItems: DropdownItem<string>[] = query.data.map((x) => ({
-    id: x.name,
-    name: x.name,
-  }));
-  const icons: ButtonIcon[] = [
-    <DropdownIcon
-      onChange={(item) =>
-        onEdit({ content: item.id, properties: data.properties })
-      }
-      key={1}
-      items={dropdownItems}
-      icon={EditIcon}
-    />,
-    <PopoverIcon icon={AdjustIcon} key={0}>
-      <SettingsComponentCallout
-        data={settings}
-        onEdit={(settings) =>
-          onEdit({
-            content: data.content,
-            properties: JSON.stringify(settings),
-          })
-        }
-      >
-        {({ dotColor: color }, changeSetting) => (
-          <>
-            <Label label="Dot Color" sameLine>
-              <ColorPicker
-                className="m-auto"
-                value={color}
-                onChange={(value) => changeSetting('dotColor', value)}
-                defaultColors={defaultColors}
-              />
-            </Label>
-          </>
-        )}
-      </SettingsComponentCallout>
-    </PopoverIcon>,
-  ];
 
   return (
     <>
@@ -261,62 +266,80 @@ const EditableList: React.ElementType<EditableDataComponent> = ({
   const changeProperty = useChangeProperty<typeof settings>((settings) =>
     onEdit({ content: data.content, properties: JSON.stringify(settings) })
   );
-  if (query.isLoading || query.isError) {
-    return <></>;
-  }
+
   const type: TimelineCategoryName = data != null ? data.content : 'custom';
-  const dropdownItems: DropdownItem<string>[] = [
-    {
-      name: 'Custom',
-      id: 'custom',
-    },
-  ].concat(query.data.map((x) => ({ id: x.name, name: x.name })));
-
-  const editIcons: ButtonIcon[] = [
-    <DropdownIcon
-      items={dropdownItems}
-      icon={EditIcon}
-      key={1}
-      onChange={(item) =>
-        onEdit({ content: item.id, properties: data?.properties || null })
-      }
-    />,
-  ];
-
-  editIcons.push(
-    <PopoverIcon icon={AdjustIcon}>
-      <SettingsComponentCallout
-        data={settings}
-        onEdit={changeProperty.function}
-      >
-        {({ group }, changeSettings) => (
-          <>
-            {data.content != 'custom' && (
-              <Label label="Group" sameLine>
-                <CheckboxInput
-                  value={group}
-                  onChange={(value) => changeSettings('group', value)}
-                />
-              </Label>
-            )}
-          </>
-        )}
-      </SettingsComponentCallout>
-    </PopoverIcon>
+  const dropdownItems: DropdownItem<string>[] = useMemo(
+    () =>
+      [
+        {
+          name: 'Custom',
+          id: 'custom',
+        },
+      ].concat(query.data?.map((x) => ({ id: x.name, name: x.name })) || []),
+    [query.data]
   );
-  if (type == 'custom') {
-    editIcons.push({
-      icon: AddIcon,
-      handler: () =>
-        changeProperty(settings, 'items', settings.items.concat('Text')),
-    });
-  }
+
+  const editIcons: ButtonIcon[] = useMemo(() => {
+    const icons: ButtonIcon[] = [
+      <DropdownIcon
+        items={dropdownItems}
+        icon={EditIcon}
+        key={1}
+        onChange={(item) =>
+          onEdit({ content: item.id, properties: data?.properties || null })
+        }
+      />,
+    ];
+
+    icons.push(
+      <PopoverIcon icon={AdjustIcon}>
+        <SettingsComponentCallout
+          data={settings}
+          onEdit={changeProperty.function}
+        >
+          {({ group }, changeSettings) => (
+            <>
+              {data.content != 'custom' && (
+                <Label label="Group" sameLine>
+                  <CheckboxInput
+                    value={group}
+                    onChange={(value) => changeSettings('group', value)}
+                  />
+                </Label>
+              )}
+            </>
+          )}
+        </SettingsComponentCallout>
+      </PopoverIcon>
+    );
+    if (type == 'custom') {
+      icons.push({
+        icon: AddIcon,
+        handler: () =>
+          changeProperty(settings, 'items', settings.items.concat('Text')),
+      });
+    }
+
+    return icons;
+  }, [
+    dropdownItems,
+    settings,
+    changeProperty,
+    type,
+    onEdit,
+    data?.properties,
+    data.content,
+  ]);
 
   const editLiItem = (value: string, index: number) => {
     const vals = [...settings.items];
     vals[index] = value;
     changeProperty(settings, 'items', vals);
   };
+
+  if (query.isLoading || query.isError) {
+    return <></>;
+  }
 
   return (
     <>
@@ -386,9 +409,13 @@ export const useParseSettings = <T extends SettingsComponentSettings>(
   schema: z.ZodType<T>,
   { margin = 0, color = '#000', ...rest }: Partial<T>
 ): T => {
-  const settingsParsed: T = settings
-    ? jsonParse(schema).parse(settings)
-    : ({ margin, color, ...rest } as T);
+  const settingsParsed: T = useMemo(
+    () =>
+      settings
+        ? jsonParse(schema).parse(settings)
+        : ({ margin, color, ...rest } as T),
+    [settings, schema, margin, color, rest]
+  );
 
   return settingsParsed;
 };
@@ -721,12 +748,21 @@ export default function AddComponent({
 }: {
   onAdd: (component: ComponentType) => void;
 }) {
-  const items: DropdownItem<ComponentType>[] = components.map((comp) => ({
-    name: comp.label,
-    id: comp.label,
-  }));
+  const items: DropdownItem<ComponentType>[] = useMemo(
+    () =>
+      components.map((comp) => ({
+        name: comp.label,
+        id: comp.label,
+      })),
+    []
+  );
   return (
-    <Dropdown items={items} chevron={false} onChange={(item) => onAdd(item.id)}>
+    <Dropdown
+      anchor="top start"
+      items={items}
+      chevron={false}
+      onChange={(item) => onAdd(item.id)}
+    >
       +
     </Dropdown>
   );

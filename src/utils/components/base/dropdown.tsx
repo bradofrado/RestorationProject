@@ -1,6 +1,13 @@
-import { Menu, Transition } from '@headlessui/react';
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from '@headlessui/react';
 import { Fragment, useState, type PropsWithChildren, useEffect } from 'react';
 import { CheckIcon, ChevronDown, type IconComponent } from '../icons/icons';
+import { type AnchorProps } from '@headlessui/react/dist/internal/floating';
 
 export interface DropdownItem<T> {
   name: React.ReactNode;
@@ -13,6 +20,7 @@ interface DropdownProps<T> extends PropsWithChildren {
   className?: string;
   chevron?: boolean;
   onChange?: ItemAction<T>;
+  anchor?: AnchorProps;
 }
 
 const Dropdown = <T,>({
@@ -22,13 +30,17 @@ const Dropdown = <T,>({
   items,
   chevron = true,
   className = 'inline-flex items-center w-full justify-center rounded-md bg-white shadow-sm px-3 py-1.5 border text-sm text-gray-900 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75',
+  anchor,
 }: DropdownProps<T>) => {
   const [value, setValue] = useState<DropdownItem<T> | undefined>(
     items.find((x) => x.id == initialValue)
   );
   useEffect(() => {
-    setValue(items.find((x) => x.id == initialValue));
-  }, [initialValue, items]);
+    const newValue = items.find((x) => x.id == initialValue);
+    if (value !== newValue) {
+      setValue(newValue);
+    }
+  }, [initialValue, items, value]);
 
   const onClick = (item: DropdownItem<T>, index: number) => {
     setValue(item);
@@ -41,12 +53,12 @@ const Dropdown = <T,>({
     <>
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className={className}>
+          <MenuButton className={className}>
             {initialValue && value ? value?.name : children}{' '}
             {chevron && (
               <ChevronDown className="-mr-1 ml-2 h-4 w-4" aria-hidden="true" />
             )}
-          </Menu.Button>
+          </MenuButton>
         </div>
         <Transition
           as={Fragment}
@@ -57,10 +69,13 @@ const Dropdown = <T,>({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <MenuItems
+            anchor={anchor}
+            className="absolute left-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+          >
             <div className="px-1 py-1 ">
               {items.map((item, i) => (
-                <Menu.Item key={i}>
+                <MenuItem key={i}>
                   {({ active }) => (
                     <button
                       data-testid={`dropdown-item-${String(item.id)}`}
@@ -72,10 +87,10 @@ const Dropdown = <T,>({
                       {item.name}
                     </button>
                   )}
-                </Menu.Item>
+                </MenuItem>
               ))}
             </div>
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
     </>
