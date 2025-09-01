@@ -181,14 +181,14 @@ export const Timeline: React.FC<TimelineProps> = ({
         }
       );
       const itemsByDate = items.reduce<
-        Record<string, { item: TimelineItemStandalone; index: number }[]>
-      >((prev, curr, index) => {
+        Record<string, TimelineItemStandalone[]>
+      >((prev, curr) => {
         const date = curr.date.toISOString();
         const currItems = prev[date];
         if (currItems) {
-          currItems.push({ item: curr, index });
+          currItems.push(curr);
         } else {
-          prev[date] = [{ item: curr, index }];
+          prev[date] = [curr];
         }
 
         return prev;
@@ -233,8 +233,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
       const timeItems: TimelineItem[] = [];
       for (const [_, items] of Object.entries(itemsByDate)) {
-        const item = items[0]?.item;
-        const index = items[0]?.index;
+        const item = items[0];
         if (!item) continue;
 
         if (
@@ -260,6 +259,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             : item.type === 'ESTIMATE_YEAR'
             ? `~ ${dayjs(item.date).format('YYYY')}`
             : `~ ${dayjs(item.date).format('MMM')}`;
+        const index = timeItems.length;
         timeItems.push({
           date,
           x:
@@ -269,8 +269,8 @@ export const Timeline: React.FC<TimelineProps> = ({
           below: currDateCount % 2 === 0,
           content: (
             <TimelineItemContent
-              items={items.map((item) => item.item)}
-              onClick={() => setScrollIndex(index ?? 0)}
+              items={items}
+              onClick={() => setScrollIndex(index)}
               offset={offset}
             />
           ),
