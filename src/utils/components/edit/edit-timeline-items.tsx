@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Dropdown from '~/utils/components/base/dropdown';
 import {
   type ItemAction,
@@ -39,10 +39,13 @@ import { MapSelector } from '../base/map-selector';
 import { type MapImage, maps } from '~/utils/types/maps';
 import Image from 'next/image';
 import { TimelineDateType } from '@prisma/client';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type Position = { x: number; y: number };
 
 export const EditTimelineItems = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [category, setCategory] = useState<TimelineCategory>();
   const changeProperty = useChangeProperty<TimelineCategory>(setCategory);
   const { update, create, deletem } = useCategoryMutations();
@@ -60,6 +63,30 @@ export const EditTimelineItems = () => {
       setCategory(update.data);
     }
   }, [create.data, update.data]);
+
+  const id = useMemo(() => {
+    return searchParams.get('id');
+  }, [searchParams]);
+
+  const setId = useCallback(
+    (id: string | undefined) => {
+      if (!id) {
+        router.push('/edit/timelines');
+        return;
+      }
+      router.push(`/edit/timelines?id=${id}`);
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    if (categoryQuery.data) {
+      setCategory(
+        categoryQuery.data.find((x) => x.id === Number(id)) || undefined
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryQuery.data]);
 
   if (
     pageQuery.isLoading ||
@@ -102,6 +129,7 @@ export const EditTimelineItems = () => {
 
   const onClear = () => {
     setCategory(undefined);
+    setId(undefined);
   };
 
   const onDelete = (isNew: boolean) => {
@@ -114,6 +142,7 @@ export const EditTimelineItems = () => {
   const onChange: ItemAction<number> = (item) => {
     const category = categoriesGroup[item.id];
     setCategory(category);
+    setId(category?.id.toString());
   };
 
   const onPageChange: ItemAction<string> = (value) => {
@@ -240,7 +269,11 @@ export const EditTimelineItems = () => {
                           saveItem(item, i),
                       };
                       return isNew ? (
-                        <AddRemoveItem {...props} category={category} />
+                        <AddRemoveItem
+                          key={`${item.id}`}
+                          {...props}
+                          category={category}
+                        />
                       ) : (
                         <DirtyComponent
                           key={`${item.id}`}

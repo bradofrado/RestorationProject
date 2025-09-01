@@ -1,6 +1,8 @@
 'use client';
 
-import { Tab } from '@headlessui/react';
+import { Tab, TabGroup, TabList, TabPanels, TabPanel } from '@headlessui/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 function classNames(...classes: (string | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -10,18 +12,33 @@ export interface TabItem {
   label: string;
   component: React.ReactElement;
   className?: string;
+  href?: string;
 }
 
 type TabControlProps = {
   items: TabItem[];
   className?: string;
+  selectedIndex?: number;
 };
 
-export default function TabControl({ items, className }: TabControlProps) {
+export default function TabControl({
+  items,
+  className,
+  selectedIndex: selectedIndexProps,
+}: TabControlProps) {
+  const [selectedIndex, setSelectedIndex] = useState(selectedIndexProps);
+  useEffect(() => {
+    if (selectedIndex !== selectedIndexProps) {
+      setSelectedIndex(selectedIndexProps);
+    }
+  }, [selectedIndexProps, selectedIndex]);
+
+  const router = useRouter();
+
   return (
     <div className={className}>
-      <Tab.Group>
-        <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+      <TabGroup selectedIndex={selectedIndex} onChange={setSelectedIndex}>
+        <TabList className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
           {items.map((item, i) => (
             <Tab
               key={i}
@@ -34,15 +51,20 @@ export default function TabControl({ items, className }: TabControlProps) {
                     : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
                 )
               }
+              onClick={() => {
+                if (item.href) {
+                  router.push(item.href);
+                }
+              }}
             >
               {item.label}
             </Tab>
           ))}
-        </Tab.List>
-        <Tab.Panels className="mt-2">
+        </TabList>
+        <TabPanels className="mt-2">
           {items.map((item, idx) => {
             return (
-              <Tab.Panel
+              <TabPanel
                 key={idx}
                 className={classNames(
                   'rounded-xl p-3',
@@ -51,11 +73,11 @@ export default function TabControl({ items, className }: TabControlProps) {
                 )}
               >
                 {item.component}
-              </Tab.Panel>
+              </TabPanel>
             );
           })}
-        </Tab.Panels>
-      </Tab.Group>
+        </TabPanels>
+      </TabGroup>
     </div>
   );
 }

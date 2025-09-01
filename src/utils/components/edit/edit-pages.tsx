@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEffect, useState } from 'react';
 import { type DropdownItem } from '~/utils/components/base/dropdown';
 import Button from '~/utils/components/base/buttons/button';
@@ -22,12 +22,13 @@ import AddComponent, {
 } from '~/utils/components/edit/add-component';
 import { CustomComponents } from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { type ComponentType } from './components';
 import { getPageUrl } from '~/utils/get-page-url';
 
 export const EditPages = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currPage, setCurrPage] = useState<EventPage>();
   const { create, update, deletem } = useEventPagesMutation();
   const {
@@ -40,9 +41,17 @@ export const EditPages = () => {
 
   let pages: EventPage[] | null = null;
 
+  const id = useMemo(() => {
+    return searchParams.get('id');
+  }, [searchParams]);
+
   const setId = useCallback(
     (id: string | undefined) => {
-      router.push(`/edit?id=${id}`);
+      if (!id) {
+        router.push('/edit/essays');
+        return;
+      }
+      router.push(`/edit/essays?id=${id}`);
     },
     [router]
   );
@@ -54,6 +63,13 @@ export const EditPages = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [create.data, update.data]);
+
+  useEffect(() => {
+    if (query.data) {
+      setCurrPage(query.data.find((page) => page.id === id) || undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data]);
 
   if (query.isLoading) {
     return <div>Loading...</div>;
@@ -127,6 +143,7 @@ export const EditPages = () => {
   };
 
   const onClear = () => {
+    setId(undefined);
     setCurrPage(undefined);
   };
 
@@ -134,6 +151,20 @@ export const EditPages = () => {
     if (currPage == undefined) return;
     const copy: EventPage = { ...currPage };
     copy.url = value;
+    setCurrPage(copy);
+  };
+
+  const onTitleChange = (value: string) => {
+    if (currPage == undefined) return;
+    const copy: EventPage = { ...currPage };
+    copy.title = value;
+    setCurrPage(copy);
+  };
+
+  const onDescriptionChange = (value: string) => {
+    if (currPage == undefined) return;
+    const copy: EventPage = { ...currPage };
+    copy.description = value;
     setCurrPage(copy);
   };
 
@@ -153,6 +184,27 @@ export const EditPages = () => {
             <>
               {currPage && (
                 <>
+                  <div className="py-1">
+                    <Input
+                      include={Label}
+                      label="Title"
+                      value={currPage.title}
+                      onChange={onTitleChange}
+                      className="my-1 ml-1"
+                      inputClass="w-full"
+                    />
+                  </div>
+                  <div className="py-1">
+                    <Input
+                      include={Label}
+                      label="Description"
+                      value={currPage.description}
+                      onChange={onDescriptionChange}
+                      className="my-1 ml-1"
+                      inputClass="w-full"
+                      type="textarea"
+                    />
+                  </div>
                   <div className="py-1">
                     <Input
                       include={Label}
