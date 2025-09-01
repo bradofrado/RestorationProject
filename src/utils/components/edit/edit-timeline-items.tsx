@@ -80,7 +80,7 @@ export const EditTimelineItems = () => {
   );
 
   useEffect(() => {
-    if (categoryQuery.data) {
+    if (categoryQuery.data && !category) {
       setCategory(
         categoryQuery.data.find((x) => x.id === Number(id)) || undefined
       );

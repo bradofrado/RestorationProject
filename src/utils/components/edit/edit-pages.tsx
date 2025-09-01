@@ -65,7 +65,7 @@ export const EditPages = () => {
   }, [create.data, update.data]);
 
   useEffect(() => {
-    if (query.data) {
+    if (query.data && !currPage) {
       setCurrPage(query.data.find((page) => page.id === id) || undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
