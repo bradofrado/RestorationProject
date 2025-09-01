@@ -4,6 +4,12 @@ import { z } from 'zod';
 import { type UserRole, userRoleSchema } from './types/auth';
 
 export const DateFormat = {
+  estimateMonth: (date: Date) => {
+    return `~ ${dayjs(date).format('MMM YYYY')}`;
+  },
+  estimateYear: (date: Date) => {
+    return `~ ${dayjs(date).format('YYYY')}`;
+  },
   fullText: (date: Date) => {
     return dayjs(date).format('MMM, D, YYYY');
   },

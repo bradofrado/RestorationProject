@@ -2,7 +2,7 @@ import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import { DateFormat } from '~/utils/utils';
 import { useAnnotationLink } from '../edit/add-component';
 import { type HexColor } from '~/utils/types/colors';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export interface CondensedTimelineProps {
   items: RestorationTimelineItem[];
@@ -42,9 +42,24 @@ const TimelineRow: React.FC<TimelineRowProps> = ({
   item,
 }: TimelineRowProps) => {
   const { annotate } = useAnnotationLink();
-  if (!item.date) return <></>;
+  const date = useMemo(() => {
+    if (!item.date) return null;
 
-  const date = DateFormat.fullTextRange(item.date, item.endDate);
+    if (item.type === 'EXACT') {
+      return DateFormat.fullTextRange(item.date, item.endDate);
+    }
+
+    if (item.type === 'ESTIMATE_MONTH') {
+      return DateFormat.estimateMonth(item.date);
+    }
+
+    if (item.type === 'ESTIMATE_YEAR') {
+      return DateFormat.estimateYear(item.date);
+    }
+  }, [item.date, item.endDate, item.type]);
+
+  if (!date) return <></>;
+
   return (
     <>
       <li className="condensed-timeline-row">
