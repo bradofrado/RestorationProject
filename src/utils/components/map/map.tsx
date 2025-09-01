@@ -64,7 +64,12 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
   return (
     <AnnotationLinkProvider>
       <div className="grid grid-cols-4 gap-4">
-        <EventList items={filtered} hoveredId={hoveredItem?.id} />
+        <EventList
+          items={filtered}
+          hoveredId={hoveredItem?.id}
+          onSelect={onSelect}
+          onHover={setHoveredItem}
+        />
         <div className="relative col-span-2 h-fit">
           {items.map((item) =>
             item.x && item.y ? (
@@ -73,7 +78,9 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
                 className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all ease-in-out hover:cursor-pointer ${
                   filteredIds.includes(item.id)
                     ? 'scale-[200%]'
-                    : 'hover:scale-[150%]'
+                    : hoveredItem?.id === item.id
+                    ? 'scale-[150%]'
+                    : undefined
                 }`}
                 style={{
                   left: `${item.x * 100}%`,
@@ -115,19 +122,27 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
 const EventList: React.FunctionComponent<{
   items: (RestorationTimelineItem & { category: TimelineCategory })[];
   hoveredId: number | undefined;
-}> = ({ items, hoveredId }) => {
+  onSelect: (item: RestorationTimelineItem) => void;
+  onHover: (item: RestorationTimelineItem | undefined) => void;
+}> = ({ items, hoveredId, onSelect, onHover }) => {
   const { annotate } = useAnnotationLink();
   return (
     <div className="flex flex-1 flex-col gap-2">
       {items.map((item) =>
         item.x && item.y ? (
-          <div key={item.id} className="flex items-center justify-start gap-2">
+          <button
+            key={item.id}
+            className="flex items-center justify-start gap-2"
+            onClick={() => onSelect(item)}
+            onMouseEnter={() => onHover(item)}
+            onMouseLeave={() => onHover(undefined)}
+          >
             <div
               className="h-3 w-3 rounded-full"
               style={{ backgroundColor: item.category.color }}
             />
             <div
-              className={`text-sm ${
+              className={`flex-1 text-sm ${
                 item.id === hoveredId ? 'font-semibold' : ''
               }`}
             >
@@ -136,7 +151,7 @@ const EventList: React.FunctionComponent<{
                 <Annotation key={i} link={link} id={annotate(link)} />
               ))}
             </div>
-          </div>
+          </button>
         ) : null
       )}
     </div>
