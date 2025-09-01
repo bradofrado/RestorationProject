@@ -9,7 +9,7 @@ import {
   type DroppableProps,
   type DraggableProps,
   type DropResult,
-} from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
 import { type Replace, type ReplaceWithName } from '~/utils/utils';
 
 export const DroppableComponent = ({
