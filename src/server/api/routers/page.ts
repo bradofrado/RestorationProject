@@ -5,7 +5,12 @@ import {
   editableProcedure,
   publicProcedure,
 } from '~/server/api/trpc';
-import { getPage, prismaToComponent, prismaToPage } from '~/server/dao/pageDAO';
+import {
+  getPage,
+  getPages,
+  prismaToComponent,
+  prismaToPage,
+} from '~/server/dao/pageDAO';
 import { type Db } from '~/server/db';
 import {
   type EventPage,
@@ -62,14 +67,7 @@ export const pageRouter = createTRPCRouter({
   getPages: publicProcedure.query(async ({ ctx }) => {
     await ctx.logger.info('GetPages', ctx.session?.user);
 
-    const pages = await ctx.prisma.page.findMany({
-      include: { settings: { include: { data: true } } },
-      where: {
-        isDeleted: false,
-      },
-    });
-
-    return pages.map((page) => prismaToPage(page));
+    return await getPages({ db: ctx.prisma });
   }),
   getPage: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
     await ctx.logger.info(`GetPage ${input}`, ctx.session?.user);

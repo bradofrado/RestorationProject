@@ -25,6 +25,7 @@ import Label from '../base/label';
 import Header from '../base/header';
 import { Annotation } from './CondensedTimeline';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import { getPageUrl } from '~/utils/get-page-url';
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -455,7 +456,14 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
   if (!item) {
     throw new Error('No item found');
   }
-  const getUrl = query.data;
+  const getUrl = (pageId: string) => {
+    const result = query.data?.(pageId);
+    if (!result) {
+      throw new Error('No data found');
+    }
+    return getPageUrl(result);
+  };
+
   const hoverState =
     item.text.length > offset
       ? 'hover:w-[300px] sm:hover:w-[500px] group/overflow'
@@ -497,7 +505,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
         <div className="flex h-5 justify-around">
           <Link
             className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
-            href={`/${getUrl?.(item.pageId)}`}
+            href={getUrl?.(item.pageId)}
           >
             More
           </Link>

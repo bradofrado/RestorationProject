@@ -24,6 +24,7 @@ import { CustomComponents } from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
 import { useRouter } from 'next/navigation';
 import { type ComponentType } from './components';
+import { getPageUrl } from '~/utils/get-page-url';
 
 export const EditPages = () => {
   const router = useRouter();
@@ -162,7 +163,7 @@ export const EditPages = () => {
                     />
                     <Button
                       as={Link}
-                      href={`/${currPage.url}`}
+                      href={getPageUrl(currPage.url)}
                       className="ml-1"
                     >
                       Go
