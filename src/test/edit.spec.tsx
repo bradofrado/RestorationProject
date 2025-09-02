@@ -15,7 +15,6 @@ import {
   queryByTestId,
 } from '~/test/util';
 import userEvent from '@testing-library/user-event';
-import { ListSettingsSchema } from '~/utils/components/edit/add-component';
 import { type UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
 import { RenderPage } from '~/utils/components/event-page/render-page';
 import {
@@ -25,7 +24,8 @@ import {
 import { DateFormat, groupBy, jsonParse } from '~/utils/utils';
 import { EditPages } from '~/utils/components/edit/edit-pages';
 import { EditTimelineItems } from '~/utils/components/edit/edit-timeline-items';
-import { type ComponentType } from '~/utils/components/edit/components';
+import { ComponentType } from '~/utils/components/blocks/utils/types';
+import { listSettingsSchema } from '~/utils/components/blocks/list/list';
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -37,6 +37,9 @@ const getUrl = (pageId: string) => {
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: jest.fn(),
   }),
 }));
 
@@ -366,7 +369,7 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
   },
   List: ({ setting, container }) => {
     const settings = setting.data.properties
-      ? jsonParse(ListSettingsSchema).parse(setting.data.properties)
+      ? jsonParse(listSettingsSchema).parse(setting.data.properties)
       : null;
     if (setting.data.content == 'custom' && settings) {
       const items = settings.items;

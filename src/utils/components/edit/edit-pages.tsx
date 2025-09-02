@@ -17,14 +17,12 @@ import {
 } from '~/utils/types/page';
 import Input from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
-import AddComponent, {
-  type EditableComponentType,
-} from '~/utils/components/edit/add-component';
-import { CustomComponents } from '~/utils/components/edit/add-component';
+import AddComponent from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { type ComponentType } from './components';
 import { getPageUrl } from '~/utils/get-page-url';
+import { ComponentType, EditableComponentType } from '../blocks/utils/types';
+import { RenderBlocks } from '../blocks/render-blocks';
 
 export const EditPages = () => {
   const router = useRouter();
@@ -326,7 +324,6 @@ const EditablePage = ({
     if (index < -1) {
       throw new Error(`Cannot delete setting ${id}`);
     }
-    editSettings((components) => components.splice(index, 1));
     const setting = page.settings[index];
     if (!setting) {
       throw new Error('Cannot delete setting');
@@ -334,6 +331,7 @@ const EditablePage = ({
     if (!isNew && setting.id >= 0) {
       deleteSetting(setting.id);
     }
+    editSettings((components) => components.splice(index, 1));
   };
 
   const onReorder = (items: EditableComponentType[]) => {
@@ -356,9 +354,9 @@ const EditablePage = ({
   const settings = page.settings; //.slice().sort((a, b) => a.order - b.order);
   return (
     <>
-      <CustomComponents
+      <RenderBlocks
         isNew={isNew}
-        editable={true}
+        editable
         onReorder={onReorder}
         items={settings.map((editable: ComponentSettings, index: number) => ({
           id: editable.id,

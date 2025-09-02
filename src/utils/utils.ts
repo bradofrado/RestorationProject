@@ -75,12 +75,15 @@ export const setStyleFromSettings = (
 
 export const jsonParse = <T>(schema: z.ZodType<T>) =>
   z.string().transform((str, ctx): z.infer<typeof schema> => {
+    let json: any;
     try {
-      return schema.parse(JSON.parse(str));
-    } catch {
+      json = JSON.parse(str);
+    } catch (error) {
+      console.error(error);
       ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
       return z.NEVER;
     }
+    return schema.parse(json);
   });
 
 export const useChangeProperty = <T>(func: (item: T) => void) => {

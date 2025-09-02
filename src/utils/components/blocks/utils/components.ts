@@ -1,0 +1,39 @@
+import { EditableHeaderBlock } from '../header/editable-header';
+import { HeaderBlock } from '../header/header';
+import { EditableListBlock } from '../list/editable-list';
+import { ListBlock } from '../list/list';
+import { EditableParagraphBlock } from '../paragraph/editable-paragraph';
+import { ParagraphBlock } from '../paragraph/paragraph';
+import { EditableTimelineBlock } from '../timeline/editable-timeline';
+import { TimelineBlock } from '../timeline/timeline';
+import { Component } from './types';
+
+function createComponents<
+  T extends readonly Component[] & Array<{ label: V }>,
+  V extends string
+>(...args: T) {
+  return args;
+}
+
+export const components = createComponents(
+  {
+    label: 'Header',
+    editable: EditableHeaderBlock,
+    component: HeaderBlock,
+  },
+  {
+    label: 'Paragraph',
+    editable: EditableParagraphBlock,
+    component: ParagraphBlock,
+  },
+  {
+    label: 'Timeline',
+    editable: EditableTimelineBlock,
+    component: TimelineBlock,
+  },
+  {
+    label: 'List',
+    editable: EditableListBlock,
+    component: ListBlock,
+  }
+);

@@ -10,7 +10,7 @@ import { Annotation } from '../Timeline/CondensedTimeline';
 import {
   AnnotationLinkProvider,
   useAnnotationLink,
-} from '../edit/add-component';
+} from '../event-page/annotation-provider';
 import { MapSelector } from '../base/map-selector';
 import { maps, type MapImage } from '~/utils/types/maps';
 import Image from 'next/image';

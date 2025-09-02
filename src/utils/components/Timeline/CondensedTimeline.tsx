@@ -1,8 +1,8 @@
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import { DateFormat } from '~/utils/utils';
-import { useAnnotationLink } from '../edit/add-component';
 import { type HexColor } from '~/utils/types/colors';
 import { useEffect, useMemo, useRef } from 'react';
+import { useAnnotationLink } from '../event-page/annotation-provider';
 
 export interface CondensedTimelineProps {
   items: RestorationTimelineItem[];

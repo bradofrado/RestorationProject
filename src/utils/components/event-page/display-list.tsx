@@ -1,9 +1,9 @@
 import { DateFormat, groupBy } from '~/utils/utils';
 import { Annotation } from '../Timeline/CondensedTimeline';
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
-import { type ContentEditableBlur } from '../edit/add-component';
+import { type ContentEditableBlur } from '../blocks/utils/types';
 import React from 'react';
-import { useAnnotationLink } from '~/utils/components/edit/add-component';
+import { useAnnotationLink } from './annotation-provider';
 
 type DataGroupbyListProps<T extends ListItem> = {
   className?: string;
