@@ -136,3 +136,59 @@ export const exclude = <T extends Pick<T, K>, K extends keyof T>(
     Object.entries<T>(user).filter(([key]) => !keys.includes(key as K))
   ) as Omit<T, K>;
 };
+
+declare global {
+  interface String {
+    replaceWith: <T extends string extends T ? unknown : 'Must be a string'>(
+      regex: RegExp,
+      callback: (match: RegExpMatchArray, index: number) => T
+    ) => T[];
+    replaceOccurance: (
+      searchValue: string | RegExp,
+      replaceValue: string,
+      index: number
+    ) => string;
+  }
+}
+String.prototype.replaceWith = function <
+  T extends string extends T ? unknown : 'Must be a string'
+>(regex: RegExp, callback: (match: RegExpMatchArray, index: number) => T): T[] {
+  const str = this as string;
+  let match;
+  let index = 0;
+  const contents: T[] = [];
+  let matchIndex = 0;
+  while ((match = regex.exec(str))) {
+    contents.push(str.slice(index, match.index) as T);
+    contents.push(callback(match, matchIndex));
+    index = match.index + match[0].length;
+    matchIndex++;
+  }
+  if (index < str.length) {
+    contents.push(str.slice(index) as T);
+  }
+
+  return contents;
+};
+
+String.prototype.replaceOccurance = function (
+  searchValue: string | RegExp,
+  replaceValue: string,
+  index: number
+) {
+  const str = this as string;
+  const allReplaceableIndexes = Array.from(
+    str.matchAll(
+      searchValue instanceof RegExp ? searchValue : new RegExp(searchValue, 'g')
+    )
+  );
+  const replaceableIndex = allReplaceableIndexes[index];
+  if (!replaceableIndex) {
+    return str;
+  }
+  return (
+    str.slice(0, replaceableIndex.index) +
+    replaceValue +
+    str.slice(replaceableIndex.index + replaceableIndex[0]!.length)
+  );
+};

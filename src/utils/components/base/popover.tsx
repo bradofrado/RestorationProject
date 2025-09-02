@@ -10,7 +10,7 @@ type PopoverProps = React.PropsWithChildren<{
 const Popover = ({ children, button, className }: PopoverProps) => {
   return (
     <>
-      <ReactPopover className="relative inline-block">
+      <ReactPopover className="relative inline-block" contentEditable={false}>
         {() => (
           <>
             <ReactPopover.Button className={className}>

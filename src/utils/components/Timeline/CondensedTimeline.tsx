@@ -3,6 +3,7 @@ import { DateFormat } from '~/utils/utils';
 import { type HexColor } from '~/utils/types/colors';
 import { useEffect, useMemo, useRef } from 'react';
 import { useAnnotationLink } from '../event-page/annotation-provider';
+import { Annotation } from './annotation';
 
 export interface CondensedTimelineProps {
   items: RestorationTimelineItem[];
@@ -71,33 +72,12 @@ const TimelineRow: React.FC<TimelineRowProps> = ({
             <span>{item.text}</span>
             <span>
               {item.links.map((link, i) => (
-                <Annotation link={link} key={i} id={annotate(link)} />
+                <Annotation link={link} key={i} linkNumber={annotate(link)} />
               ))}
             </span>
           </p>
         </div>
       </li>
-    </>
-  );
-};
-
-interface AnnotationProps {
-  link: string;
-  id: number;
-}
-export const Annotation: React.FC<AnnotationProps> = (
-  props: AnnotationProps
-) => {
-  const { link, id } = props;
-  return (
-    <>
-      <span className="relative font-normal" role="annotation">
-        <a className="no-underline" href={link} target="_blank">
-          <span className="relative top-[-7px] text-[0.75em]">
-            [<span className="underline">{id}</span>]
-          </span>
-        </a>
-      </span>
     </>
   );
 };

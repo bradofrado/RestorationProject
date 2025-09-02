@@ -1,5 +1,5 @@
 import { DateFormat, groupBy } from '~/utils/utils';
-import { Annotation } from '../Timeline/CondensedTimeline';
+import { Annotation } from '../Timeline/annotation';
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import { type ContentEditableBlur } from '../blocks/utils/types';
 import React, { CSSProperties, FC, ReactNode } from 'react';
@@ -119,7 +119,7 @@ export const Quote = <C extends React.ElementType>({
       {item.subText}
       <span>
         {item.links.map((link, i) => (
-          <Annotation link={link} key={i} id={annotate(link)} />
+          <Annotation link={link} key={i} linkNumber={annotate(link)} />
         ))}
       </span>
     </Component>
