@@ -451,7 +451,7 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
       }
     }
   },
-  Quote: ({ setting, container }) => {
+  Quote: ({ setting }) => {
     const settings = setting.data.properties
       ? jsonParse(quoteBlockSettingsSchema).parse(setting.data.properties)
       : null;

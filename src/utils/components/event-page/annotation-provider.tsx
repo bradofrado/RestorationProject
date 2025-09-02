@@ -1,27 +1,19 @@
 import {
   createContext,
   useContext,
-  PropsWithChildren,
-  FC,
+  type PropsWithChildren,
   useCallback,
 } from 'react';
-import {
-  Annotation as AnnotationComponent,
-  AnnotationProps,
-} from '../Timeline/annotation';
 
 const AnnotationLinkContext = createContext<{
   annotationLinks: Record<string, number>;
 }>({ annotationLinks: {} });
 
-interface AnnotationProviderProps<C extends AnnotationProps = AnnotationProps>
-  extends PropsWithChildren {}
+type AnnotationProviderProps = PropsWithChildren;
 
-export const AnnotationLinkProvider = <
-  C extends AnnotationProps = AnnotationProps
->({
+export const AnnotationLinkProvider = ({
   children,
-}: AnnotationProviderProps<C>) => {
+}: AnnotationProviderProps) => {
   const annotationLinks = {};
 
   return (

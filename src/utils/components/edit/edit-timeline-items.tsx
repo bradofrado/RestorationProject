@@ -27,11 +27,6 @@ import { DateRangePicker } from '~/utils/components/base/calendar/date-picker';
 import { RemoveField } from '../base/remove-field';
 import { type EditableDeleteableComponentProps } from './editable';
 import { DirtyComponent, defaultDirtyProps } from './dirty-component';
-import {
-  DraggableComponent,
-  DroppableContext,
-} from '~/utils/components/base/draggable-list';
-import { DragMoveIcon } from '../icons/icons';
 import Modal from '../base/modal';
 import Button from '../base/buttons/button';
 import { type HexColor } from '~/utils/types/colors';

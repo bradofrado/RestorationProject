@@ -75,7 +75,7 @@ export const setStyleFromSettings = (
 
 export const jsonParse = <T>(schema: z.ZodType<T>) =>
   z.string().transform((str, ctx): z.infer<typeof schema> => {
-    let json: any;
+    let json: unknown;
     try {
       json = JSON.parse(str);
     } catch (error) {
@@ -189,6 +189,6 @@ String.prototype.replaceOccurance = function (
   return (
     str.slice(0, replaceableIndex.index) +
     replaceValue +
-    str.slice(replaceableIndex.index + replaceableIndex[0]!.length)
+    str.slice(replaceableIndex.index + replaceableIndex[0].length)
   );
 };

@@ -5,7 +5,7 @@ import {
   ContentEditable,
   type ContentEditableBlur,
 } from '../blocks/utils/types';
-import React, { CSSProperties, FC, ReactNode } from 'react';
+import React, { CSSProperties, ReactNode } from 'react';
 import { useAnnotationLink } from './annotation-provider';
 import { PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import { AnnotationComponentProvider } from '../blocks/annotation/annotation-component-provider';
@@ -65,12 +65,12 @@ export const DisplayList = <T extends ListItem>({
           if (contentEditable === true || contentEditable === 'true') {
             return (
               <AnnotationComponentProvider
+                key={i}
                 value={item.text}
                 onChange={(value) => onBlur?.(value, i)}
               >
                 {({ onBlur: onAnnotationBlur }) => (
                   <ListComponent
-                    key={i}
                     item={item}
                     contentEditable={contentEditable}
                     onBlur={onAnnotationBlur}
