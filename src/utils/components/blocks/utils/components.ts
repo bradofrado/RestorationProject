@@ -4,6 +4,8 @@ import { EditableListBlock } from '../list/editable-list';
 import { ListBlock } from '../list/list';
 import { EditableParagraphBlock } from '../paragraph/editable-paragraph';
 import { ParagraphBlock } from '../paragraph/paragraph';
+import { EditableQuoteBlock } from '../quote/editable-quote';
+import { QuoteBlock } from '../quote/quote';
 import { EditableTimelineBlock } from '../timeline/editable-timeline';
 import { TimelineBlock } from '../timeline/timeline';
 import { Component } from './types';
@@ -35,5 +37,10 @@ export const components = createComponents(
     label: 'List',
     editable: EditableListBlock,
     component: ListBlock,
+  },
+  {
+    label: 'Quote',
+    editable: EditableQuoteBlock,
+    component: QuoteBlock,
   }
 );

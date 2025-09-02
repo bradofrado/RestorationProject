@@ -40,6 +40,7 @@ import { type MapImage, maps } from '~/utils/types/maps';
 import Image from 'next/image';
 import { TimelineDateType } from '@prisma/client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { AnnotationList } from './annotation-list';
 
 type Position = { x: number; y: number };
 
@@ -412,32 +413,16 @@ const EditRestorationItem = ({
           }
         />
         <Label label="Links" className="my-1">
-          <AddRemove
-            items={propItem.links}
+          <AnnotationList
+            links={propItem.links}
             onAdd={onAddLink}
-            custom
-            container={DroppableContext<string>}
-            id={`links-${propItem.id}`}
             onReorder={(links: string[]) =>
               changePropertyItem(propItem, 'links', links)
             }
-            className="flex flex-col gap-2"
-          >
-            {(link: string, i: number, Wrapper) => (
-              <DraggableComponent key={i} id={`${i}`} index={i}>
-                <Wrapper
-                  onDelete={() => onDeleteLink(i)}
-                  icons={[{ icon: DragMoveIcon }]}
-                >
-                  <Input
-                    value={link}
-                    inputClass="w-full"
-                    onChange={(value) => onLinkChange(value, i)}
-                  />
-                </Wrapper>
-              </DraggableComponent>
-            )}
-          </AddRemove>
+            onDelete={onDeleteLink}
+            onChange={onLinkChange}
+            id={`links-${propItem.id}`}
+          />
         </Label>
         <Label label="Location">
           <div className="flex gap-2">

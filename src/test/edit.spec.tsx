@@ -26,6 +26,7 @@ import { EditPages } from '~/utils/components/edit/edit-pages';
 import { EditTimelineItems } from '~/utils/components/edit/edit-timeline-items';
 import { ComponentType } from '~/utils/components/blocks/utils/types';
 import { listSettingsSchema } from '~/utils/components/blocks/list/list';
+import { quoteBlockSettingsSchema } from '~/utils/components/blocks/quote/quote';
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -268,6 +269,7 @@ const addAndDeleteItemToPage = async ({
     Paragraph: 'paragraph',
     List: 'list',
     Timeline: 'list',
+    Quote: 'quote',
   };
 
   const { getByText, user, getAllByRole } = rest;
@@ -448,6 +450,12 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
         }
       }
     }
+  },
+  Quote: ({ setting, container }) => {
+    const settings = setting.data.properties
+      ? jsonParse(quoteBlockSettingsSchema).parse(setting.data.properties)
+      : null;
+    expect(settings).toBeTruthy();
   },
 };
 

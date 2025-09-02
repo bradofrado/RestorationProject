@@ -13,7 +13,13 @@ export type EditableDataComponent =
       onAdd: (component: ComponentType) => void;
     };
 
-const componentsTypes = ['Header', 'Paragraph', 'Timeline', 'List'] as const;
+const componentsTypes = [
+  'Header',
+  'Paragraph',
+  'Timeline',
+  'List',
+  'Quote',
+] as const;
 
 export type ComponentType = (typeof componentsTypes)[number];
 export const ComponentTypeSchema = z.custom<ComponentType>((val) => {

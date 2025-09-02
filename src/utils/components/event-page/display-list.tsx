@@ -2,8 +2,9 @@ import { DateFormat, groupBy } from '~/utils/utils';
 import { Annotation } from '../Timeline/CondensedTimeline';
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import { type ContentEditableBlur } from '../blocks/utils/types';
-import React from 'react';
+import React, { CSSProperties, FC, ReactNode } from 'react';
 import { useAnnotationLink } from './annotation-provider';
+import { PolymorphicComponentProps } from '~/utils/types/polymorphic';
 
 type DataGroupbyListProps<T extends ListItem> = {
   className?: string;
@@ -80,11 +81,11 @@ export type DisplayListComponentPassthrough<T extends ListItem> = {
 } & ContentEditableBlur;
 
 type DisplayListItemComponent<T extends ListItem> = (
-  props: { item: T; index: number } & ContentEditableBlur
+  props: { item: T; index: number; style?: CSSProperties } & ContentEditableBlur
 ) => JSX.Element;
 
 export const DisplayListItem: DisplayListItemComponent<{ text: string }> =
-  function ({ item, index, contentEditable, onBlur }) {
+  function ({ item, index, contentEditable, onBlur, style }) {
     return (
       <li
         onBlur={(e: React.FocusEvent<HTMLLIElement>) =>
@@ -92,36 +93,61 @@ export const DisplayListItem: DisplayListItemComponent<{ text: string }> =
         }
         contentEditable={contentEditable}
         suppressContentEditableWarning
+        style={style}
       >
         {item.text}
       </li>
     );
   };
 
-export const RestorationQuote: DisplayListItemComponent<
-  RestorationTimelineItem
-> = ({ item }) => {
+interface QuoteItem {
+  text: string;
+  subText: ReactNode;
+  links: string[];
+}
+
+export const Quote = <C extends React.ElementType>({
+  item,
+  as,
+  ...rest
+}: PolymorphicComponentProps<C, { item: QuoteItem }>) => {
   const { annotate } = useAnnotationLink();
-  const [quote, name] = item.text.split('-');
+  const Component = as || 'li';
   return (
-    <li>
-      <span className="italic">{quote}</span>
-      {name && (
-        <>
-          <span className="font-medium">-{name}</span>
-          {item.date && (
-            <span className="">
-              {' '}
-              {DateFormat.fullTextRange(item.date, item.endDate)}
-            </span>
-          )}
-        </>
-      )}
+    <Component {...rest}>
+      <span className="italic">{item.text}</span>
+      {item.subText}
       <span>
         {item.links.map((link, i) => (
           <Annotation link={link} key={i} id={annotate(link)} />
         ))}
       </span>
-    </li>
+    </Component>
+  );
+};
+
+export const RestorationQuote: DisplayListItemComponent<
+  RestorationTimelineItem
+> = ({ item, ...rest }) => {
+  const [quote, name] = item.text.split('-');
+  return (
+    <Quote
+      item={{
+        text: quote || '',
+        subText: name ? (
+          <>
+            <span className="font-medium">-{name}</span>
+            {item.date && (
+              <span className="">
+                {' '}
+                {DateFormat.fullTextRange(item.date, item.endDate)}
+              </span>
+            )}
+          </>
+        ) : null,
+        links: item.links,
+      }}
+      {...rest}
+    />
   );
 };
