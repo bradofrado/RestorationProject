@@ -69,11 +69,11 @@ export const timelineRouter = createTRPCRouter({
     }
   }),
   getCategory: publicProcedure
-    .input(z.string())
+    .input(z.number())
     .query(async ({ input, ctx }) => {
       await ctx.logger.info(`GetCategory: ${input}`, ctx.session?.user);
 
-      return await getCategory({ name: input, db: ctx.prisma });
+      return await getCategory({ id: input, db: ctx.prisma });
     }),
   getCategories: publicProcedure
     .input(

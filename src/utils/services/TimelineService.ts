@@ -1,7 +1,7 @@
 import { api } from '../api';
 
-export const useGetCategory = (category: string) => {
-  return api.timeline.getCategory.useQuery(category);
+export const useGetCategory = (categoryId: number) => {
+  return api.timeline.getCategory.useQuery(categoryId);
 };
 
 export const useGetCategories = (

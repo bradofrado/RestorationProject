@@ -31,11 +31,11 @@ export const getCategories = async (
   );
 };
 
-export const getCategory = async ({ db, name }: { db: Db; name: string }) => {
+export const getCategory = async ({ db, id }: { db: Db; id: number }) => {
   const dbCategory: PrismaTimelineCategory | null =
     await db.timelineCategory.findFirst({
       where: {
-        name: name,
+        id,
         isDeleted: false,
       },
       include: TimelineCategoryArgs.include,
@@ -43,7 +43,7 @@ export const getCategory = async ({ db, name }: { db: Db; name: string }) => {
   if (dbCategory == null) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: `Invalid input ${name}`,
+      message: `Invalid input ${id}`,
     });
   }
 

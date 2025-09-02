@@ -92,7 +92,7 @@ const DataCondensedTimeline: React.ElementType<DataComponent> = ({
   className,
   ...rest
 }) => {
-  const query = useGetCategory(data?.content || 'Book of Mormon');
+  const query = useGetCategory(Number(data?.content));
   const settings = useParseSettings(
     data.properties,
     CondensedTimelineSettingsSchema,
@@ -131,7 +131,7 @@ const EditableCondensedTimeline: React.ElementType<EditableDataComponent> = ({
   const icons: ButtonIcon[] = useMemo(() => {
     const dropdownItems: DropdownItem<string>[] =
       query.data?.map((x) => ({
-        id: x.name,
+        id: String(x.id),
         name: x.name,
       })) ?? [];
     return [
