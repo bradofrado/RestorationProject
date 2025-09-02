@@ -159,6 +159,11 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
   const [items, setItems] = useState(itemsProps.map((x) => x.id));
   const [isDirty, setIsDirty] = useState(false);
 
+  useEffect(() => {
+    if (itemsProps.length == items.length) return;
+    setItems(itemsProps.map((x) => x.id));
+  }, [itemsProps, items]);
+
   const sortItems = (_items: T[]) =>
     _items.slice().sort((a, b) => {
       const aIndex = items.indexOf(a.id);

@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from 'react';
+import { type ElementType, type FC, type PropsWithChildren } from 'react';
 import { type PolymorphicComponentProps } from '../../types/polymorphic';
 import { type IconComponent } from '../icons/icons';
 
@@ -8,8 +8,10 @@ interface EditablePropsInner extends PropsWithChildren {
   wrapped?: boolean;
 }
 
-export type EditableProps<C extends React.ElementType> =
-  PolymorphicComponentProps<C, EditablePropsInner>;
+export type EditableProps<C extends ElementType> = PolymorphicComponentProps<
+  C,
+  EditablePropsInner
+>;
 
 export interface DeletableComponentProps {
   onDelete: () => void;
@@ -24,10 +26,8 @@ export interface EditableDeleteableComponentProps<T>
   extends EditableComponentProps<T>,
     DeletableComponentProps {}
 
-export type EditableComponent<T> = React.ComponentType<
-  EditableComponentProps<T>
->;
-export type EditableDeleteableComponent<T> = React.ComponentType<
+export type EditableComponent<T> = FC<EditableComponentProps<T>>;
+export type EditableDeleteableComponent<T> = FC<
   EditableDeleteableComponentProps<T>
 >;
 
@@ -42,7 +42,7 @@ export type ContentEditableComponent = {
   contentEditable?: boolean | 'true' | 'false';
 };
 
-function Editable<T extends React.ElementType>({
+function Editable<T extends ElementType>({
   children,
   as,
   icons,
@@ -78,7 +78,7 @@ function Editable<T extends React.ElementType>({
                 key={i}
                 data-testid="editable-edit-icon"
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 fill-primary stroke-primary-light" />
               </button>
             );
           } else {

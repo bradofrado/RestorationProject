@@ -275,10 +275,12 @@ export const EditTimelineItems = () => {
                           category={category}
                         />
                       ) : (
-                        <DirtyComponent
+                        <DirtyComponent<
+                          RestorationTimelineItem,
+                          EditableDeleteableComponentProps<RestorationTimelineItem> &
+                            EditRestorationItemProps
+                        >
                           key={`${item.id}`}
-                          id={`${item.id}`}
-                          index={i}
                           {...defaultDirtyProps(item.id < 0)}
                           as={AddRemoveItem}
                           {...props}

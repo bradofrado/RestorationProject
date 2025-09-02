@@ -61,6 +61,7 @@ import Paragraph, { type ParagraphProps } from '../base/paragraph';
 import { HeaderSettingsSchema } from '~/utils/components/base/header';
 import { CheckboxInput } from '~/utils/components/base/input';
 import { type ComponentType } from './components';
+import { PlusIcon } from '@heroicons/react/outline';
 
 const Placeholder = ({ children }: React.PropsWithChildren) => {
   return <div className="text-gray-400">{children}</div>;
@@ -69,15 +70,18 @@ const Placeholder = ({ children }: React.PropsWithChildren) => {
 const defaultColors: HexColor[] = ['#ad643a', '#f1635c', '#111827'];
 
 type EditableDataComponent = EditableDeleteableComponentProps<EditableData> &
-  DataComponent;
+  DataComponent & {
+    onAdd: (component: ComponentType) => void;
+  };
+
 interface DataComponent {
   data: EditableData;
   className?: string;
 }
 interface Component {
   label: string;
-  editable: React.ComponentType<EditableDataComponent>;
-  component: React.ComponentType<DataComponent>;
+  editable: React.FC<EditableDataComponent>;
+  component: React.FC<DataComponent>;
 }
 
 const CondensedTimelineSettingsSchema = SettingsComponentSettingsSchema.extend({
@@ -253,7 +257,6 @@ const DataList: React.ElementType<DataListProps> = ({ data, ...rest }) => {
 };
 
 const EditableList: React.ElementType<EditableDataComponent> = ({
-  onDelete,
   onEdit,
   data,
   ...rest
@@ -348,7 +351,6 @@ const EditableList: React.ElementType<EditableDataComponent> = ({
         icons={editIcons}
         data={data}
         onBlur={editLiItem}
-        onDelete={onDelete}
         {...rest}
       />
     </>
@@ -356,13 +358,37 @@ const EditableList: React.ElementType<EditableDataComponent> = ({
 };
 
 type EditableComponentContainerProps<C extends React.ElementType> =
-  DeletableComponentProps & EditableProps<C>;
+  DeletableComponentProps &
+    EditableProps<C> & {
+      onAdd: (component: ComponentType) => void;
+    };
 const EditableComponentContainer = <C extends React.ElementType>(
   props: EditableComponentContainerProps<C>
 ) => {
+  const items: DropdownItem<ComponentType>[] = useMemo(
+    () =>
+      components.map((comp) => ({
+        name: comp.label,
+        id: comp.label,
+      })),
+    []
+  );
   const defaultIcons: ButtonIcon[] = [
     { icon: DeleteIcon, handler: props.onDelete },
     { icon: DragMoveIcon },
+    <PopoverIcon icon={PlusIcon} key={2}>
+      <div className="flex w-[8rem] flex-col gap-1">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            className="rounded-md p-1 hover:bg-primary-light hover:text-white"
+            onClick={() => props.onAdd(item.id)}
+          >
+            {item.name}
+          </button>
+        ))}
+      </div>
+    </PopoverIcon>,
   ];
   const allIcons = defaultIcons.concat(props.icons || []);
   return (
@@ -461,9 +487,9 @@ const SettingsComponentCallout = <T extends SettingsComponentSettings>({
 };
 
 const EditableHeader: React.ComponentType<EditableDataComponent> = ({
-  onDelete,
   onEdit,
   data,
+  ...rest
 }) => {
   const settings = useParseSettings(data.properties, HeaderSettingsSchema, {
     level: 2,
@@ -488,10 +514,10 @@ const EditableHeader: React.ComponentType<EditableDataComponent> = ({
     <>
       <EditableComponentContainer
         as={DataHeader}
-        onDelete={onDelete}
         onBlur={onBlur}
         icons={icons}
         data={data}
+        {...rest}
       />
     </>
   );
@@ -522,9 +548,9 @@ const ParagraphSettingsCallout: EditableComponent<
   );
 };
 const EditableParagraph: React.ComponentType<EditableDataComponent> = ({
-  onDelete,
   onEdit,
   data,
+  ...rest
 }) => {
   const settings = useParseSettings(
     data.properties,
@@ -552,10 +578,10 @@ const EditableParagraph: React.ComponentType<EditableDataComponent> = ({
       <EditableComponentContainer
         as={DataParagraph}
         role="paragraph"
-        onDelete={onDelete}
         data={data}
         icons={icons}
         onBlur={onBlur}
+        {...rest}
       />
     </>
   );

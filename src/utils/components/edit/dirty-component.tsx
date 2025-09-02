@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { type EditableDeleteableComponent } from '~/utils/components/edit/editable';
+import { type FC, useEffect, useState } from 'react';
+import { type EditableDeleteableComponentProps } from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import Button from '~/utils/components/base/buttons/button';
 type DirtComponentOtherProps = {
@@ -11,8 +11,8 @@ type DirtComponentOtherProps = {
 };
 type DirtyComponentProps<
   K,
-  T extends EditableDeleteableComponent<K>
-> = PolymorphicComponentProps<T, DirtComponentOtherProps>;
+  T extends EditableDeleteableComponentProps<K>
+> = PolymorphicComponentProps<FC<T>, DirtComponentOtherProps>;
 type DirtyState<T> =
   | {
       state: false;
@@ -30,7 +30,10 @@ type DirtyType<T> =
       type: 'delete';
     };
 
-export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({
+export const DirtyComponent = <
+  K,
+  T extends EditableDeleteableComponentProps<K>
+>({
   as,
   onDelete: onDeleteProps,
   onEdit: onEditProps,
@@ -82,6 +85,12 @@ export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({
   };
 
   const Component = as || 'span';
+  const componentProps = {
+    onDelete,
+    onEdit,
+    data: currData,
+    ...rest,
+  } as unknown as T;
   return (
     <div className="relative" data-testid={dataTestId}>
       {dirtyState.state && dirtyState.type == 'delete' && (
@@ -90,12 +99,7 @@ export const DirtyComponent = <K, T extends EditableDeleteableComponent<K>>({
           data-testid="dirty-state-delete"
         ></div>
       )}
-      <Component
-        onDelete={onDelete}
-        onEdit={onEdit}
-        data={currData}
-        {...rest}
-      />
+      <Component {...componentProps} />
       {dirtyState.state && (
         <div className="relative z-10 mx-4 my-1 text-right">
           {showCancel && (

@@ -261,7 +261,7 @@ const EditablePage = ({
 }: EditablePageProps) => {
   const editSettings = (f: (settings: ComponentSettings[]) => void) => {
     const copy: EventPage = { ...page };
-    const settings = copy.settings.slice();
+    const settings = copy.settings;
     f(settings);
     copy.settings = settings;
     setPage(copy);
@@ -269,13 +269,13 @@ const EditablePage = ({
     return copy;
   };
 
-  const onAdd = (component: ComponentType) => {
+  const onAdd = (component: ComponentType, index: number) => {
     const maxId =
       page.settings.length > 0
         ? Math.max(...page.settings.map((x) => Math.abs(x.id)))
         : 0;
-    editSettings((components) =>
-      components.push({
+    editSettings((components) => {
+      const newItem: ComponentSettings = {
         component,
         data: {
           content: 'custom',
@@ -283,9 +283,17 @@ const EditablePage = ({
         },
         id: -1 * (maxId + 1),
         pageId: page.id,
-        order: components.length,
-      })
-    );
+        order: index,
+      };
+      if (index < components.length) {
+        components.splice(index, 0, newItem);
+      } else {
+        components.push(newItem);
+      }
+      components.forEach((component, i) => {
+        component.order = i;
+      });
+    });
   };
 
   const onEdit = (data: EditableData, id: number) => {
@@ -347,15 +355,16 @@ const EditablePage = ({
         isNew={isNew}
         editable={true}
         onReorder={onReorder}
-        items={settings.map((editable: ComponentSettings) => ({
+        items={settings.map((editable: ComponentSettings, index: number) => ({
           id: editable.id,
           type: editable.component,
           onDelete: () => deleteComponent(editable.id),
           onEdit: (data: EditableData) => onEdit(data, editable.id),
           data: editable.data,
+          onAdd: (component: ComponentType) => onAdd(component, index),
         }))}
       />
-      <AddComponent onAdd={onAdd} />
+      <AddComponent onAdd={(component) => onAdd(component, settings.length)} />
     </>
   );
 };
