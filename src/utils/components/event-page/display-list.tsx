@@ -128,7 +128,7 @@ export const Quote = <C extends React.ElementType>({
 
 export const RestorationQuote: DisplayListItemComponent<
   RestorationTimelineItem
-> = ({ item, ...rest }) => {
+> = ({ item, contentEditable: _, ...rest }) => {
   const [quote, name] = item.text.split('-');
   return (
     <Quote
