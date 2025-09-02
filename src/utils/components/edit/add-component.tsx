@@ -234,7 +234,15 @@ const DataList: React.ElementType<DataListProps> = ({ data, ...rest }) => {
   }
 
   const items: RestorationTimelineItem[] =
-    query.data.find((x) => x.name == data.content)?.items || [];
+    query.data.find((x) => x.id == Number(data.content))?.items || [];
+
+  if (items.length === 0) {
+    return (
+      <div style={style}>
+        <Placeholder>List is empty</Placeholder>
+      </div>
+    );
+  }
 
   if (settings.group) {
     return (
@@ -278,7 +286,9 @@ const EditableList: React.ElementType<EditableDataComponent> = ({
           name: 'Custom',
           id: 'custom',
         },
-      ].concat(query.data?.map((x) => ({ id: x.name, name: x.name })) || []),
+      ].concat(
+        query.data?.map((x) => ({ id: String(x.id), name: x.name })) || []
+      ),
     [query.data]
   );
 
