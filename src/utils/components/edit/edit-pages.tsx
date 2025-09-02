@@ -225,8 +225,8 @@ export const EditPages = () => {
                     page={currPage}
                     setPage={setCurrPage}
                     isNew={isNew}
-                    createSetting={createSetting.mutate}
-                    updateSetting={updateSetting.mutate}
+                    createSetting={createSetting.mutateAsync}
+                    updateSetting={updateSetting.mutateAsync}
                     deleteSetting={deleteSetting.mutate}
                     reorderSettings={reorderSetting.mutate}
                   />
@@ -245,8 +245,8 @@ type EditablePageProps = {
   page: EventPage;
   setPage: (page: EventPage) => void;
   isNew: boolean;
-  createSetting: (setting: ComponentSettings) => void;
-  updateSetting: (setting: ComponentSettings) => void;
+  createSetting: (setting: ComponentSettings) => Promise<ComponentSettings>;
+  updateSetting: (setting: ComponentSettings) => Promise<ComponentSettings>;
   deleteSetting: (id: number) => void;
   reorderSettings: (params: ReorderSettingsParam) => void;
 };
@@ -296,7 +296,7 @@ const EditablePage = ({
     });
   };
 
-  const onEdit = (data: EditableData, id: number) => {
+  const onEdit = async (data: EditableData, id: number) => {
     const page = editSettings((components) => {
       const component = components.find((x) => x.id == id);
       (component || { data: null }).data = data;
@@ -307,11 +307,16 @@ const EditablePage = ({
     }
     if (setting.id >= 0) {
       if (!isNew) {
-        updateSetting(setting);
+        const result = await updateSetting(setting);
+        setting.id = result.id;
       }
     } else {
       if (!isNew) {
-        createSetting(setting);
+        const result = await createSetting(setting);
+        setting.id = result.id;
+
+        // Adding a new setting will likely change the order of the settings
+        reorderSettings(page.settings);
       }
     }
   };

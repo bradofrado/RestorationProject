@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Button from '~/utils/components/base/buttons/button';
 import {
   Draggable,
@@ -160,28 +160,32 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (itemsProps.length == items.length) return;
+    if (items.every((id, index) => id == itemsProps[index]?.id)) return;
+
     setItems(itemsProps.map((x) => x.id));
-  }, [itemsProps, items]);
+  }, [itemsProps]);
 
-  const sortItems = (_items: T[]) =>
-    _items.slice().sort((a, b) => {
-      const aIndex = items.indexOf(a.id);
-      const bIndex = items.indexOf(b.id);
-      if (aIndex < 0 || bIndex < 0) {
-        if (aIndex >= 0) {
-          return -1;
+  const sortedItems = useMemo(
+    () =>
+      itemsProps.slice().sort((a, b) => {
+        const aIndex = items.indexOf(a.id);
+        const bIndex = items.indexOf(b.id);
+        if (aIndex < 0 || bIndex < 0) {
+          if (aIndex >= 0) {
+            return -1;
+          }
+
+          if (bIndex >= 0) {
+            return 1;
+          }
+
+          return Math.abs(a.id) - Math.abs(b.id);
         }
 
-        if (bIndex >= 0) {
-          return 1;
-        }
-
-        return Math.abs(a.id) - Math.abs(b.id);
-      }
-
-      return aIndex - bIndex;
-    });
+        return aIndex - bIndex;
+      }),
+    [itemsProps, items]
+  );
 
   const onReorder = (newItems: T[]) => {
     setItems(newItems.map((x) => x.id));
@@ -190,7 +194,7 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
   };
 
   const onSave = () => {
-    onReorderProps(sortItems(itemsProps));
+    onReorderProps(sortedItems);
     setIsDirty(false);
   };
 
@@ -198,8 +202,6 @@ export const DirtyDraggableListComponent = <T extends { id: number }>({
     setItems(itemsProps.map((x) => x.id));
     setIsDirty(false);
   };
-
-  const sortedItems = sortItems(itemsProps);
 
   return (
     <>
