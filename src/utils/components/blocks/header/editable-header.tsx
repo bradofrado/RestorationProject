@@ -10,6 +10,7 @@ import { SettingsComponentCallout } from '../utils/settings-callout';
 import { NumberInput } from '../../base/input';
 import { HeaderLevels } from '../../base/header';
 import Label from '../../base/label';
+import { AnnotationComponentProvider } from '../annotation/annotation-component-provider';
 
 export const EditableHeaderBlock: FC<EditableDataComponent> = ({
   onEdit,
@@ -19,9 +20,6 @@ export const EditableHeaderBlock: FC<EditableDataComponent> = ({
   const settings = useParseSettings(data.properties, HeaderSettingsSchema, {
     level: 2,
   });
-  const onBlur = (e: React.FocusEvent<HTMLHeadingElement>) =>
-    e.target.innerHTML !== data?.content &&
-    onEdit({ content: e.target.innerHTML, properties: data.properties });
   const icons: ButtonIcon[] = [
     <PopoverIcon icon={AdjustIcon} key={0}>
       <HeaderSettingsComponent
@@ -36,15 +34,20 @@ export const EditableHeaderBlock: FC<EditableDataComponent> = ({
     </PopoverIcon>,
   ];
   return (
-    <>
-      <EditableComponentContainer
-        as={HeaderBlock}
-        onBlur={onBlur}
-        icons={icons}
-        data={data}
-        {...rest}
-      />
-    </>
+    <AnnotationComponentProvider
+      value={data.content}
+      onChange={(value) => onEdit({ ...data, content: value })}
+    >
+      {({ onBlur }) => (
+        <EditableComponentContainer
+          as={HeaderBlock}
+          onBlur={onBlur}
+          icons={icons}
+          data={data}
+          {...rest}
+        />
+      )}
+    </AnnotationComponentProvider>
   );
 };
 

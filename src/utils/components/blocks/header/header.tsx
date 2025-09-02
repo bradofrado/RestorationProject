@@ -5,6 +5,7 @@ import { SettingsComponentSettingsSchema } from '../utils/settings-component';
 import { DataComponent } from '../utils/types';
 import { z } from 'zod';
 import { FC } from 'react';
+import { AnnotationMarkdown } from '../annotation/annotation-markdown';
 
 export const HeaderSettingsSchema = SettingsComponentSettingsSchema.extend({
   level: HeaderLevelsSchema,
@@ -22,10 +23,11 @@ export const HeaderBlock: FC<DataComponent & HeaderProps> = ({
     <Header
       className="py-2"
       level={settings.level}
+      key={data?.content}
       style={setStyleFromSettings(settings)}
       {...rest}
     >
-      {data?.content || 'Text'}
+      {data?.content ? <AnnotationMarkdown text={data?.content} /> : 'Text'}
     </Header>
   );
 };

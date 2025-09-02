@@ -23,9 +23,9 @@ import { useGetPageUrl } from 'src/utils/services/EventPageService';
 import Button from '../base/buttons/button';
 import Label from '../base/label';
 import Header from '../base/header';
-import { Annotation } from './CondensedTimeline';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
 import { getPageUrl } from '~/utils/get-page-url';
+import { Annotation } from './annotation';
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -497,7 +497,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
         <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
           {item.text}{' '}
           {item.links.map((link, i) => (
-            <Annotation key={i} link={link} id={i + 1} />
+            <Annotation key={i} link={link} linkNumber={i + 1} />
           ))}
         </p>
       </div>

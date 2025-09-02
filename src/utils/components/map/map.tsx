@@ -6,7 +6,6 @@ import {
   type TimelineCategory,
 } from '~/utils/types/timeline';
 import { TimelineCategoryFilter } from '../Timeline/Timeline';
-import { Annotation } from '../Timeline/CondensedTimeline';
 import {
   AnnotationLinkProvider,
   useAnnotationLink,
@@ -15,6 +14,7 @@ import { MapSelector } from '../base/map-selector';
 import { maps, type MapImage } from '~/utils/types/maps';
 import Image from 'next/image';
 import Label from '../base/label';
+import { Annotation } from '../Timeline/annotation';
 
 interface MapProps {
   categories: TimelineCategory[];
@@ -148,7 +148,7 @@ const EventList: React.FunctionComponent<{
             >
               {item.text}{' '}
               {item.links.map((link, i) => (
-                <Annotation key={i} link={link} id={annotate(link)} />
+                <Annotation key={i} link={link} linkNumber={annotate(link)} />
               ))}
             </div>
           </button>

@@ -3,40 +3,18 @@ import { useParseSettings } from '../utils/parse-settings';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';
 import { DataComponent } from '../utils/types';
 import { PropsOf } from '~/utils/types/polymorphic';
-import { FC, ReactNode, useMemo } from 'react';
-import {
-  useAnnotationComponent,
-  useAnnotationLink,
-} from '../../event-page/annotation-provider';
-
-export const inlineAnnotationRegex = /\[([^\[\]]*)\]/g;
+import { FC } from 'react';
+import { AnnotationMarkdown } from '../annotation/annotation-markdown';
 
 export const ParagraphBlock: FC<DataComponent & PropsOf<'p'>> = ({
   data,
   ...rest
 }) => {
-  const { annotate } = useAnnotationLink();
-  const { Annotation } = useAnnotationComponent();
   const settings = useParseSettings(
     data.properties,
     SettingsComponentSettingsSchema,
     {}
   );
-
-  const content = useMemo(() => {
-    const nodes = data.content.replaceWith<ReactNode>(
-      inlineAnnotationRegex,
-      (match, index) => (
-        <Annotation
-          link={match[1] || ''}
-          linkNumber={annotate(match[1] || '')}
-          id={String(index)}
-        />
-      )
-    );
-
-    return nodes;
-  }, [data.content]);
 
   return (
     <>
@@ -46,7 +24,7 @@ export const ParagraphBlock: FC<DataComponent & PropsOf<'p'>> = ({
         style={setStyleFromSettings(settings)}
         {...rest}
       >
-        {content || 'Text'}
+        {data.content ? <AnnotationMarkdown text={data.content} /> : 'Text'}
       </p>
     </>
   );

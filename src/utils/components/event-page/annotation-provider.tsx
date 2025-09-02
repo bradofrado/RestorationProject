@@ -1,4 +1,10 @@
-import { createContext, useContext, PropsWithChildren, FC } from 'react';
+import {
+  createContext,
+  useContext,
+  PropsWithChildren,
+  FC,
+  useCallback,
+} from 'react';
 import {
   Annotation as AnnotationComponent,
   AnnotationProps,
@@ -31,36 +37,20 @@ export const useAnnotationLink = () => {
     const sorted = vals.slice().sort((a, b) => b - a);
     return sorted[0] || 0;
   };
-  const annotate = (link: string): number => {
-    const curr = annotationLinks[link];
-    if (curr) {
-      return curr;
-    }
+  const annotate = useCallback(
+    (link: string): number => {
+      const curr = annotationLinks[link];
+      if (curr) {
+        return curr;
+      }
 
-    const nextVal: number = max(Object.values(annotationLinks)) + 1;
-    annotationLinks[link] = nextVal;
+      const nextVal: number = max(Object.values(annotationLinks)) + 1;
+      annotationLinks[link] = nextVal;
 
-    return nextVal;
-  };
+      return nextVal;
+    },
+    [annotationLinks]
+  );
 
   return { annotate };
-};
-
-const AnnotationComponentContext = createContext<{
-  Annotation: FC<AnnotationProps>;
-}>({ Annotation: AnnotationComponent });
-
-export const AnnotationComponentProvider = ({
-  children,
-  Annotation,
-}: PropsWithChildren & { Annotation: FC<AnnotationProps> }) => {
-  return (
-    <AnnotationComponentContext.Provider value={{ Annotation }}>
-      {children}
-    </AnnotationComponentContext.Provider>
-  );
-};
-
-export const useAnnotationComponent = () => {
-  return useContext(AnnotationComponentContext);
 };

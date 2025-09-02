@@ -1,10 +1,15 @@
 import { DateFormat, groupBy } from '~/utils/utils';
 import { Annotation } from '../Timeline/annotation';
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
-import { type ContentEditableBlur } from '../blocks/utils/types';
+import {
+  ContentEditable,
+  type ContentEditableBlur,
+} from '../blocks/utils/types';
 import React, { CSSProperties, FC, ReactNode } from 'react';
 import { useAnnotationLink } from './annotation-provider';
 import { PolymorphicComponentProps } from '~/utils/types/polymorphic';
+import { AnnotationComponentProvider } from '../blocks/annotation/annotation-component-provider';
+import { AnnotationMarkdown } from '../blocks/annotation/annotation-markdown';
 
 type DataGroupbyListProps<T extends ListItem> = {
   className?: string;
@@ -50,21 +55,32 @@ export const DisplayList = <T extends ListItem>({
   items,
   ListComponent,
   contentEditable,
+  onBlur,
   ...rest
 }: DisplayListProps<T>) => {
   return (
     <>
       <ul className="list-disc px-10 py-2">
         {items.map((item, i) => {
-          return (
-            <ListComponent
-              key={i}
-              index={i}
-              item={item}
-              contentEditable={contentEditable}
-              {...rest}
-            />
-          );
+          if (contentEditable === true || contentEditable === 'true') {
+            return (
+              <AnnotationComponentProvider
+                value={item.text}
+                onChange={(value) => onBlur?.(value, i)}
+              >
+                {({ onBlur: onAnnotationBlur }) => (
+                  <ListComponent
+                    key={i}
+                    item={item}
+                    contentEditable={contentEditable}
+                    onBlur={onAnnotationBlur}
+                    {...rest}
+                  />
+                )}
+              </AnnotationComponentProvider>
+            );
+          }
+          return <ListComponent key={i} item={item} {...rest} />;
         })}
       </ul>
     </>
@@ -81,21 +97,22 @@ export type DisplayListComponentPassthrough<T extends ListItem> = {
 } & ContentEditableBlur;
 
 type DisplayListItemComponent<T extends ListItem> = (
-  props: { item: T; index: number; style?: CSSProperties } & ContentEditableBlur
+  props: { item: T; style?: CSSProperties } & ContentEditable & {
+      onBlur?: (e: React.FocusEvent) => void;
+    }
 ) => JSX.Element;
 
 export const DisplayListItem: DisplayListItemComponent<{ text: string }> =
-  function ({ item, index, contentEditable, onBlur, style }) {
+  function ({ item, contentEditable, onBlur, style }) {
     return (
       <li
-        onBlur={(e: React.FocusEvent<HTMLLIElement>) =>
-          onBlur && onBlur(e.target.innerHTML, index)
-        }
+        onBlur={onBlur}
         contentEditable={contentEditable}
         suppressContentEditableWarning
         style={style}
+        key={item.text}
       >
-        {item.text}
+        <AnnotationMarkdown text={item.text} />
       </li>
     );
   };
