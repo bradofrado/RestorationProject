@@ -41,6 +41,7 @@ export const PageSchema = z.object({
   description: z.string(),
   settings: z.array(ComponentSettingsSchema),
   url: z.string(),
+  isPublished: z.boolean(),
 }) satisfies z.Schema<
   Replace<Omit<PrismaPage, 'isDeleted'>, 'settings', ComponentSettings[]>
 >;

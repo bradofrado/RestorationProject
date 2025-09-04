@@ -454,7 +454,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
   const query = useGetPageUrl();
   const item = items[page];
   if (!item) {
-    throw new Error('No item found');
+    return null;
   }
   const getUrl = (pageId: string) => {
     const result = query.data?.(pageId);

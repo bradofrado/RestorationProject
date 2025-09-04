@@ -86,6 +86,7 @@ model Page {
   settings    ComponentSettings[]
   categories  TimelineCategory[]
   isDeleted   Boolean             @default(false)
+  isPublished Boolean             @default(false)
 }
 
 model ComponentSettings {

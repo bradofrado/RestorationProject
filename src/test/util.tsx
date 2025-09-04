@@ -272,6 +272,7 @@ export const pages: EventPage[] = [
     title: 'This is a page',
     description: 'This is a description',
     url: 'this-is-url',
+    isPublished: true,
     settings: [
       {
         id: 0,
@@ -320,6 +321,7 @@ export const pages: EventPage[] = [
     title: 'This is another page',
     description: 'This is another description',
     url: 'this-is-another-url',
+    isPublished: true,
     settings: [
       {
         id: 2,

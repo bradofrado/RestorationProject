@@ -54,6 +54,7 @@ const createPage = async ({ input, db }: { input: EventPage; db: Db }) => {
           return setting;
         }),
       },
+      isPublished: input.isPublished,
     },
     include: {
       settings: { include: { data: true } },
@@ -115,6 +116,7 @@ export const pageRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           url: input.url,
+          isPublished: input.isPublished,
         },
         include: {
           settings: { include: { data: true } },

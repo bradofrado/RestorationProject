@@ -43,11 +43,18 @@ export const getPage = async ({ input, db }: { input: string; db: Db }) => {
   return prismaToPage(prismaPage);
 };
 
-export const getPages = async ({ db }: { db: Db }) => {
+export const getPages = async ({
+  db,
+  isPublished,
+}: {
+  db: Db;
+  isPublished?: boolean;
+}) => {
   const pages = await db.page.findMany({
     include: { settings: { include: { data: true } } },
     where: {
       isDeleted: false,
+      isPublished,
     },
   });
 

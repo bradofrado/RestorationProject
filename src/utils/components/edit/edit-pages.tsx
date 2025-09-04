@@ -15,13 +15,16 @@ import {
   type ComponentSettings,
   type EditableData,
 } from '~/utils/types/page';
-import Input from '~/utils/components/base/input';
+import Input, { CheckboxInput } from '~/utils/components/base/input';
 import EditItemsButtons from '~/utils/components/edit/edit-items-buttons';
 import AddComponent from '~/utils/components/edit/add-component';
 import Label from '~/utils/components/base/label';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getPageUrl } from '~/utils/get-page-url';
-import { ComponentType, EditableComponentType } from '../blocks/utils/types';
+import {
+  type ComponentType,
+  type EditableComponentType,
+} from '../blocks/utils/types';
 import { RenderBlocks } from '../blocks/render-blocks';
 
 export const EditPages = () => {
@@ -116,6 +119,7 @@ export const EditPages = () => {
       url: 'new-url',
       title: 'Book of Mormon Translation',
       description: 'Text',
+      isPublished: false,
       settings,
     });
   };
@@ -163,6 +167,13 @@ export const EditPages = () => {
     if (currPage == undefined) return;
     const copy: EventPage = { ...currPage };
     copy.description = value;
+    setCurrPage(copy);
+  };
+
+  const onPublishChange = (value: boolean) => {
+    if (currPage == undefined) return;
+    const copy: EventPage = { ...currPage };
+    copy.isPublished = value;
     setCurrPage(copy);
   };
 
@@ -218,6 +229,14 @@ export const EditPages = () => {
                     >
                       Go
                     </Button>
+                  </div>
+                  <div className="py-1">
+                    <Label label="Published">
+                      <CheckboxInput
+                        value={currPage.isPublished}
+                        onChange={onPublishChange}
+                      />
+                    </Label>
                   </div>
                   <EditablePage
                     page={currPage}

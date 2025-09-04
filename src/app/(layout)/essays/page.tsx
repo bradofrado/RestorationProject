@@ -6,7 +6,7 @@ import Header from '~/utils/components/base/header';
 import { getPageUrl } from '~/utils/get-page-url';
 
 const EssaysPage: NextPage = async () => {
-  const pages = await getPages({ db: prisma });
+  const pages = await getPages({ db: prisma, isPublished: true });
   return (
     <div className="mx-auto mt-5 max-w-xl">
       <Header level={1}>Essays</Header>
