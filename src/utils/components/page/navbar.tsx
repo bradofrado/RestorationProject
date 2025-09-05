@@ -1,7 +1,7 @@
 import { ProfileButton } from '../auth/profile-button';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import { getServerAuthSession } from '~/server/auth';
+import { SigninButton } from './signin-button';
 
 interface NavItem {
   label: string;
@@ -42,11 +42,7 @@ export const Navbar = async () => {
           ))}
         </div>
         <div className="">
-          {session?.user ? (
-            <ProfileButton />
-          ) : (
-            <button onClick={() => void signIn()}>Sign in</button>
-          )}
+          {session?.user ? <ProfileButton /> : <SigninButton />}
         </div>
       </div>
     </>
