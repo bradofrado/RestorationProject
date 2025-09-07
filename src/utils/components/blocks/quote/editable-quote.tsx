@@ -1,10 +1,10 @@
-import { FC, useMemo } from 'react';
-import { EditableDataComponent } from '../utils/types';
+import { type FC, useMemo } from 'react';
+import { type EditableDataComponent } from '../utils/types';
 import { EditableComponentContainer } from '../utils/editable-component-container';
 import { QuoteBlock, quoteBlockSettingsSchema } from './quote';
-import { ButtonIcon } from '../../edit/editable';
+import { type ButtonIcon } from '../../edit/editable';
 import { PopoverIcon } from '../../base/popover';
-import Input from '../../base/input';
+import Input, { CheckboxInput } from '../../base/input';
 import { AdjustIcon, EditIcon } from '../../icons/icons';
 import Label from '../../base/label';
 import { useParseSettings } from '../utils/parse-settings';
@@ -71,6 +71,17 @@ export const EditableQuoteBlock: FC<EditableDataComponent> = ({
             })
           }
         />
+        <Label label="Is Verse" sameLine>
+          <CheckboxInput
+            value={settings.isVerse ?? false}
+            onChange={(value) =>
+              onEdit({
+                ...data,
+                properties: JSON.stringify({ ...settings, isVerse: value }),
+              })
+            }
+          />
+        </Label>
         <Label label="Links">
           <AnnotationList
             links={settings.links}
