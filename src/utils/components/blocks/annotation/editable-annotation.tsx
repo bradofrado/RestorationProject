@@ -21,7 +21,9 @@ export const EditableAnnotation: FC<EditableAnnotationProps> = ({
   ...rest
 }) => {
   return (
-    <Popover button={<AnnotationBase linkNumber={rest.linkNumber} />}>
+    <Popover
+      button={<AnnotationBase linkNumber={rest.linkNumber} link={rest.link} />}
+    >
       <Input
         value={rest.link.link}
         include={Label}

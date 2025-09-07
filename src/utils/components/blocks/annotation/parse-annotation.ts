@@ -1,6 +1,8 @@
+import { decode } from 'entities';
+
 export const parseAnnotation = (content: string) => {
-  const contents = content.replaceWith(
-    /\<div .*? data-annotation="(.*?)".*?<\/div>/g,
+  const contents = decode(content).replaceWith(
+    /\<div .*? data-annotation="(.*?)" .*?<\/div>/g,
     (match) => `[${match[1]}]`
   );
 
