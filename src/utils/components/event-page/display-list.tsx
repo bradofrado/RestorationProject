@@ -2,14 +2,15 @@ import { DateFormat, groupBy } from '~/utils/utils';
 import { Annotation } from '../Timeline/annotation';
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import {
-  ContentEditable,
+  type ContentEditable,
   type ContentEditableBlur,
 } from '../blocks/utils/types';
-import React, { CSSProperties, ReactNode } from 'react';
+import React, { type CSSProperties, type ReactNode } from 'react';
 import { useAnnotationLink } from './annotation-provider';
-import { PolymorphicComponentProps } from '~/utils/types/polymorphic';
+import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import { AnnotationComponentProvider } from '../blocks/annotation/annotation-component-provider';
 import { AnnotationMarkdown } from '../blocks/annotation/annotation-markdown';
+import { type Annotation as AnnotationType } from '~/utils/types/annotation';
 
 type DataGroupbyListProps<T extends ListItem> = {
   className?: string;
@@ -120,7 +121,7 @@ export const DisplayListItem: DisplayListItemComponent<{ text: string }> =
 interface QuoteItem {
   text: string;
   subText: ReactNode;
-  links: string[];
+  links: AnnotationType[];
 }
 
 export const Quote = <C extends React.ElementType>({

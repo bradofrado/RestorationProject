@@ -36,6 +36,7 @@ import Image from 'next/image';
 import { TimelineDateType } from '@prisma/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AnnotationList } from './annotation-list';
+import { type Annotation } from '~/utils/types/annotation';
 
 type Position = { x: number; y: number };
 
@@ -309,7 +310,7 @@ const EditRestorationItem = ({
     useChangeProperty<RestorationTimelineItem>(onSaveProp);
   const [show, setShow] = useState(false);
 
-  const onLinkChange = (value: string, i: number) => {
+  const onLinkChange = (value: Annotation, i: number) => {
     const links = propItem.links;
     links[i] = value;
     changePropertyItem(propItem, 'links', links);
@@ -317,7 +318,7 @@ const EditRestorationItem = ({
 
   const onAddLink = () => {
     const links = propItem.links.slice();
-    links.push('new link');
+    links.push({ link: 'new link' });
     changePropertyItem(propItem, 'links', links);
   };
 
@@ -411,9 +412,7 @@ const EditRestorationItem = ({
           <AnnotationList
             links={propItem.links}
             onAdd={onAddLink}
-            onReorder={(links: string[]) =>
-              changePropertyItem(propItem, 'links', links)
-            }
+            onReorder={(links) => changePropertyItem(propItem, 'links', links)}
             onDelete={onDeleteLink}
             onChange={onLinkChange}
             id={`links-${propItem.id}`}

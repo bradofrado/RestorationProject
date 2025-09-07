@@ -1,13 +1,26 @@
-import { Fragment } from 'react';
+import { FC, Fragment } from 'react';
 import { Popover as ReactPopover, Transition } from '@headlessui/react';
 import { type ReplaceWithName } from '~/utils/utils';
 import { type IconComponent } from '../icons/icons';
+import * as RadixPopover from './radix-popover';
 
 type PopoverProps = React.PropsWithChildren<{
   button: React.ReactNode;
   className?: string;
+  portal?: boolean;
 }>;
-const Popover = ({ children, button, className }: PopoverProps) => {
+const Popover = ({
+  children,
+  button,
+  className,
+  portal = false,
+}: PopoverProps) => {
+  if (portal)
+    return (
+      <PopoverWithPortal button={button} className={className}>
+        {children}
+      </PopoverWithPortal>
+    );
   return (
     <>
       <ReactPopover className="relative inline-block" contentEditable={false}>
@@ -33,6 +46,23 @@ const Popover = ({ children, button, className }: PopoverProps) => {
         )}
       </ReactPopover>
     </>
+  );
+};
+
+const PopoverWithPortal: FC<PopoverProps> = ({
+  children,
+  button,
+  className,
+}) => {
+  return (
+    <RadixPopover.Popover>
+      <RadixPopover.PopoverTrigger className={className}>
+        {button}
+      </RadixPopover.PopoverTrigger>
+      <RadixPopover.PopoverContent className="absolute top-full z-10 mt-2 rounded-md border border-gray-300 bg-white p-2 shadow-lg">
+        {children}
+      </RadixPopover.PopoverContent>
+    </RadixPopover.Popover>
   );
 };
 

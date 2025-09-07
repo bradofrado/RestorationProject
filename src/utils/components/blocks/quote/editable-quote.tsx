@@ -10,6 +10,7 @@ import Label from '../../base/label';
 import { useParseSettings } from '../utils/parse-settings';
 import { AnnotationList } from '../../edit/annotation-list';
 import { SettingsComponentCallout } from '../utils/settings-callout';
+import { type Annotation } from '~/utils/types/annotation';
 
 export const EditableQuoteBlock: FC<EditableDataComponent> = ({
   data,
@@ -21,31 +22,35 @@ export const EditableQuoteBlock: FC<EditableDataComponent> = ({
     reference: null,
     links: [],
   });
+
+  const createProperties = (_settings: typeof settings) => {
+    return JSON.stringify(_settings);
+  };
   const onAddLink = () => {
     onEdit({
       ...data,
-      properties: JSON.stringify({
+      properties: createProperties({
         ...settings,
-        links: [...settings.links, 'new link'],
+        links: [...settings.links, { link: 'new link' }],
       }),
     });
   };
-  const onReorder = (links: string[]) => {
-    onEdit({ ...data, properties: JSON.stringify({ ...settings, links }) });
+  const onReorder = (links: Annotation[]) => {
+    onEdit({ ...data, properties: createProperties({ ...settings, links }) });
   };
   const onDelete = (index: number) => {
     onEdit({
       ...data,
-      properties: JSON.stringify({
+      properties: createProperties({
         ...settings,
         links: settings.links.filter((_, i) => i !== index),
       }),
     });
   };
-  const onChange = (link: string, index: number) => {
+  const onChange = (link: Annotation, index: number) => {
     onEdit({
       ...data,
-      properties: JSON.stringify({
+      properties: createProperties({
         ...settings,
         links: settings.links.map((l, i) => (i === index ? link : l)),
       }),
@@ -67,7 +72,7 @@ export const EditableQuoteBlock: FC<EditableDataComponent> = ({
           onChange={(value) =>
             onEdit({
               ...data,
-              properties: JSON.stringify({ ...settings, reference: value }),
+              properties: createProperties({ ...settings, reference: value }),
             })
           }
         />
@@ -77,7 +82,7 @@ export const EditableQuoteBlock: FC<EditableDataComponent> = ({
             onChange={(value) =>
               onEdit({
                 ...data,
-                properties: JSON.stringify({ ...settings, isVerse: value }),
+                properties: createProperties({ ...settings, isVerse: value }),
               })
             }
           />
@@ -97,7 +102,7 @@ export const EditableQuoteBlock: FC<EditableDataComponent> = ({
         <SettingsComponentCallout
           data={settings}
           onEdit={(settings) =>
-            onEdit({ ...data, properties: JSON.stringify(settings) })
+            onEdit({ ...data, properties: createProperties(settings) })
           }
         />
       </PopoverIcon>,

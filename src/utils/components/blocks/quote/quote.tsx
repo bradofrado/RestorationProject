@@ -7,12 +7,13 @@ import { useParseSettings } from '../utils/parse-settings';
 import { setStyleFromSettings } from '~/utils/utils';
 import { Annotation } from '../../Timeline/annotation';
 import { useAnnotationLink } from '../../event-page/annotation-provider';
+import { annotationLinkSchema } from '../annotation/constants';
 
 export const quoteBlockSettingsSchema = SettingsComponentSettingsSchema.extend({
   quote: z.string(),
   reference: z.string().nullable(),
-  links: z.array(z.string()),
-  isVerse: z.boolean().default(false),
+  links: z.array(annotationLinkSchema),
+  isVerse: z.optional(z.boolean()).default(false),
 });
 
 export const QuoteBlock: FC<DataComponent> = ({ data }) => {

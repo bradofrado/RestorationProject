@@ -1,11 +1,12 @@
-import { createContext, FC, ReactNode, useContext } from 'react';
+import { createContext, type FC, type ReactNode, useContext } from 'react';
 import {
   Annotation as AnnotationComponent,
-  AnnotationProps,
+  type AnnotationProps,
 } from '../../Timeline/annotation';
 import { EditableAnnotation } from './editable-annotation';
 import { parseAnnotation } from './parse-annotation';
 import { inlineAnnotationRegex } from './constants';
+import { type Annotation as AnnotationType } from '~/utils/types/annotation';
 
 const AnnotationComponentContext = createContext<{
   Annotation: FC<AnnotationProps>;
@@ -22,11 +23,14 @@ export const AnnotationComponentProvider = ({
   value,
   onChange,
 }: AnnotationComponentProviderProps) => {
-  const onAnnotationEdit = (oldLinkIndex: number, annotation: string) => {
+  const onAnnotationEdit = (
+    oldLinkIndex: number,
+    annotation: AnnotationType
+  ) => {
     const content = parseAnnotation(value);
     const newContent = content.replaceOccurance(
       inlineAnnotationRegex,
-      `[${annotation}]`,
+      `[${JSON.stringify(annotation)}]`,
       oldLinkIndex
     );
     if (newContent !== value) {

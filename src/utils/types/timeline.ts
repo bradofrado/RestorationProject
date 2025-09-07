@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { HexColorSchema, type HexColor } from './colors';
 import { TimelineDateType, type Prisma } from '@prisma/client';
 import { type Replace } from '../utils';
+import { type Annotation, annotationSchema } from './annotation';
 
 const timelineCategories = [
   'Book of Mormon',
@@ -28,7 +29,7 @@ export type PrismaTimelineItem = Prisma.TimelineItemGetPayload<
 type PrismaTimelineItemWithLinksArray = Replace<
   PrismaTimelineItem,
   'links',
-  string[]
+  Annotation[]
 >;
 export const RestorationTimelineItemDateTypeSchema =
   z.nativeEnum(TimelineDateType);
@@ -42,7 +43,7 @@ export const RestorationTimelineItemSchema = z.object({
   endDate: z.date().nullable(),
   subcategory: z.string().nullable(),
   text: z.string(),
-  links: z.array(z.string()),
+  links: z.array(annotationSchema),
   categoryId: z.number().nullable(),
   type: z.nativeEnum(TimelineDateType),
   x: z.number().nullable(),

@@ -7,8 +7,10 @@ import {
   TimelineCategorySchema,
 } from '~/utils/types/timeline';
 import { type Db } from '../db';
-import { exclude } from '~/utils/utils';
+import { exclude, jsonParse } from '~/utils/utils';
 import { TRPCError } from '@trpc/server';
+import { type Annotation, annotationSchema } from '~/utils/types/annotation';
+import z from 'zod';
 
 export const getCategories = async (
   db: Db,
@@ -53,10 +55,7 @@ export const getCategory = async ({ db, id }: { db: Db; id: number }) => {
 export const translatePrismaToTimelineItem = (
   item: PrismaTimelineItem
 ): RestorationTimelineItem => {
-  return exclude(
-    { ...item, links: item.links.split(',').filter((x) => x != '') },
-    'isDeleted'
-  );
+  return exclude({ ...item, links: parseLinks(item.links) }, 'isDeleted');
 };
 
 export const translatePrismaToTimelineCategory = (
@@ -73,6 +72,19 @@ export const translatePrismaToTimelineCategory = (
       ? { ...category, items }
       : exclude({ ...category, items }, 'isDeleted')
   );
+};
+
+const parseLinks = (links: string): Annotation[] => {
+  const result = jsonParse(z.array(annotationSchema)).safeParse(links);
+
+  if (!result.success) {
+    return links
+      .split(',')
+      .filter(Boolean)
+      .map((link) => ({ link }));
+  }
+
+  return result.data;
 };
 
 const sortTimelineItems = (

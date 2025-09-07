@@ -497,7 +497,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
         <p className="mt-3 overflow-hidden text-sm group-hover/overflow:overflow-auto group-hover:pb-1 md:text-base">
           {item.text}{' '}
           {item.links.map((link, i) => (
-            <Annotation key={i} link={link} linkNumber={i + 1} />
+            <Annotation key={i} link={link} linkNumber={i + 1} portal />
           ))}
         </p>
       </div>
