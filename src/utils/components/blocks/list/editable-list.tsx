@@ -13,6 +13,7 @@ import { SettingsComponentCallout } from '../utils/settings-callout';
 import Label from '../../base/label';
 import { CheckboxInput } from '../../base/input';
 import { EditableComponentContainer } from '../utils/editable-component-container';
+import { useEffectEvent } from '../../hooks/effect-event';
 
 export const EditableListBlock: FC<EditableDataComponent> = ({
   onEdit,
@@ -94,11 +95,11 @@ export const EditableListBlock: FC<EditableDataComponent> = ({
     data.content,
   ]);
 
-  const editLiItem = (value: string, index: number) => {
+  const editLiItem = useEffectEvent((value: string, index: number) => {
     const vals = [...settings.items];
     vals[index] = value;
     changeProperty(settings, 'items', vals);
-  };
+  });
 
   if (query.isLoading || query.isError) {
     return <></>;
