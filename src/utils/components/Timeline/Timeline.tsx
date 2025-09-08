@@ -47,7 +47,6 @@ export interface TimelineProps {
 export const Timeline: React.FC<TimelineProps> = ({
   categories,
 }: TimelineProps) => {
-  const query = useGetPageUrl();
   const [filteredCategories, setFilteredCategories] = useState<
     TimelineCategory['id'][]
   >([]);
@@ -344,7 +343,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     (x) => x.items.filter((item) => item.date).length > 0
   );
 
-  if (query.isLoading || query.isError || items.length == 0) {
+  if (items.length == 0) {
     return <>Loading</>;
   }
 
@@ -501,7 +500,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
           ))}
         </p>
       </div>
-      {item.pageId && (
+      {item.pageId && !query.isLoading && (
         <div className="flex h-5 justify-around">
           <Link
             className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"

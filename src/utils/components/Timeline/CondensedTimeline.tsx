@@ -1,3 +1,5 @@
+'use client';
+
 import { type RestorationTimelineItem } from '~/utils/types/timeline';
 import { DateFormat } from '~/utils/utils';
 import { type HexColor } from '~/utils/types/colors';
