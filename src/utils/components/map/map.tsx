@@ -31,7 +31,17 @@ export const Map: React.FunctionComponent<MapProps> = ({ categories }) => {
       (prev, curr) =>
         prev.concat(curr.items.map((item) => ({ ...item, category: curr }))),
       []
-    );
+    )
+    .sort((a, b) => {
+      const aDate = a.date?.getTime() ?? 0;
+      const bDate = b.date?.getTime() ?? 0;
+      if (aDate < bDate) {
+        return -1;
+      } else if (aDate > bDate) {
+        return 1;
+      }
+      return 0;
+    });
   const [filteredIds, setFilteredIds] = useState<number[]>([]);
 
   const filtered =
