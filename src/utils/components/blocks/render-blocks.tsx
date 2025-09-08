@@ -5,18 +5,13 @@ import {
   type DataComponentType,
   type EditableComponentType,
 } from './utils/types';
-import {
-  AnnotationLinkProvider,
-  useAnnotationLink,
-} from '../event-page/annotation-provider';
+import { AnnotationLinkProvider } from '../event-page/annotation-provider';
 import { components } from './utils/components';
 import { DirtyComponent } from '../edit/dirty-component';
 import {
   DirtyDraggableListComponent,
   DraggableListComponent,
 } from '../base/draggable-list';
-import { type FC } from 'react';
-import Header from '../base/header';
 
 type RenderBlocksProps = { isNew?: boolean } & IfElse<
   'editable',
@@ -36,11 +31,12 @@ export const RenderBlocks = ({ isNew = false, ...rest }: RenderBlocksProps) => {
           onReorder={rest.onReorder}
         />
       ) : (
-        rest.items.map((item, i) => (
-          <RenderBlock key={i} {...item} isNew={isNew} editable={false} />
-        ))
+        <>
+          {rest.items.map((item, i) => (
+            <RenderBlock key={i} {...item} isNew={isNew} editable={false} />
+          ))}
+        </>
       )}
-      <Footnotes />
     </AnnotationLinkProvider>
   );
 };
@@ -104,43 +100,6 @@ const RenderEditableBlocks = ({
       <Component id="editable-components" items={items} onReorder={onReorder}>
         {(item) => <RenderBlock {...item} isNew={isNew} editable={true} />}
       </Component>
-    </>
-  );
-};
-
-const Footnotes: FC = () => {
-  const { annotationLinks } = useAnnotationLink();
-
-  return (
-    <>
-      <Header level={2}>Footnotes</Header>
-      <ol className="list-decimal">
-        {annotationLinks.map(({ link, note }) => (
-          <li key={link}>
-            {note ? (
-              <span>
-                {note} (
-                <a
-                  className="text-blue-500 underline"
-                  href={link}
-                  target="_blank"
-                >
-                  link
-                </a>
-                )
-              </span>
-            ) : (
-              <a
-                className="text-blue-500 underline"
-                href={link}
-                target="_blank"
-              >
-                {link}
-              </a>
-            )}
-          </li>
-        ))}
-      </ol>
     </>
   );
 };

@@ -1,3 +1,5 @@
+import { EditableFootnotesBlock } from '../footnotes/editable-footnotes';
+import { FootnotesBlock } from '../footnotes/footnotes';
 import { EditableHeaderBlock } from '../header/editable-header';
 import { HeaderBlock } from '../header/header';
 import { EditableListBlock } from '../list/editable-list';
@@ -42,5 +44,10 @@ export const components = createComponents(
     label: 'Quote',
     editable: EditableQuoteBlock,
     component: QuoteBlock,
+  },
+  {
+    label: 'Footnotes',
+    editable: EditableFootnotesBlock,
+    component: FootnotesBlock,
   }
 );

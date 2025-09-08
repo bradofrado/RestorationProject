@@ -19,6 +19,7 @@ const componentsTypes = [
   'Timeline',
   'List',
   'Quote',
+  'Footnotes',
 ] as const;
 
 export type ComponentType = (typeof componentsTypes)[number];
