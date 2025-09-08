@@ -27,9 +27,6 @@ export const ListBlock: FC<DataListProps> = ({ data, ...rest }) => {
     group: false,
     items: [],
   });
-  if (query.isLoading || query.isError) {
-    return <></>;
-  }
 
   const style = setStyleFromSettings(settings);
 
@@ -51,6 +48,10 @@ export const ListBlock: FC<DataListProps> = ({ data, ...rest }) => {
         />
       </div>
     );
+  }
+
+  if (query.isLoading || query.isError) {
+    return <></>;
   }
 
   const items: RestorationTimelineItem[] =
