@@ -24,9 +24,27 @@ export const FootnotesBlock: FC<DataComponent> = ({ data }) => {
       <ol className="list-decimal">
         {annotationLinks.map(({ link, note }) => (
           <li key={link}>
-            <a className="text-blue-500 underline" href={link} target="_blank">
-              {note ?? link}
-            </a>
+            {note ? (
+              <span>
+                {note} (
+                <a
+                  className="text-blue-500 underline"
+                  href={link}
+                  target="_blank"
+                >
+                  link
+                </a>
+                )
+              </span>
+            ) : (
+              <a
+                className="text-blue-500 underline"
+                href={link}
+                target="_blank"
+              >
+                {link}
+              </a>
+            )}
           </li>
         ))}
       </ol>
