@@ -15,10 +15,10 @@ export const Navbar = async () => {
       label: 'Timeline',
       href: '/timeline',
     },
-    {
-      label: 'Map',
-      href: '/map',
-    },
+    // {
+    //   label: 'Map',
+    //   href: '/map',
+    // },
     {
       label: 'Essays',
       href: '/essays',

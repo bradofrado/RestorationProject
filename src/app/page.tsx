@@ -16,13 +16,13 @@ const Index: NextPage = () => {
         >
           Go to timeline
         </Button>
-        <Button
+        {/* <Button
           as={Link}
           href="/map"
           className="px-3 py-3 font-bold sm:text-base"
         >
           Go to map
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
