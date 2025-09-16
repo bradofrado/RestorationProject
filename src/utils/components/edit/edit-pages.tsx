@@ -22,10 +22,12 @@ import Label from '~/utils/components/base/label';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getPageUrl } from '~/utils/get-page-url';
 import {
+  Component,
   type ComponentType,
   type EditableComponentType,
 } from '../blocks/utils/types';
 import { RenderBlocks } from '../blocks/render-blocks';
+import { components } from '../blocks/utils/components';
 
 export const EditPages = () => {
   const router = useRouter();
@@ -276,6 +278,10 @@ const EditablePage = ({
   deleteSetting,
   reorderSettings,
 }: EditablePageProps) => {
+  const [confirmModalOptions, setConfirmModalOptions] = useState<
+    { component: ComponentType; index: number } | undefined
+  >();
+
   const editSettings = (f: (settings: ComponentSettings[]) => void) => {
     const copy: EventPage = { ...page };
     const settings = copy.settings;
@@ -286,7 +292,22 @@ const EditablePage = ({
     return copy;
   };
 
-  const onAdd = (component: ComponentType, index: number) => {
+  const onAddOrConfirm = (component: ComponentType, index: number) => {
+    const maybeComponentWithConfirm = components.find(
+      (x) => x.label == component
+    ) as Component | undefined;
+    if (maybeComponentWithConfirm?.confirmModal) {
+      setConfirmModalOptions({ component, index });
+    } else {
+      onAdd(component, index);
+    }
+  };
+
+  const onAdd = (
+    component: ComponentType,
+    index: number,
+    data?: EditableData
+  ) => {
     const maxId =
       page.settings.length > 0
         ? Math.max(...page.settings.map((x) => Math.abs(x.id)))
@@ -294,7 +315,7 @@ const EditablePage = ({
     editSettings((components) => {
       const newItem: ComponentSettings = {
         component,
-        data: {
+        data: data || {
           content: 'custom',
           properties: null,
         },
@@ -370,7 +391,25 @@ const EditablePage = ({
     }
   };
 
+  const onConfirmModal = (data: EditableData) => {
+    if (!confirmModalOptions) return;
+
+    onAdd(confirmModalOptions.component, confirmModalOptions.index, data);
+    onCloseConfirmModal();
+  };
+
+  const onCloseConfirmModal = () => {
+    setConfirmModalOptions(undefined);
+  };
+
   const settings = page.settings; //.slice().sort((a, b) => a.order - b.order);
+
+  const confirmModals = components
+    .map((component) => ({
+      component: component.label,
+      Modal: (component as Component).confirmModal,
+    }))
+    .filter(Boolean);
   return (
     <>
       <RenderBlocks
@@ -383,10 +422,22 @@ const EditablePage = ({
           onDelete: () => deleteComponent(editable.id),
           onEdit: (data: EditableData) => onEdit(data, editable.id),
           data: editable.data,
-          onAdd: (component: ComponentType) => onAdd(component, index),
+          onAdd: (component: ComponentType) => onAddOrConfirm(component, index),
         }))}
       />
-      <AddComponent onAdd={(component) => onAdd(component, settings.length)} />
+      {confirmModals.map(({ Modal, component }) =>
+        Modal ? (
+          <Modal
+            key={component}
+            isOpen={component == confirmModalOptions?.component}
+            onClose={onCloseConfirmModal}
+            onConfirm={onConfirmModal}
+          />
+        ) : undefined
+      )}
+      <AddComponent
+        onAdd={(component) => onAddOrConfirm(component, settings.length)}
+      />
     </>
   );
 };

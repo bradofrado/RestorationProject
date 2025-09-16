@@ -8,6 +8,14 @@ if (!process.env.SKIP_ENV_VALIDATION) {
 
 /** @type {import("next").NextConfig} */
 const config = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'necgqvap1g3t014x.public.blob.vercel-storage.com',
+      },
+    ],
+  },
   reactStrictMode: true,
 
   /**

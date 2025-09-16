@@ -13,12 +13,19 @@ export type EditableDataComponent =
       onAdd: (component: ComponentType) => void;
     };
 
+export interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (data: EditableData) => void;
+}
+
 const componentsTypes = [
   'Header',
   'Paragraph',
   'Timeline',
   'List',
   'Quote',
+  'Image',
   'Footnotes',
 ] as const;
 
@@ -31,6 +38,7 @@ export interface Component {
   label: string;
   editable: React.FC<EditableDataComponent>;
   component: React.FC<DataComponent>;
+  confirmModal?: React.FC<ConfirmModalProps>;
 }
 
 export type EditableComponentType = {

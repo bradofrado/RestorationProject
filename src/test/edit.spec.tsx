@@ -27,6 +27,8 @@ import { EditTimelineItems } from '~/utils/components/edit/edit-timeline-items';
 import { ComponentType } from '~/utils/components/blocks/utils/types';
 import { listSettingsSchema } from '~/utils/components/blocks/list/list';
 import { quoteBlockSettingsSchema } from '~/utils/components/blocks/quote/quote';
+import { imageSettingsSchema } from '~/utils/components/blocks/image/image';
+import { footnotesSettingsSchema } from '~/utils/components/blocks/footnotes/footnotes';
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -270,6 +272,8 @@ const addAndDeleteItemToPage = async ({
     List: 'list',
     Timeline: 'list',
     Quote: 'quote',
+    Image: 'img',
+    Footnotes: 'note',
   };
 
   const { getByText, user, getAllByRole } = rest;
@@ -454,6 +458,18 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
   Quote: ({ setting }) => {
     const settings = setting.data.properties
       ? jsonParse(quoteBlockSettingsSchema).parse(setting.data.properties)
+      : null;
+    expect(settings).toBeTruthy();
+  },
+  Image: ({ setting, container }) => {
+    const settings = setting.data.properties
+      ? jsonParse(imageSettingsSchema).parse(setting.data.properties)
+      : null;
+    expect(settings).toBeTruthy();
+  },
+  Footnotes: ({ setting }) => {
+    const settings = setting.data.properties
+      ? jsonParse(footnotesSettingsSchema).parse(setting.data.properties)
       : null;
     expect(settings).toBeTruthy();
   },

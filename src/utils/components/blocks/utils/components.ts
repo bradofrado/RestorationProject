@@ -2,6 +2,9 @@ import { EditableFootnotesBlock } from '../footnotes/editable-footnotes';
 import { FootnotesBlock } from '../footnotes/footnotes';
 import { EditableHeaderBlock } from '../header/editable-header';
 import { HeaderBlock } from '../header/header';
+import { EditableImageBlock } from '../image/editable-image';
+import { ImageBlock } from '../image/image';
+import { ImageUploadModal } from '../image/image-upload-modal';
 import { EditableListBlock } from '../list/editable-list';
 import { ListBlock } from '../list/list';
 import { EditableParagraphBlock } from '../paragraph/editable-paragraph';
@@ -44,6 +47,12 @@ export const components = createComponents(
     label: 'Quote',
     editable: EditableQuoteBlock,
     component: QuoteBlock,
+  },
+  {
+    label: 'Image',
+    editable: EditableImageBlock,
+    component: ImageBlock,
+    confirmModal: ImageUploadModal,
   },
   {
     label: 'Footnotes',
