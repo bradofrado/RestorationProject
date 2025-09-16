@@ -21,7 +21,7 @@ export const UploadFile: React.FunctionComponent<UploadFileProps> = ({
       setIsLoading(true);
       ret
         .then(() => setIsLoading(false))
-        .catch((err) => {
+        .catch(() => {
           setError('There was an error uploading the image');
           setIsLoading(false);
         });

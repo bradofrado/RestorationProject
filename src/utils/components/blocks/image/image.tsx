@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { DataComponent } from '../utils/types';
-import Image from 'next/image';
 import z from 'zod';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';
 import { useParseSettings } from '../utils/parse-settings';

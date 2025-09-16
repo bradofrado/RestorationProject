@@ -461,7 +461,7 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
       : null;
     expect(settings).toBeTruthy();
   },
-  Image: ({ setting, container }) => {
+  Image: ({ setting }) => {
     const settings = setting.data.properties
       ? jsonParse(imageSettingsSchema).parse(setting.data.properties)
       : null;
