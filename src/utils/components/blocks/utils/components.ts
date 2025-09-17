@@ -1,3 +1,5 @@
+import { CarouselBlock } from '../carousel/carousel';
+import { EditableCarouselBlock } from '../carousel/edit-carousel';
 import { EditableFootnotesBlock } from '../footnotes/editable-footnotes';
 import { FootnotesBlock } from '../footnotes/footnotes';
 import { EditableHeaderBlock } from '../header/editable-header';
@@ -53,6 +55,11 @@ export const components = createComponents(
     editable: EditableImageBlock,
     component: ImageBlock,
     confirmModal: ImageUploadModal,
+  },
+  {
+    label: 'Carousel',
+    editable: EditableCarouselBlock,
+    component: CarouselBlock,
   },
   {
     label: 'Footnotes',

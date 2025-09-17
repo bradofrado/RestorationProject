@@ -27,6 +27,7 @@ const componentsTypes = [
   'Quote',
   'Image',
   'Footnotes',
+  'Carousel',
 ] as const;
 
 export type ComponentType = (typeof componentsTypes)[number];

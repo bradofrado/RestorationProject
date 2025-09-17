@@ -6,24 +6,30 @@ import { uploadImage } from './upload-image';
 import { ImageUploadResponse } from '~/utils/types/image';
 import { api } from '~/utils/api';
 
-export const ImageUploadModal: FC<ConfirmModalProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-}) => {
+export const ImageUploadModal: FC<
+  ConfirmModalProps & { multiple?: boolean }
+> = ({ isOpen, onClose, onConfirm, multiple = false }) => {
   const utils = api.useUtils();
   const { data: images } = api.image.getImages.useQuery();
 
-  const [data, setData] = useState<ImageUploadResponse | null>(null);
+  const [data, setData] = useState<
+    ImageUploadResponse | ImageUploadResponse[] | null
+  >(multiple ? [] : null);
 
   const onUpload = async (file: File): Promise<void> => {
     const data = await uploadImage(file);
-    setData(data);
+    setData((prev) => (Array.isArray(prev) ? [...(prev || []), data] : data));
     await utils.image.getImages.invalidate();
   };
 
   const onImageSelect = (image: string) => {
-    setData({ url: image });
+    setData((prev) =>
+      Array.isArray(prev)
+        ? prev.find((d) => d.url === image)
+          ? prev.filter((d) => d.url !== image)
+          : [...(prev || []), { url: image }]
+        : { url: image }
+    );
   };
 
   return (
@@ -38,7 +44,11 @@ export const ImageUploadModal: FC<ConfirmModalProps> = ({
                 label: 'Confirm',
                 mode: 'primary',
                 handler: () =>
-                  onConfirm({ content: data.url, properties: null }),
+                  onConfirm(
+                    Array.isArray(data)
+                      ? { content: '', properties: JSON.stringify(data) }
+                      : { content: data.url, properties: null }
+                  ),
               }
             : undefined,
         ].filter(Boolean) as ButtonInfo[]
@@ -48,7 +58,13 @@ export const ImageUploadModal: FC<ConfirmModalProps> = ({
         {images?.map((image) => (
           <button
             className={`rounded-md p-1 hover:bg-gray-100 ${
-              data?.url === image ? 'border-2 border-primary' : ''
+              (
+                Array.isArray(data)
+                  ? data.some((d) => d.url === image)
+                  : data?.url === image
+              )
+                ? 'border-2 border-primary'
+                : ''
             }`}
             key={image}
             onClick={() => onImageSelect(image)}

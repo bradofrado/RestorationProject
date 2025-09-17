@@ -29,6 +29,7 @@ import { listSettingsSchema } from '~/utils/components/blocks/list/list';
 import { quoteBlockSettingsSchema } from '~/utils/components/blocks/quote/quote';
 import { imageSettingsSchema } from '~/utils/components/blocks/image/image';
 import { footnotesSettingsSchema } from '~/utils/components/blocks/footnotes/footnotes';
+import { carouselSettingsSchema } from '~/utils/components/blocks/carousel/carousel';
 
 const getCategories = () => categories;
 const getPages = () => pages;
@@ -274,6 +275,7 @@ const addAndDeleteItemToPage = async ({
     Quote: 'quote',
     Image: 'img',
     Footnotes: 'note',
+    Carousel: 'list',
   };
 
   const { getByText, user, getAllByRole } = rest;
@@ -470,6 +472,12 @@ const pageSettingTesters: Record<ComponentType, PageSettingTester> = {
   Footnotes: ({ setting }) => {
     const settings = setting.data.properties
       ? jsonParse(footnotesSettingsSchema).parse(setting.data.properties)
+      : null;
+    expect(settings).toBeTruthy();
+  },
+  Carousel: ({ setting }) => {
+    const settings = setting.data.properties
+      ? jsonParse(carouselSettingsSchema).parse(setting.data.properties)
       : null;
     expect(settings).toBeTruthy();
   },
