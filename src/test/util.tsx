@@ -41,7 +41,7 @@ export const categories: TimelineCategory[] = [
     items: [
       {
         id: 1,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1827, 8, 22),
         endDate: null,
@@ -58,7 +58,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 2,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1827, 10, 9),
         endDate: null,
@@ -75,7 +75,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 3,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1828, 0, 1),
         endDate: null,
@@ -92,7 +92,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 4,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1828, 3, 12),
         endDate: new Date(1828, 5, 14),
@@ -109,7 +109,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 5,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1828, 5, 1),
         endDate: null,
@@ -126,7 +126,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 6,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1828, 6, 1),
         endDate: null,
@@ -143,7 +143,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 7,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1828, 8, 1),
         endDate: null,
@@ -160,7 +160,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 8,
-        categoryId: 1,
+        categories: [],
         subcategory: null,
         date: new Date(1829, 3, 7),
         endDate: new Date(1829, 5, 1),
@@ -185,7 +185,7 @@ export const categories: TimelineCategory[] = [
     items: [
       {
         id: 9,
-        categoryId: 2,
+        categories: [],
         date: new Date(1829, 7, 11),
         endDate: null,
         subcategory: 'Seer stone in a hat',
@@ -202,7 +202,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 10,
-        categoryId: 2,
+        categories: [],
         date: new Date(1879, 9, 1),
         endDate: null,
         subcategory: 'Seer stone in a hat',
@@ -219,7 +219,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 11,
-        categoryId: 2,
+        categories: [],
         date: new Date(1831, 1, 7),
         endDate: null,
         subcategory: 'Seer stone in a hat',
@@ -236,7 +236,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 12,
-        categoryId: 2,
+        categories: [],
         date: new Date(1830, 11, 18),
         endDate: null,
         subcategory: 'Two spectacles',
@@ -253,7 +253,7 @@ export const categories: TimelineCategory[] = [
       },
       {
         id: 13,
-        categoryId: 2,
+        categories: [],
         date: new Date(1859, 7, 1),
         endDate: null,
         subcategory: 'Two spectacles',

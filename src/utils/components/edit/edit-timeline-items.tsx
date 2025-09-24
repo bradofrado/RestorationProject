@@ -180,7 +180,7 @@ export const EditTimelineItems = () => {
       endDate: null,
       links: [],
       subcategory: null,
-      categoryId: category.id,
+      categories: [category],
       type: 'EXACT',
       x: null,
       y: null,

@@ -21,7 +21,20 @@ interface TimelineAttributes {
   color?: HexColor;
 }
 
-export const TimelineItemArgs = {} satisfies Prisma.TimelineItemDefaultArgs;
+export const TimelineCategorySchemaBase = z.object({
+  id: z.number(),
+  name: z.string(),
+  pageId: z.string().nullable(),
+  color: z.string().nullable(),
+  isDeleted: z.boolean().optional(),
+}) satisfies z.Schema<Omit<PrismaTimelineCategory, 'isDeleted' | 'items'>>;
+export type TimelineCategorySchemaBase = z.infer<
+  typeof TimelineCategorySchemaBase
+>;
+
+export const TimelineItemArgs = {
+  include: { categories: true },
+} satisfies Prisma.TimelineItemDefaultArgs;
 export type PrismaTimelineItem = Prisma.TimelineItemGetPayload<
   typeof TimelineItemArgs
 >;
@@ -44,12 +57,18 @@ export const RestorationTimelineItemSchema = z.object({
   subcategory: z.string().nullable(),
   text: z.string(),
   links: z.array(annotationSchema),
-  categoryId: z.number().nullable(),
+  categories: z.array(TimelineCategorySchemaBase),
   type: z.nativeEnum(TimelineDateType),
   x: z.number().nullable(),
   y: z.number().nullable(),
   mapImage: z.string().nullable(),
-}) satisfies z.Schema<Omit<PrismaTimelineItemWithLinksArray, 'isDeleted'>>;
+}) satisfies z.Schema<
+  Replace<
+    Omit<PrismaTimelineItemWithLinksArray, 'isDeleted'>,
+    'categories',
+    TimelineCategorySchemaBase[]
+  >
+>;
 export type RestorationTimelineItem = z.infer<
   typeof RestorationTimelineItemSchema
 >;
@@ -68,13 +87,9 @@ export type PrismaTimelineCategory = Prisma.TimelineCategoryGetPayload<
   typeof TimelineCategoryArgs
 >;
 
-export const TimelineCategorySchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  pageId: z.string().nullable(),
-  color: HexColorSchema,
+export const TimelineCategorySchema = TimelineCategorySchemaBase.extend({
   items: z.array(RestorationTimelineItemSchema),
-  isDeleted: z.boolean().optional(),
+  color: HexColorSchema,
 }) satisfies z.Schema<
   Replace<
     Omit<PrismaTimelineCategory, 'isDeleted'>,

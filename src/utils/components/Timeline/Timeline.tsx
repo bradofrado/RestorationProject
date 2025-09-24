@@ -76,8 +76,8 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     return 0;
   });
-  const sorted = unfilteredSorted.filter(
-    (x) => x.categoryId && filteredCategories.indexOf(x.categoryId) < 0
+  const sorted = unfilteredSorted.filter((x) =>
+    x.categories.some((c) => filteredCategories.indexOf(c.id) < 0)
   );
 
   const lastDate = unfilteredSorted[unfilteredSorted.length - 1]?.date as Date;

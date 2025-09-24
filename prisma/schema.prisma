@@ -113,12 +113,12 @@ model TimelineCategory {
   page      Page?          @relation(fields: [pageId], references: [id])
   pageId    String?
   color     String?
-  items     TimelineItem[]
+  items     TimelineItem[] @relation(name: "CategoryItems")
   isDeleted Boolean        @default(false)
 }
 
 model TimelineItem {
-  id          Int               @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   date        DateTime?
   endDate     DateTime?
   subcategory String?
@@ -128,9 +128,8 @@ model TimelineItem {
   y           Float?
   mapImage    String?
   type        TimelineDateType
-  category    TimelineCategory? @relation(fields: [categoryId], references: [id])
-  categoryId  Int?
-  isDeleted   Boolean           @default(false)
+  categories  TimelineCategory[] @relation(name: "CategoryItems")
+  isDeleted   Boolean            @default(false)
 }
 
 enum TimelineDateType {

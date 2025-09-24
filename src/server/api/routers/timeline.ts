@@ -6,6 +6,7 @@ import {
   type PrismaTimelineItem,
   type PrismaTimelineCategory,
   TimelineCategoryArgs,
+  TimelineItemArgs,
 } from '~/utils/types/timeline';
 import { z } from 'zod';
 import { type Prisma } from '@prisma/client';
@@ -17,8 +18,7 @@ import {
 } from '~/server/dao/categoriesDAO';
 
 const translateTimelineItemToPrisma = (
-  input: RestorationTimelineItem,
-  categoryId?: number
+  input: RestorationTimelineItem
 ): Prisma.TimelineItemUncheckedCreateInput => {
   return {
     date: input.date,
@@ -26,7 +26,9 @@ const translateTimelineItemToPrisma = (
     text: input.text,
     links: JSON.stringify(input.links),
     subcategory: input.subcategory,
-    categoryId: categoryId,
+    categories: input.categories
+      ? { connect: input.categories.map((x) => ({ id: x.id })) }
+      : undefined,
     type: input.type,
     x: input.x,
     y: input.y,
@@ -132,10 +134,8 @@ export const timelineRouter = createTRPCRouter({
       );
 
       const dbItem: PrismaTimelineItem = await ctx.prisma.timelineItem.create({
-        data: translateTimelineItemToPrisma(
-          input,
-          input.categoryId || undefined
-        ),
+        data: translateTimelineItemToPrisma(input),
+        ...TimelineItemArgs,
       });
 
       return translatePrismaToTimelineItem(dbItem);
@@ -153,6 +153,7 @@ export const timelineRouter = createTRPCRouter({
         where: {
           id: input.id,
         },
+        ...TimelineItemArgs,
       });
 
       return translatePrismaToTimelineItem(dbItem);
