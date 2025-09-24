@@ -5,6 +5,7 @@ import {
   type TimelineCategory,
   TimelineCategoryArgs,
   TimelineCategorySchema,
+  TimelineItemArgs,
 } from '~/utils/types/timeline';
 import { type Db } from '../db';
 import { exclude, jsonParse } from '~/utils/utils';
@@ -50,6 +51,20 @@ export const getCategory = async ({ db, id }: { db: Db; id: number }) => {
   }
 
   return translatePrismaToTimelineCategory(dbCategory);
+};
+
+export const getTimelineItems = async (
+  db: Db,
+  ids: number[]
+): Promise<RestorationTimelineItem[]> => {
+  const dbItems: PrismaTimelineItem[] = await db.timelineItem.findMany({
+    where: {
+      id: { in: ids },
+    },
+    ...TimelineItemArgs,
+  });
+
+  return dbItems.map(translatePrismaToTimelineItem);
 };
 
 export const translatePrismaToTimelineItem = (

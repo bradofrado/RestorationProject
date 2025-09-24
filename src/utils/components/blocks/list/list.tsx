@@ -1,10 +1,10 @@
 import z from 'zod';
-import { ContentEditableBlur } from '../utils/types';
+import { type ContentEditableBlur } from '../utils/types';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';
-import { DataComponent } from '../utils/types';
-import { useGetCategories } from '~/utils/services/TimelineService';
+import { type DataComponent } from '../utils/types';
+import { useGetCategory } from '~/utils/services/TimelineService';
 import { useParseSettings } from '../utils/parse-settings';
-import { FC } from 'react';
+import { type FC } from 'react';
 import { setStyleFromSettings } from '~/utils/utils';
 import { Placeholder } from '../utils/placeholder';
 import {
@@ -13,16 +13,16 @@ import {
   DisplayListItem,
   RestorationQuote,
 } from '../../event-page/display-list';
-import { RestorationTimelineItem } from '~/utils/types/timeline';
 
 interface DataListProps extends DataComponent, ContentEditableBlur {}
 
 export const listSettingsSchema = SettingsComponentSettingsSchema.extend({
   group: z.boolean(),
   items: z.array(z.string()),
+  timelineItemIds: z.optional(z.array(z.number())),
 });
 export const ListBlock: FC<DataListProps> = ({ data, ...rest }) => {
-  const query = useGetCategories();
+  const query = useGetCategory(Number(data.content));
   const settings = useParseSettings(data.properties, listSettingsSchema, {
     group: false,
     items: [],
@@ -54,8 +54,9 @@ export const ListBlock: FC<DataListProps> = ({ data, ...rest }) => {
     return <></>;
   }
 
-  const items: RestorationTimelineItem[] =
-    query.data.find((x) => x.id == Number(data.content))?.items || [];
+  const items = query.data.items.filter((item) =>
+    settings.timelineItemIds ? settings.timelineItemIds.includes(item.id) : true
+  );
 
   if (items.length === 0) {
     return (
