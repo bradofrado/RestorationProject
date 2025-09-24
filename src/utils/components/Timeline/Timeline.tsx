@@ -10,6 +10,8 @@ import {
   useState,
   useMemo,
   useCallback,
+  createContext,
+  useContext,
 } from 'react';
 import Link from 'next/link';
 import { PrimaryColor, type HexColor } from '~/utils/types/colors';
@@ -61,6 +63,7 @@ export const Timeline: React.FC<TimelineProps> = ({
         color: curr.color,
         pageId: curr.pageId,
         date: item.date || new Date(),
+        categories: [curr],
       }));
     prev = prev.concat(items);
 
@@ -186,7 +189,10 @@ export const Timeline: React.FC<TimelineProps> = ({
         const date = curr.date.toISOString();
         const currItems = prev[date];
         if (currItems) {
+          // Make sure that the items in this list are unique
+          //if (!currItems.some((item) => item.id === curr.id)) {
           currItems.push(curr);
+          //}
         } else {
           prev[date] = [curr];
         }
@@ -449,6 +455,7 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
   offset,
 }: TimelineItemContentProps) => {
   const [page, setPage] = useState<number>(0);
+  const { setColor } = useContext(TimelineItemComponentContext);
 
   const query = useGetPageUrl();
   const item = items[page];
@@ -473,8 +480,10 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
     e.stopPropagation();
     if (page < items.length - 1) {
       setPage(page + 1);
+      setColor(items[page + 1]?.color);
     } else {
       setPage(0);
+      setColor(items[0]?.color);
     }
   };
   const onPreviousClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -482,8 +491,10 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
     e.stopPropagation();
     if (page > 0) {
       setPage(page - 1);
+      setColor(items[page - 1]?.color);
     } else {
       setPage(items.length - 1);
+      setColor(items[items.length - 1]?.color);
     }
   };
   return (
@@ -538,6 +549,10 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
   );
 };
 
+const TimelineItemComponentContext = createContext<{
+  setColor: (color: HexColor | undefined) => void;
+}>({ setColor: () => {} });
+
 const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
   const ref = useRef<HTMLDivElement>(null);
   const { date, x, content, below, graphDate, color, skip, amount } = props;
@@ -551,12 +566,21 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
     belowClass += ' relative';
   }
 
+  const setColor = useCallback(
+    (color: HexColor | undefined) => {
+      if (!color) return;
+
+      ref.current?.style.setProperty('--bom-color', color);
+    },
+    [ref]
+  );
+
   useEffect(() => {
-    ref.current?.style.setProperty('--bom-color', color);
-  }, [color]);
+    setColor(color);
+  }, [color, setColor]);
 
   return (
-    <>
+    <TimelineItemComponentContext.Provider value={{ setColor }}>
       <div
         className={'timeline-item' + belowClass}
         style={style}
@@ -588,7 +612,7 @@ const TimelineItemComponent: React.FC<TimelineItem> = (props: TimelineItem) => {
           </div>
         )}
       </div>
-    </>
+    </TimelineItemComponentContext.Provider>
   );
 };
 
