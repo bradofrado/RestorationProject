@@ -95,9 +95,20 @@ const TimelineCondensed: React.FC<TimelineProps> = ({
     (x) => x.items.filter((item) => item.date).length > 0
   );
 
-  const onCategoryClick = (i: TimelineCategory['id']) => {
+  const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
+    const index = filteredCategories.indexOf(i);
+    if (metaKey) {
+      setFilteredCategories(
+        // If you press on an already single selected category, select all categories
+        index === -1 &&
+          filteredCategories.length === categoriesWithDateItems.length - 1
+          ? []
+          : categoriesWithDateItems.map((x) => x.id).filter((x) => x !== i)
+      );
+      return;
+    }
+
     const copy = filteredCategories.slice();
-    const index = copy.indexOf(i);
     if (index >= 0) {
       copy.splice(index, 1);
     } else {
@@ -383,9 +394,21 @@ export const Timeline: React.FC<TimelineProps> = ({
     return items;
   }, [convertToTimelineItems, sorted]);
 
-  const onCategoryClick = (i: TimelineCategory['id']) => {
+  const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
     const copy = filteredCategories.slice();
     const index = copy.indexOf(i);
+
+    if (metaKey) {
+      setFilteredCategories(
+        // If you press on an already single selected category, select all categories
+        index === -1 && copy.length === categoriesWithDateItems.length - 1
+          ? []
+          : categoriesWithDateItems.map((x) => x.id).filter((x) => x !== i)
+      );
+      setScrollIndex(-1);
+      return;
+    }
+
     if (index >= 0) {
       copy.splice(index, 1);
     } else {
@@ -457,14 +480,12 @@ export const Timeline: React.FC<TimelineProps> = ({
           </>
         </ScrollDrag>
         <div className="flex flex-col-reverse items-center sm:flex-row">
-          <Label label="Categories" className="grow">
-            <TimelineCategoryFilter
-              categories={categoriesWithDateItems}
-              filtered={filteredCategories}
-              onChange={onCategoryClick}
-              filterKey="id"
-            />
-          </Label>
+          <TimelineCategoryFilter
+            categories={categoriesWithDateItems}
+            filtered={filteredCategories}
+            onChange={onCategoryClick}
+            filterKey="id"
+          />
           <div className="grow">
             <Header
               className={
@@ -500,7 +521,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 type TimelineCategoryFilterProps<T extends keyof TimelineCategory> = {
   categories: TimelineCategory[];
   filtered: TimelineCategory[T][];
-  onChange: (key: TimelineCategory[T]) => void;
+  onChange: (key: TimelineCategory[T], metaKey: boolean) => void;
   filterKey: T;
 };
 export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
@@ -509,8 +530,18 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
   onChange,
   filterKey,
 }: TimelineCategoryFilterProps<T>) => {
+  const onClick = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    key: TimelineCategory[T]
+  ) => {
+    onChange(key, e.metaKey || e.ctrlKey);
+  };
   return (
-    <>
+    <Label
+      label="Categories"
+      className="grow"
+      tooltip="Ctrl/Cmd + click to select single category"
+    >
       {categories.map((category, i) => (
         <Button
           key={i}
@@ -518,12 +549,14 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
             filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'
           }
           backgroundColor={category.color}
-          onClick={() => onChange(category[filterKey])}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+            onClick(e, category[filterKey])
+          }
         >
           {category.name}
         </Button>
       ))}
-    </>
+    </Label>
   );
 };
 
