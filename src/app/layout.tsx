@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import '~/styles/globals.css';
 import { QueryStateProvider } from '~/utils/components/hooks/query-state';
 import { LocalizationProvider } from '~/utils/localization';
@@ -8,13 +9,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <QueryStateProvider>
-          <TrpcProvider>
-            <ServiceContainer providers={[]}>
-              <LocalizationProvider>{children}</LocalizationProvider>
-            </ServiceContainer>
-          </TrpcProvider>
-        </QueryStateProvider>
+        <Suspense>
+          <QueryStateProvider>
+            <TrpcProvider>
+              <ServiceContainer providers={[]}>
+                <LocalizationProvider>{children}</LocalizationProvider>
+              </ServiceContainer>
+            </TrpcProvider>
+          </QueryStateProvider>
+        </Suspense>
       </body>
     </html>
   );

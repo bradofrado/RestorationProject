@@ -42,14 +42,15 @@ export function useQueryState<T>({
         value === '' ||
         value === null ||
         (Array.isArray(value) && value.length === 0) ||
-        (typeof value === 'object' && Object.keys(value).length === 0)
+        (typeof value === 'object' && Object.keys(value).length === 0) ||
+        value === defaultValue
       ) {
         deleteSearchParam(key);
       } else {
         setSearchParam(key, encodedValue);
       }
     },
-    [deleteSearchParam, setSearchParam, key]
+    [defaultValue, deleteSearchParam, key, setSearchParam]
   );
 
   useEffect(() => {

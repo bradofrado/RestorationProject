@@ -134,7 +134,10 @@ export const Timeline: React.FC<TimelineProps> = ({
     key: 'filteredCategories',
     defaultValue: [],
   });
-  const [scrollIndex, setScrollIndex] = useState<number>(-1);
+  const [scrollIndex, setScrollIndex] = useQueryState<number>({
+    key: 'selectedIndex',
+    defaultValue: -1,
+  });
   const [zoom, setZoom] = useState<number>(getContainerSize());
   const query = useGetPages();
 
