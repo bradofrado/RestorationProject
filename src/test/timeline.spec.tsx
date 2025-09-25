@@ -1,7 +1,7 @@
 import { render, getAllByRole, itemsSorted, categories } from './util';
 import userEvent from '@testing-library/user-event';
 import {
-  Timeline,
+  TimelineContainer,
   type TimelineProps,
 } from '../utils/components/Timeline/Timeline';
 const getUrl = (pageId: string) => {
@@ -22,7 +22,7 @@ const renderTimeline = (props?: TimelineProps) => {
   };
   return {
     user: userEvent.setup(),
-    ...render(<Timeline {...props} {...defaultProps} />),
+    ...render(<TimelineContainer {...props} {...defaultProps} />),
   };
 };
 

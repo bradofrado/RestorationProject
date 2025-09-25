@@ -32,6 +32,7 @@ import { Switch } from '../base/switch';
 import { AnnotationLinkProvider } from '../event-page/annotation-provider';
 import { useQueryState } from '../hooks/query-state';
 import { getPageUrl } from '~/utils/get-page-url';
+import { DateFormat } from '~/utils/utils';
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -47,98 +48,13 @@ const getContainerSize = () => {
   return Number(sizeStr.substring(0, sizeStr.length - 2));
 };
 
-export const TimelineContainer: React.FC<TimelineProps> = ({
+export const TimelineContainer: React.FC<Pick<TimelineProps, 'categories'>> = ({
   categories,
-}: TimelineProps) => {
-  const [condensed, setCondensed] = useQueryState({
+}) => {
+  const [condensed] = useQueryState({
     key: 'condensed',
     defaultValue: false,
   });
-  const items = categories
-    .flatMap((x) => x.items)
-    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
-  const firstDate = items[0]?.date as Date;
-  const lastDate = items[items.length - 1]?.date as Date;
-  return (
-    <div className="w-full">
-      <div className="mt-[20px] flex flex-col items-center sm:mb-[100px] sm:mt-0">
-        <h1 className="pb-5 text-center text-4xl font-bold tracking-tight text-gray-800">
-          Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}
-        </h1>
-        <Label label="Condensed" sameLine>
-          <Switch checked={condensed} onCheckedChange={setCondensed} />
-        </Label>
-      </div>
-      {condensed ? (
-        <TimelineCondensed categories={categories} />
-      ) : (
-        <Timeline categories={categories} />
-      )}
-    </div>
-  );
-};
-
-const TimelineCondensed: React.FC<TimelineProps> = ({
-  categories,
-}: TimelineProps) => {
-  const [filteredCategories, setFilteredCategories] = useQueryState<
-    TimelineCategory['id'][]
-  >({
-    key: 'filteredCategories',
-    defaultValue: [],
-  });
-  const items = categories
-    .filter((x) => !filteredCategories.includes(x.id))
-    .flatMap((x) => x.items.map((item) => ({ ...item, color: x.color })))
-    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
-  const categoriesWithDateItems = categories.filter(
-    (x) => x.items.filter((item) => item.date).length > 0
-  );
-
-  const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
-    const index = filteredCategories.indexOf(i);
-    if (metaKey) {
-      setFilteredCategories(
-        // If you press on an already single selected category, select all categories
-        index === -1 &&
-          filteredCategories.length === categoriesWithDateItems.length - 1
-          ? []
-          : categoriesWithDateItems.map((x) => x.id).filter((x) => x !== i)
-      );
-      return;
-    }
-
-    const copy = filteredCategories.slice();
-    if (index >= 0) {
-      copy.splice(index, 1);
-    } else {
-      copy.push(i);
-    }
-    setFilteredCategories(copy);
-  };
-  return (
-    <AnnotationLinkProvider>
-      <div className="space-y-4">
-        <div className="">
-          <TimelineCategoryFilter
-            categories={categoriesWithDateItems}
-            filtered={filteredCategories}
-            onChange={onCategoryClick}
-            filterKey="id"
-          />
-        </div>
-        <CondensedTimeline items={items} />
-      </div>
-    </AnnotationLinkProvider>
-  );
-};
-
-export interface TimelineProps {
-  categories: TimelineCategory[];
-}
-export const Timeline: React.FC<TimelineProps> = ({
-  categories,
-}: TimelineProps) => {
   const [filteredCategories, setFilteredCategories] = useQueryState<
     TimelineCategory['id'][]
   >({
@@ -150,6 +66,172 @@ export const Timeline: React.FC<TimelineProps> = ({
     defaultValue: -1,
   });
   const [zoom, setZoom] = useState<number>(getContainerSize());
+  const categoriesWithDateItems = categories.filter(
+    (x) => x.items.filter((item) => item.date).length > 0
+  );
+  const items = categories
+    .flatMap((x) => x.items)
+    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
+  const firstDate = items[0]?.date as Date;
+  const lastDate = items[items.length - 1]?.date as Date;
+
+  const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
+    const copy = filteredCategories.slice();
+    const index = copy.indexOf(i);
+
+    if (metaKey) {
+      setFilteredCategories(
+        // If you press on an already single selected category, select all categories
+        index === -1 && copy.length === categoriesWithDateItems.length - 1
+          ? []
+          : categoriesWithDateItems.map((x) => x.id).filter((x) => x !== i)
+      );
+      setScrollIndex(-1);
+      return;
+    }
+
+    if (index >= 0) {
+      copy.splice(index, 1);
+    } else {
+      copy.push(i);
+    }
+    setScrollIndex(-1);
+    setFilteredCategories(copy);
+  };
+
+  const onNextClick = () => {
+    const newIndex = (scrollIndex + 1) % items.length;
+    setScrollIndex(newIndex);
+  };
+
+  const onPreviousClick = () => {
+    let newIndex = scrollIndex - 1;
+    newIndex = newIndex < 0 ? items.length - 1 : newIndex;
+    setScrollIndex(newIndex);
+  };
+
+  const onZoomInClick = () => {
+    if (zoom >= 1500) {
+      return;
+    }
+
+    const currentSize = getContainerSize();
+    setZoom(currentSize + 50);
+    document.documentElement.style.setProperty(
+      '--container-zoom',
+      `${currentSize + 50}px`
+    );
+  };
+
+  const onZoomOutClick = () => {
+    if (zoom <= 50) {
+      return;
+    }
+
+    const currentSize = getContainerSize();
+    document.documentElement.style.setProperty(
+      '--container-zoom',
+      `${currentSize - 50}px`
+    );
+    setZoom(currentSize - 50);
+  };
+
+  return (
+    <div className="flex h-[calc(100vh-80px)] flex-col">
+      <div className="mt-[20px] flex flex-col items-center sm:mb-[100px] sm:mt-0">
+        <h1 className="pb-5 text-center text-4xl font-bold tracking-tight text-gray-800">
+          Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}
+        </h1>
+      </div>
+
+      {condensed ? (
+        <TimelineCondensed
+          categories={categories}
+          zoom={zoom}
+          filteredCategories={filteredCategories}
+        />
+      ) : (
+        <Timeline
+          categories={categories}
+          zoom={zoom}
+          filteredCategories={filteredCategories}
+        />
+      )}
+      <div className="mt-2 flex flex-col items-center sm:flex-row">
+        <TimelineCategoryFilter
+          categories={categoriesWithDateItems}
+          filtered={filteredCategories}
+          onChange={onCategoryClick}
+          filterKey="id"
+        />
+        {!condensed ? (
+          <>
+            <div className="grow">
+              <Header
+                className={
+                  scrollIndex < 0 || !items[scrollIndex] ? 'invisible' : ''
+                }
+              >
+                {scrollIndex >= 0 && items[scrollIndex]?.date
+                  ? `${DateFormat.fullTextRange(
+                      items[scrollIndex].date,
+                      items[scrollIndex].endDate
+                    )}`
+                  : 'Filler'}
+              </Header>
+              <div>
+                <Button onClick={onPreviousClick}>Previous</Button>
+                <Button onClick={onNextClick}>Next</Button>
+              </div>
+            </div>
+            <div className="space-x-2">
+              <Button mode="secondary" onClick={onZoomOutClick}>
+                -
+              </Button>
+              <span>Zoom</span>
+              <Button mode="secondary" onClick={onZoomInClick}>
+                +
+              </Button>
+            </div>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+const TimelineCondensed: React.FC<TimelineProps> = ({
+  categories,
+  filteredCategories,
+}: TimelineProps) => {
+  const items = categories
+    .filter((x) => !filteredCategories.includes(x.id))
+    .flatMap((x) => x.items.map((item) => ({ ...item, color: x.color })))
+    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
+
+  return (
+    <AnnotationLinkProvider>
+      <div className="flex-1 overflow-auto">
+        <CondensedTimeline items={items} />
+      </div>
+    </AnnotationLinkProvider>
+  );
+};
+
+export interface TimelineProps {
+  categories: TimelineCategory[];
+  zoom: number;
+  filteredCategories: TimelineCategory['id'][];
+}
+export const Timeline: React.FC<TimelineProps> = ({
+  categories,
+  zoom,
+  filteredCategories,
+}: TimelineProps) => {
+  const [scrollIndex, setScrollIndex] = useQueryState<number>({
+    key: 'selectedIndex',
+    defaultValue: -1,
+  });
   const query = useGetPages();
 
   const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
@@ -394,70 +476,16 @@ export const Timeline: React.FC<TimelineProps> = ({
     return items;
   }, [convertToTimelineItems, sorted]);
 
-  const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
-    const copy = filteredCategories.slice();
-    const index = copy.indexOf(i);
-
-    if (metaKey) {
-      setFilteredCategories(
-        // If you press on an already single selected category, select all categories
-        index === -1 && copy.length === categoriesWithDateItems.length - 1
-          ? []
-          : categoriesWithDateItems.map((x) => x.id).filter((x) => x !== i)
+  useEffect(() => {
+    const height =
+      document.getElementsByClassName('timeline-container')[0]?.clientHeight;
+    if (height) {
+      document.body.parentElement?.style.setProperty(
+        '--container-size',
+        `${height}px`
       );
-      setScrollIndex(-1);
-      return;
     }
-
-    if (index >= 0) {
-      copy.splice(index, 1);
-    } else {
-      copy.push(i);
-    }
-    setScrollIndex(-1);
-    setFilteredCategories(copy);
-  };
-
-  const onNextClick = () => {
-    const newIndex = (scrollIndex + 1) % timeItems.length;
-    setScrollIndex(newIndex);
-  };
-
-  const onPreviousClick = () => {
-    let newIndex = scrollIndex - 1;
-    newIndex = newIndex < 0 ? timeItems.length - 1 : newIndex;
-    setScrollIndex(newIndex);
-  };
-
-  const onZoomInClick = () => {
-    if (zoom >= 1500) {
-      return;
-    }
-
-    const currentSize = getContainerSize();
-    setZoom(currentSize + 50);
-    document.documentElement.style.setProperty(
-      '--container-zoom',
-      `${currentSize + 50}px`
-    );
-  };
-
-  const onZoomOutClick = () => {
-    if (zoom <= 50) {
-      return;
-    }
-
-    const currentSize = getContainerSize();
-    document.documentElement.style.setProperty(
-      '--container-zoom',
-      `${currentSize - 50}px`
-    );
-    setZoom(currentSize - 50);
-  };
-
-  const categoriesWithDateItems = categories.filter(
-    (x) => x.items.filter((item) => item.date).length > 0
-  );
+  }, []);
 
   if (items.length == 0) {
     return <>Loading</>;
@@ -465,55 +493,19 @@ export const Timeline: React.FC<TimelineProps> = ({
 
   return (
     <>
-      <div className="w-full">
-        <ScrollDrag
-          rootClass="timeline-container mt-[20px] sm:mb-[100px] sm:mt-0"
-          scrollPos={timeItems[scrollIndex]?.x}
-        >
-          <>
-            {monthMarkers?.map((item, i) => (
-              <TimelineItemComponent {...item} key={i} />
-            ))}
-            {timeItems?.map((item, i) => (
-              <TimelineItemComponent {...item} key={i} />
-            ))}
-          </>
-        </ScrollDrag>
-        <div className="flex flex-col-reverse items-center sm:flex-row">
-          <TimelineCategoryFilter
-            categories={categoriesWithDateItems}
-            filtered={filteredCategories}
-            onChange={onCategoryClick}
-            filterKey="id"
-          />
-          <div className="grow">
-            <Header
-              className={
-                scrollIndex < 0 || !timeItems[scrollIndex] ? 'invisible' : ''
-              }
-            >
-              {scrollIndex >= 0 && timeItems[scrollIndex]
-                ? `${timeItems[scrollIndex]?.date || ''}, ${
-                    timeItems[scrollIndex]?.year || ''
-                  }`
-                : 'Filler'}
-            </Header>
-            <div>
-              <Button onClick={onPreviousClick}>Previous</Button>
-              <Button onClick={onNextClick}>Next</Button>
-            </div>
-          </div>
-          <div className="space-x-2">
-            <Button mode="secondary" onClick={onZoomOutClick}>
-              -
-            </Button>
-            <span>Zoom</span>
-            <Button mode="secondary" onClick={onZoomInClick}>
-              +
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ScrollDrag
+        rootClass="timeline-container mt-[20px] sm:mb-[100px] sm:mt-0"
+        scrollPos={timeItems[scrollIndex]?.x}
+      >
+        <>
+          {monthMarkers?.map((item, i) => (
+            <TimelineItemComponent {...item} key={i} />
+          ))}
+          {timeItems?.map((item, i) => (
+            <TimelineItemComponent {...item} key={i} />
+          ))}
+        </>
+      </ScrollDrag>
     </>
   );
 };
@@ -530,6 +522,10 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
   onChange,
   filterKey,
 }: TimelineCategoryFilterProps<T>) => {
+  const [condensed, setCondensed] = useQueryState({
+    key: 'condensed',
+    defaultValue: false,
+  });
   const onClick = (
     e: React.MouseEvent<HTMLButtonElement>,
     key: TimelineCategory[T]
@@ -537,26 +533,31 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
     onChange(key, e.metaKey || e.ctrlKey);
   };
   return (
-    <Label
-      label="Categories"
-      className="grow"
-      tooltip="Ctrl/Cmd + click to select single category"
-    >
-      {categories.map((category, i) => (
-        <Button
-          key={i}
-          mode={
-            filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'
-          }
-          backgroundColor={category.color}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-            onClick(e, category[filterKey])
-          }
-        >
-          {category.name}
-        </Button>
-      ))}
-    </Label>
+    <div className="flex flex-col">
+      <Label className="w-fit" label="Condensed" sameLine>
+        <Switch checked={condensed} onCheckedChange={setCondensed} />
+      </Label>
+      <Label
+        label="Categories"
+        className="grow"
+        tooltip="Ctrl/Cmd + click to select single category"
+      >
+        {categories.map((category, i) => (
+          <Button
+            key={i}
+            mode={
+              filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'
+            }
+            backgroundColor={category.color}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+              onClick(e, category[filterKey])
+            }
+          >
+            {category.name}
+          </Button>
+        ))}
+      </Label>
+    </div>
   );
 };
 
