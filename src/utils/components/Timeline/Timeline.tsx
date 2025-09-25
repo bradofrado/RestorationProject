@@ -21,13 +21,17 @@ import {
   type TimelineCategory,
   type TimelineItemStandalone,
 } from '~/utils/types/timeline';
-import { useGetPageUrl } from 'src/utils/services/EventPageService';
+import { useGetPages } from 'src/utils/services/EventPageService';
 import Button from '../base/buttons/button';
 import Label from '../base/label';
 import Header from '../base/header';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
-import { getPageUrl } from '~/utils/get-page-url';
 import { Annotation } from './annotation';
+import CondensedTimeline from './CondensedTimeline';
+import { Switch } from '../base/switch';
+import { AnnotationLinkProvider } from '../event-page/annotation-provider';
+import { useQueryState } from '../hooks/query-state';
+import { getPageUrl } from '~/utils/get-page-url';
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -43,17 +47,96 @@ const getContainerSize = () => {
   return Number(sizeStr.substring(0, sizeStr.length - 2));
 };
 
+export const TimelineContainer: React.FC<TimelineProps> = ({
+  categories,
+}: TimelineProps) => {
+  const [condensed, setCondensed] = useQueryState({
+    key: 'condensed',
+    defaultValue: false,
+  });
+  const items = categories
+    .flatMap((x) => x.items)
+    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
+  const firstDate = items[0]?.date as Date;
+  const lastDate = items[items.length - 1]?.date as Date;
+  return (
+    <div className="w-full">
+      <div className="mt-[20px] flex flex-col items-center sm:mb-[100px] sm:mt-0">
+        <h1 className="pb-5 text-center text-4xl font-bold tracking-tight text-gray-800">
+          Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}
+        </h1>
+        <Label label="Condensed" sameLine>
+          <Switch checked={condensed} onCheckedChange={setCondensed} />
+        </Label>
+      </div>
+      {condensed ? (
+        <TimelineCondensed categories={categories} />
+      ) : (
+        <Timeline categories={categories} />
+      )}
+    </div>
+  );
+};
+
+const TimelineCondensed: React.FC<TimelineProps> = ({
+  categories,
+}: TimelineProps) => {
+  const [filteredCategories, setFilteredCategories] = useQueryState<
+    TimelineCategory['id'][]
+  >({
+    key: 'filteredCategories',
+    defaultValue: [],
+  });
+  const items = categories
+    .filter((x) => !filteredCategories.includes(x.id))
+    .flatMap((x) => x.items.map((item) => ({ ...item, color: x.color })))
+    .sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
+  const categoriesWithDateItems = categories.filter(
+    (x) => x.items.filter((item) => item.date).length > 0
+  );
+
+  const onCategoryClick = (i: TimelineCategory['id']) => {
+    const copy = filteredCategories.slice();
+    const index = copy.indexOf(i);
+    if (index >= 0) {
+      copy.splice(index, 1);
+    } else {
+      copy.push(i);
+    }
+    setFilteredCategories(copy);
+  };
+  return (
+    <AnnotationLinkProvider>
+      <div className="space-y-4">
+        <div className="">
+          <TimelineCategoryFilter
+            categories={categoriesWithDateItems}
+            filtered={filteredCategories}
+            onChange={onCategoryClick}
+            filterKey="id"
+          />
+        </div>
+        <CondensedTimeline items={items} />
+      </div>
+    </AnnotationLinkProvider>
+  );
+};
+
 export interface TimelineProps {
   categories: TimelineCategory[];
 }
 export const Timeline: React.FC<TimelineProps> = ({
   categories,
 }: TimelineProps) => {
-  const [filteredCategories, setFilteredCategories] = useState<
+  const [filteredCategories, setFilteredCategories] = useQueryState<
     TimelineCategory['id'][]
-  >([]);
+  >({
+    key: 'filteredCategories',
+    defaultValue: [],
+  });
   const [scrollIndex, setScrollIndex] = useState<number>(-1);
   const [zoom, setZoom] = useState<number>(getContainerSize());
+  const query = useGetPages();
 
   const items = categories.reduce<TimelineItemStandalone[]>((prev, curr) => {
     const items: TimelineItemStandalone[] = curr.items
@@ -278,6 +361,7 @@ export const Timeline: React.FC<TimelineProps> = ({
               items={items}
               onClick={() => setScrollIndex(index)}
               offset={offset}
+              pageSlug={query.data?.find((x) => x.id === item.pageId)?.url}
             />
           ),
           color: item.color,
@@ -288,7 +372,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
       return timeItems;
     },
-    [firstDate, zoom]
+    [firstDate, zoom, query.data]
   );
 
   const timeItems = useMemo(() => {
@@ -356,9 +440,6 @@ export const Timeline: React.FC<TimelineProps> = ({
   return (
     <>
       <div className="w-full">
-        <h1 className="mt-[20px] pb-5 text-center text-4xl font-bold tracking-tight text-gray-800 sm:mb-[100px] sm:mt-0">
-          Timeline {firstDate.getFullYear()} - {lastDate.getFullYear()}
-        </h1>
         <ScrollDrag
           rootClass="timeline-container mt-[20px] sm:mb-[100px] sm:mt-0"
           scrollPos={timeItems[scrollIndex]?.x}
@@ -447,28 +528,22 @@ interface TimelineItemContentProps {
   items: TimelineItemStandalone[];
   onClick: () => void;
   offset: number;
+  pageSlug: string | undefined;
 }
 
 const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
   items,
   onClick,
   offset,
+  pageSlug,
 }: TimelineItemContentProps) => {
   const [page, setPage] = useState<number>(0);
   const { setColor } = useContext(TimelineItemComponentContext);
 
-  const query = useGetPageUrl();
   const item = items[page];
   if (!item) {
     return null;
   }
-  const getUrl = (pageId: string) => {
-    const result = query.data?.(pageId);
-    if (!result) {
-      throw new Error('No data found');
-    }
-    return getPageUrl(result);
-  };
 
   const hoverState =
     item.text.length > offset
@@ -511,11 +586,11 @@ const TimelineItemContent: React.FC<TimelineItemContentProps> = ({
           ))}
         </p>
       </div>
-      {item.pageId && !query.isLoading && (
+      {pageSlug && (
         <div className="flex h-5 justify-around">
           <Link
             className="hidden text-sm font-medium text-gray-800 hover:text-gray-700 group-hover:inline-block"
-            href={getUrl?.(item.pageId)}
+            href={getPageUrl(pageSlug)}
           >
             More
           </Link>

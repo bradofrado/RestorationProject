@@ -1,4 +1,5 @@
 import '~/styles/globals.css';
+import { QueryStateProvider } from '~/utils/components/hooks/query-state';
 import { LocalizationProvider } from '~/utils/localization';
 import { ServiceContainer } from '~/utils/react-service-container';
 import { TrpcProvider } from '~/utils/trpc';
@@ -7,11 +8,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <TrpcProvider>
-          <ServiceContainer providers={[]}>
-            <LocalizationProvider>{children}</LocalizationProvider>
-          </ServiceContainer>
-        </TrpcProvider>
+        <QueryStateProvider>
+          <TrpcProvider>
+            <ServiceContainer providers={[]}>
+              <LocalizationProvider>{children}</LocalizationProvider>
+            </ServiceContainer>
+          </TrpcProvider>
+        </QueryStateProvider>
       </body>
     </html>
   );

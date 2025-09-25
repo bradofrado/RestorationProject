@@ -8,7 +8,7 @@ import { useAnnotationLink } from '../event-page/annotation-provider';
 import { Annotation } from './annotation';
 
 export interface CondensedTimelineProps {
-  items: RestorationTimelineItem[];
+  items: (RestorationTimelineItem & { color?: HexColor })[];
   className?: string;
   color?: HexColor;
 }
@@ -31,7 +31,7 @@ const CondensedTimeline: React.FC<CondensedTimelineProps> = ({
         ref={ref}
       >
         {items.map((item, i) => (
-          <TimelineRow item={item} key={i} />
+          <TimelineRow item={item} key={i} color={item.color} />
         ))}
       </ul>
     </>
@@ -40,10 +40,14 @@ const CondensedTimeline: React.FC<CondensedTimelineProps> = ({
 
 interface TimelineRowProps {
   item: RestorationTimelineItem;
+  color?: HexColor;
 }
 const TimelineRow: React.FC<TimelineRowProps> = ({
   item,
+  color,
 }: TimelineRowProps) => {
+  const ref = useRef<HTMLLIElement>(null);
+
   const { annotate } = useAnnotationLink();
   const date = useMemo(() => {
     if (!item.date) return null;
@@ -61,11 +65,17 @@ const TimelineRow: React.FC<TimelineRowProps> = ({
     }
   }, [item.date, item.endDate, item.type]);
 
+  useEffect(() => {
+    if (color) {
+      ref.current?.style.setProperty('--bom-color', color);
+    }
+  }, [color]);
+
   if (!date) return <></>;
 
   return (
     <>
-      <li className="condensed-timeline-row">
+      <li className="condensed-timeline-row" ref={ref}>
         <div className="condensed-timeline-row-label">
           <p className="md:text-xl">{date}</p>
         </div>
