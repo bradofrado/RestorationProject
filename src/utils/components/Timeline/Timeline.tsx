@@ -75,6 +75,18 @@ export const TimelineContainer: React.FC<Pick<TimelineProps, 'categories'>> = ({
   const firstDate = items[0]?.date as Date;
   const lastDate = items[items.length - 1]?.date as Date;
 
+  useEffect(() => {
+    const height =
+      document.getElementsByClassName('timeline-container')[0]?.clientHeight;
+    if (height) {
+      document.body.parentElement?.style.setProperty(
+        '--container-size',
+        `${height}px`
+      );
+      setZoom(height);
+    }
+  }, []);
+
   const onCategoryClick = (i: TimelineCategory['id'], metaKey: boolean) => {
     const copy = filteredCategories.slice();
     const index = copy.indexOf(i);
@@ -475,17 +487,6 @@ export const Timeline: React.FC<TimelineProps> = ({
     const items = convertToTimelineItems(sorted);
     return items;
   }, [convertToTimelineItems, sorted]);
-
-  useEffect(() => {
-    const height =
-      document.getElementsByClassName('timeline-container')[0]?.clientHeight;
-    if (height) {
-      document.body.parentElement?.style.setProperty(
-        '--container-size',
-        `${height}px`
-      );
-    }
-  }, []);
 
   if (items.length == 0) {
     return <>Loading</>;
