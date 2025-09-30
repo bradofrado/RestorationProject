@@ -13,6 +13,7 @@ import {
   useTimelineMutations,
 } from '~/utils/services/TimelineService';
 import {
+  type TimelineCategorySchemaBase,
   type RestorationTimelineItem,
   type TimelineCategory,
 } from '~/utils/types/timeline';
@@ -264,6 +265,7 @@ export const EditTimelineItems = () => {
                         data: item,
                         onEdit: (item: RestorationTimelineItem) =>
                           saveItem(item, i),
+                        categories,
                       };
                       return isNew ? (
                         <AddRemoveItem
@@ -300,11 +302,13 @@ export const EditTimelineItems = () => {
 type EditRestorationItemProps =
   EditableDeleteableComponentProps<RestorationTimelineItem> & {
     category: TimelineCategory;
+    categories: TimelineCategorySchemaBase[];
   };
 const EditRestorationItem = ({
   data: propItem,
   onEdit: onSaveProp,
   category,
+  categories,
 }: EditRestorationItemProps) => {
   const changePropertyItem =
     useChangeProperty<RestorationTimelineItem>(onSaveProp);
@@ -366,6 +370,42 @@ const EditRestorationItem = ({
     changePropertyItem(newItem, 'mapImage', null);
   };
 
+  const onAddCategory = () => {
+    const copy = propItem.categories.slice();
+
+    if (!availableCategories[0]) return;
+
+    copy.push(availableCategories[0]);
+    changePropertyItem(propItem, 'categories', copy);
+  };
+
+  const onDeleteCategory = (i: number) => {
+    const categories = propItem.categories.slice();
+    categories.splice(i, 1);
+    changePropertyItem(propItem, 'categories', categories);
+  };
+
+  const onChangeCategory = (
+    categoryItem: DropdownItem<number>,
+    index: number
+  ) => {
+    const copy = propItem.categories.slice();
+
+    const category = availableCategories.find((c) => c.id === categoryItem.id);
+    if (!category) return;
+    copy[index] = category;
+
+    changePropertyItem(propItem, 'categories', copy);
+  };
+
+  const availableCategories = categories.filter(
+    (category) => !propItem.categories.find((c) => c.id === category.id)
+  );
+  const categoryNames = availableCategories.map((category) => ({
+    name: category.name,
+    id: category.id,
+  }));
+
   const mapImage = maps.find((m) => m.name === propItem.mapImage);
 
   return (
@@ -417,6 +457,30 @@ const EditRestorationItem = ({
             onChange={onLinkChange}
             id={`links-${propItem.id}`}
           />
+        </Label>
+        <Label label="Categories" className="my-1">
+          <AddRemove
+            items={propItem.categories}
+            onAdd={onAddCategory}
+            onDelete={onDeleteCategory}
+            custom
+          >
+            {(category, i, Wrapper) => (
+              <Wrapper
+                key={`${category.id}-${i}`}
+                onDelete={() => onDeleteCategory(i)}
+              >
+                <Dropdown
+                  items={[
+                    { name: category.name, id: category.id },
+                    ...categoryNames,
+                  ]}
+                  initialValue={category.id}
+                  onChange={(value) => onChangeCategory(value, i)}
+                />
+              </Wrapper>
+            )}
+          </AddRemove>
         </Label>
         <Label label="Location">
           <div className="flex gap-2">
