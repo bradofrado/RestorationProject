@@ -148,6 +148,10 @@ export const TimelineContainer: React.FC<Pick<TimelineProps, 'categories'>> = ({
     setZoom(currentSize - 50);
   };
 
+  const filtered = items.filter((x) =>
+    x.categories.some((c) => !filteredCategories.includes(c.id))
+  );
+
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col">
       <div className="mt-[20px] flex flex-col items-center sm:mb-[100px] sm:mt-0">
@@ -169,25 +173,27 @@ export const TimelineContainer: React.FC<Pick<TimelineProps, 'categories'>> = ({
           filteredCategories={filteredCategories}
         />
       )}
-      <div className="mt-2 flex flex-col items-center sm:flex-row">
-        <TimelineCategoryFilter
-          categories={categoriesWithDateItems}
-          filtered={filteredCategories}
-          onChange={onCategoryClick}
-          filterKey="id"
-        />
+      <div className="mt-2 flex flex-col gap-4 sm:grid sm:grid-cols-6 sm:items-center">
+        <div className="col-span-4">
+          <TimelineCategoryFilter
+            categories={categoriesWithDateItems}
+            filtered={filteredCategories}
+            onChange={onCategoryClick}
+            filterKey="id"
+          />
+        </div>
         {!condensed ? (
           <>
             <div className="grow">
               <Header
                 className={
-                  scrollIndex < 0 || !items[scrollIndex] ? 'invisible' : ''
+                  scrollIndex < 0 || !filtered[scrollIndex] ? 'invisible' : ''
                 }
               >
-                {scrollIndex >= 0 && items[scrollIndex]?.date
+                {scrollIndex >= 0 && filtered[scrollIndex]?.date
                   ? `${DateFormat.fullTextRange(
-                      items[scrollIndex].date,
-                      items[scrollIndex].endDate
+                      filtered[scrollIndex].date,
+                      filtered[scrollIndex].endDate
                     )}`
                   : 'Filler'}
               </Header>
@@ -543,20 +549,24 @@ export const TimelineCategoryFilter = <T extends keyof TimelineCategory>({
         className="grow"
         tooltip="Ctrl/Cmd + click to select single category"
       >
-        {categories.map((category, i) => (
-          <Button
-            key={i}
-            mode={
-              filtered.indexOf(category[filterKey]) > -1 ? 'secondary' : 'other'
-            }
-            backgroundColor={category.color}
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-              onClick(e, category[filterKey])
-            }
-          >
-            {category.name}
-          </Button>
-        ))}
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category, i) => (
+            <Button
+              key={i}
+              mode={
+                filtered.indexOf(category[filterKey]) > -1
+                  ? 'secondary'
+                  : 'other'
+              }
+              backgroundColor={category.color}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                onClick(e, category[filterKey])
+              }
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
       </Label>
     </div>
   );
