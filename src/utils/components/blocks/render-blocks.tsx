@@ -1,5 +1,3 @@
-'use client';
-
 import { type IfElse } from '~/utils/utils';
 import {
   type DataComponentType,

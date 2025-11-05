@@ -1,3 +1,5 @@
+'use client';
+
 import { type FC, useEffect, useState } from 'react';
 import { type EditableDeleteableComponentProps } from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';

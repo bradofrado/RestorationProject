@@ -1,3 +1,5 @@
+'use client';
+
 import { useColorArea, useColorSlider } from '@react-aria/color';
 import {
   type Color,

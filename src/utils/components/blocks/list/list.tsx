@@ -1,3 +1,5 @@
+'use client';
+
 import z from 'zod';
 import { type ContentEditableBlur } from '../utils/types';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';

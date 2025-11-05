@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, type FC } from 'react';
 import { type DataComponent } from '../utils/types';
 import { Quote } from '../../event-page/display-list';

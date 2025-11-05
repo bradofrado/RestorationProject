@@ -1,3 +1,5 @@
+'use client';
+
 import { type FC, Fragment, type ReactNode, useMemo } from 'react';
 import { inlineAnnotationRegex } from './constants';
 import { useAnnotationLink } from '../../event-page/annotation-provider';

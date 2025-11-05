@@ -1,9 +1,11 @@
-import { FC, useState } from 'react';
-import Modal, { ButtonInfo } from '../../base/modal';
+'use client';
+
+import { type FC, useState } from 'react';
+import Modal, { type ButtonInfo } from '../../base/modal';
 import { UploadFile } from '../../base/upload-file';
-import { ConfirmModalProps } from '../utils/types';
+import { type ConfirmModalProps } from '../utils/types';
 import { uploadImage } from './upload-image';
-import { ImageUploadResponse } from '~/utils/types/image';
+import { type ImageUploadResponse } from '~/utils/types/image';
 import { api } from '~/utils/api';
 
 export const ImageUploadModal: FC<

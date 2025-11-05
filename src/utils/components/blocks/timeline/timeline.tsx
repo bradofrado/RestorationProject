@@ -1,3 +1,5 @@
+'use client';
+
 import { HexColorSchema } from '~/utils/types/colors';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';
 import { type DataComponent } from '../utils/types';

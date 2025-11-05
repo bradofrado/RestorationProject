@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, type FC, type ReactNode, useContext } from 'react';
 import {
   Annotation as AnnotationComponent,

@@ -1,8 +1,10 @@
-import { FC, useState } from 'react';
-import { ImageBlock, ImageSettings, imageSettingsSchema } from './image';
-import { EditableDataComponent } from '../utils/types';
+'use client';
+
+import { type FC, useState } from 'react';
+import { ImageBlock, type ImageSettings, imageSettingsSchema } from './image';
+import { type EditableDataComponent } from '../utils/types';
 import { EditableComponentContainer } from '../utils/editable-component-container';
-import { ButtonIcon } from '../../edit/editable';
+import { type ButtonIcon } from '../../edit/editable';
 import { SettingsComponentCallout } from '../utils/settings-callout';
 import Input, { NumberInput } from '../../base/input';
 import Label from '../../base/label';
@@ -10,7 +12,7 @@ import { PopoverIcon } from '../../base/popover';
 import { AdjustIcon, EditIcon } from '../../icons/icons';
 import { useParseSettings } from '../utils/parse-settings';
 import { ImageUploadModal } from './image-upload-modal';
-import { EditableData } from '~/utils/types/page';
+import { type EditableData } from '~/utils/types/page';
 
 export const EditableImageBlock: FC<EditableDataComponent> = ({
   onEdit,

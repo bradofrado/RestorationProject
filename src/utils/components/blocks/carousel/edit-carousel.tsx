@@ -1,3 +1,5 @@
+'use client';
+
 import { type FC, useState } from 'react';
 import { type EditableDataComponent } from '../utils/types';
 import { EditableComponentContainer } from '../utils/editable-component-container';

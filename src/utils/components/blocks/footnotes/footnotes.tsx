@@ -1,5 +1,7 @@
-import { FC } from 'react';
-import { DataComponent } from '../utils/types';
+'use client';
+
+import { type FC } from 'react';
+import { type DataComponent } from '../utils/types';
 import { useAnnotationLink } from '../../event-page/annotation-provider';
 import Header, { HeaderLevelsSchema } from '../../base/header';
 import { setStyleFromSettings } from '~/utils/utils';
