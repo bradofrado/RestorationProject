@@ -5,17 +5,15 @@ import {
   useContext,
   type PropsWithChildren,
   useCallback,
-  useMemo,
-  useState,
   useRef,
+  type RefObject,
 } from 'react';
-import { type Annotation, annotationSchema } from '~/utils/types/annotation';
-import { jsonParse } from '~/utils/utils';
+import { type Annotation } from '~/utils/types/annotation';
 
 const AnnotationLinkContext = createContext<{
-  annotationLinks: Annotation[];
+  annotationLinksRef: RefObject<Record<string, number>>;
   updateAnnotationLink: (link: Annotation) => number;
-}>({ annotationLinks: [], updateAnnotationLink: () => 0 });
+}>({ annotationLinksRef: { current: {} }, updateAnnotationLink: () => 0 });
 
 type AnnotationProviderProps = PropsWithChildren;
 
@@ -23,7 +21,6 @@ export const AnnotationLinkProvider = ({
   children,
 }: AnnotationProviderProps) => {
   const annotationLinksRef = useRef<Record<string, number>>({});
-  const [rerender, setRerender] = useState(0);
 
   const updateAnnotationLink = useCallback(
     (annotation: Annotation) => {
@@ -41,28 +38,15 @@ export const AnnotationLinkProvider = ({
       const nextVal: number =
         max(Object.values(annotationLinksRef.current)) + 1;
       annotationLinksRef.current[link] = nextVal;
-      setRerender((prev) => prev + 1);
 
       return nextVal;
     },
     [annotationLinksRef]
   );
 
-  const sortedAnnotationLinks = useMemo(() => {
-    return Object.entries(annotationLinksRef.current).reduce<Annotation[]>(
-      (prev, [link, number]) => {
-        const annotation = jsonParse(annotationSchema).parse(link);
-        prev.splice(number, 0, annotation);
-        return prev;
-      },
-      []
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [annotationLinksRef, rerender]);
-
   return (
     <AnnotationLinkContext.Provider
-      value={{ annotationLinks: sortedAnnotationLinks, updateAnnotationLink }}
+      value={{ annotationLinksRef, updateAnnotationLink }}
     >
       {children}
     </AnnotationLinkContext.Provider>
@@ -70,12 +54,12 @@ export const AnnotationLinkProvider = ({
 };
 
 export const useAnnotationLink = () => {
-  const { annotationLinks, updateAnnotationLink } = useContext(
+  const { annotationLinksRef, updateAnnotationLink } = useContext(
     AnnotationLinkContext
   );
 
   return {
     annotate: updateAnnotationLink,
-    annotationLinks,
+    annotationLinksRef,
   };
 };
