@@ -1,11 +1,13 @@
 import { setStyleFromSettings } from '~/utils/utils';
-import Header, { HeaderLevelsSchema, HeaderProps } from '../../base/header';
+import Header, {
+  HeaderLevelsSchema,
+  type HeaderProps,
+} from '../../base/header';
 import { useParseSettings } from '../utils/parse-settings';
 import { SettingsComponentSettingsSchema } from '../utils/settings-component';
-import { DataComponent } from '../utils/types';
-import { z } from 'zod';
-import { FC } from 'react';
-import { AnnotationMarkdown } from '../annotation/annotation-markdown';
+import { type DataComponent } from '../utils/types';
+import { type z } from 'zod';
+import { type FC } from 'react';
 
 export const HeaderSettingsSchema = SettingsComponentSettingsSchema.extend({
   level: HeaderLevelsSchema,
@@ -27,7 +29,7 @@ export const HeaderBlock: FC<DataComponent & HeaderProps> = ({
       style={setStyleFromSettings(settings)}
       {...rest}
     >
-      {data?.content ? <AnnotationMarkdown text={data?.content} /> : 'Text'}
+      {data?.content}
     </Header>
   );
 };

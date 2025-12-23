@@ -4,6 +4,7 @@ import { type FC, useEffect, useState } from 'react';
 import { type EditableDeleteableComponentProps } from '~/utils/components/edit/editable';
 import { type PolymorphicComponentProps } from '~/utils/types/polymorphic';
 import Button from '~/utils/components/base/buttons/button';
+import { getClass } from '~/utils/utils';
 type DirtComponentOtherProps = {
   showCancel?: boolean;
   overrideDelete?: boolean;
@@ -95,7 +96,7 @@ export const DirtyComponent = <
   } as unknown as T;
   return (
     <div className="relative" data-testid={dataTestId}>
-      {dirtyState.state && dirtyState.type == 'delete' && (
+      {dirtyState.state && dirtyState.type === 'delete' && (
         <div
           className="absolute left-0 top-0 z-10 h-full w-full rounded-xl bg-red-200 opacity-50"
           data-testid="dirty-state-delete"
@@ -103,7 +104,12 @@ export const DirtyComponent = <
       )}
       <Component {...componentProps} />
       {dirtyState.state && (
-        <div className="relative z-10 mx-4 my-1 text-right">
+        <div
+          className={getClass(
+            'z-10 mx-4 my-1 text-right',
+            dirtyState.type === 'delete' ? 'relative' : ''
+          )}
+        >
           {showCancel && (
             <Button className="mx-1" mode="secondary" onClick={onCancel}>
               Cancel

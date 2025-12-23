@@ -10,6 +10,7 @@ import { setStyleFromSettings } from '~/utils/utils';
 import { Annotation } from '../../Timeline/annotation';
 import { useAnnotationLink } from '../../event-page/annotation-provider';
 import { annotationLinkSchema } from '../annotation/constants';
+import { AnnotationMarkdown } from '../annotation/annotation-markdown';
 
 export const quoteBlockSettingsSchema = SettingsComponentSettingsSchema.extend({
   quote: z.string(),
@@ -40,7 +41,7 @@ export const QuoteBlock: FC<DataComponent> = ({ data }) => {
       <p className="mx-5 py-2" style={setStyleFromSettings(settings)}>
         {verses.map((verse, i) => (
           <div className="my-1 italic" key={i}>
-            {verse}
+            <AnnotationMarkdown text={verse} />
           </div>
         ))}
         <span className="font-medium">- {settings.reference}</span>
