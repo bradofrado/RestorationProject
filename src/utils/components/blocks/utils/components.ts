@@ -1,5 +1,7 @@
 import { CarouselBlock } from '../carousel/carousel';
 import { EditableCarouselBlock } from '../carousel/edit-carousel';
+import { CustomBlock } from '../custom/custom';
+import { EditableCustomBlock } from '../custom/editable-custom';
 import { EditableFootnotesBlock } from '../footnotes/editable-footnotes';
 import { FootnotesBlock } from '../footnotes/footnotes';
 import { EditableHeaderBlock } from '../header/editable-header';
@@ -65,5 +67,10 @@ export const components = createComponents(
     label: 'Footnotes',
     editable: EditableFootnotesBlock,
     component: FootnotesBlock,
+  },
+  {
+    label: 'Custom',
+    editable: EditableCustomBlock,
+    component: CustomBlock,
   }
 );
