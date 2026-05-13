@@ -10,7 +10,7 @@ import bomData from './bom-names.json';
 // ─────────────────────────────────────────────────────────────────────────────
 
 type Category = 'prophet' | 'king' | 'villain' | 'minor';
-type SortMode = 'total' | 'span' | 'name';
+type SortMode = 'total' | 'span' | 'name' | 'first';
 type ActiveCategory = Category | 'all';
 
 interface Mention {
@@ -26,15 +26,27 @@ interface Person {
 
 interface ProcessedPerson extends Person {
   bookCounts: Record<string, number>;
+  chapterCounts: Record<string, Record<number, number>>;
   total: number;
   span: number;
+  chapterSpan: number | null;
+  firstMention: number | null;
 }
+
+type ZoomLevel = 0 | 1 | 2 | 3;
+
+type Column =
+  | { type: 'book'; book: string; label: string }
+  | { type: 'group'; book: string; start: number; end: number; label: string }
+  | { type: 'chapter'; book: string; chapter: number; label: string };
 
 interface TooltipState {
   name: string;
-  book: string;
+  columnLabel: string;
   count: number;
   total: number;
+  span: number;
+  chapterSpan: number | null;
   x: number;
   y: number;
 }
@@ -60,6 +72,35 @@ const BOOKS: string[] = [
   'Ether',
   'Moroni',
 ];
+
+// Static chapter counts derived from /data/json directory structure
+const BOOK_CHAPTERS: Record<string, number> = {
+  '1 Nephi': 22,
+  '2 Nephi': 33,
+  Jacob: 7,
+  Enos: 1,
+  Jarom: 1,
+  Omni: 1,
+  'Words of Mormon': 1,
+  Mosiah: 29,
+  Alma: 63,
+  Helaman: 16,
+  '3 Nephi': 30,
+  '4 Nephi': 1,
+  Mormon: 9,
+  Ether: 15,
+  Moroni: 10,
+};
+
+// Group sizes for each zoom level (1, 2, 3). Level 0 = book view.
+const ZOOM_GROUP_SIZES: Record<1 | 2 | 3, number> = { 1: 10, 2: 5, 3: 1 };
+
+const ZOOM_LEVEL_LABELS: Record<ZoomLevel, string> = {
+  0: 'Books',
+  1: 'Chapter groups (10)',
+  2: 'Chapter groups (5)',
+  3: 'Individual chapters',
+};
 
 const BOOK_SHORT: Record<string, string> = {
   '1 Nephi': '1 Ne',
@@ -87,7 +128,6 @@ const CATEGORIES: ActiveCategory[] = [
   'minor',
 ];
 
-// HSL values per category for programmatic cell coloring
 const CAT_HSL: Record<Category, { h: number; s: number }> = {
   prophet: { h: 213, s: 72 },
   king: { h: 34, s: 82 },
@@ -95,7 +135,6 @@ const CAT_HSL: Record<Category, { h: number; s: number }> = {
   minor: { h: 100, s: 63 },
 };
 
-// Tailwind-safe dot colors (must be full class strings, not constructed)
 const CAT_DOT_CLASS: Record<Category, string> = {
   prophet: 'bg-blue-600',
   king: 'bg-amber-700',
@@ -118,19 +157,97 @@ const CAT_BUTTON_ACTIVE: Record<ActiveCategory, string> = {
 function buildCounts(data: Person[]): ProcessedPerson[] {
   return data.map((person) => {
     const bookCounts: Record<string, number> = {};
-    for (const { book } of person.mentions) {
+    const chapterCounts: Record<string, Record<number, number>> = {};
+
+    for (const { book, chapter } of person.mentions) {
       bookCounts[book] = (bookCounts[book] ?? 0) + 1;
+      if (!chapterCounts[book]) chapterCounts[book] = {};
+      (chapterCounts[book] ?? {})[chapter] =
+        ((chapterCounts[book] ?? {})[chapter] ?? 0) + 1;
     }
+
     const total = person.mentions.length;
     const bookIndices = BOOKS.map((_, i) => i).filter(
-      (i) => bookCounts[BOOKS[i] ?? ''] ?? 0 > 0
+      (i) => (bookCounts[BOOKS[i] ?? ''] ?? 0) > 0
     );
     const span =
       bookIndices.length > 1
         ? bookIndices[bookIndices.length - 1]! - bookIndices[0]!
-        : bookIndices.length;
-    return { ...person, bookCounts, total, span };
+        : bookIndices.length - 1;
+    const chapterSpan =
+      bookIndices.length === 1
+        ? person.mentions[person.mentions.length - 1]!.chapter -
+          person.mentions[0]!.chapter
+        : null;
+    const firstMention = person.mentions[0] ?? null;
+    const firstMentionScore =
+      firstMention !== null
+        ? (BOOKS.indexOf(firstMention.book) ?? 0) * 1000 +
+          (firstMention.chapter ?? 0)
+        : null;
+    return {
+      ...person,
+      bookCounts,
+      chapterCounts,
+      total,
+      span,
+      chapterSpan,
+      firstMention: firstMentionScore,
+    };
   });
+}
+
+function getColumns(zoomedBook: string | null, zoomLevel: ZoomLevel): Column[] {
+  return BOOKS.flatMap((book): Column[] => {
+    const short = BOOK_SHORT[book] ?? book;
+
+    if (book !== zoomedBook || zoomLevel === 0) {
+      return [{ type: 'book', book, label: short }];
+    }
+
+    const totalChapters = BOOK_CHAPTERS[book] ?? 1;
+    const groupSize = ZOOM_GROUP_SIZES[zoomLevel];
+
+    if (groupSize === 1) {
+      return Array.from(
+        { length: totalChapters },
+        (_, i): Column => ({
+          type: 'chapter',
+          book,
+          chapter: i + 1,
+          label: String(i + 1),
+        })
+      );
+    }
+
+    const cols: Column[] = [];
+    for (let start = 1; start <= totalChapters; start += groupSize) {
+      const end = Math.min(start + groupSize - 1, totalChapters);
+      cols.push({
+        type: 'group',
+        book,
+        start,
+        end,
+        label: start === end ? String(start) : `${start}–${end}`,
+      });
+    }
+    return cols;
+  });
+}
+
+function getCount(person: ProcessedPerson, col: Column): number {
+  if (col.type === 'book') {
+    return person.bookCounts[col.book] ?? 0;
+  } else if (col.type === 'group') {
+    const chapters = person.chapterCounts[col.book] ?? {};
+    let count = 0;
+    for (let ch = col.start; ch <= col.end; ch++) {
+      count += chapters[ch] ?? 0;
+    }
+    return count;
+  } else {
+    return (person.chapterCounts[col.book] ?? {})[col.chapter] ?? 0;
+  }
 }
 
 function cellStyle(
@@ -164,6 +281,8 @@ export default function BomHeatmap({
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('all');
   const [sortMode, setSortMode] = useState<SortMode>('total');
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [zoomedBook, setZoomedBook] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(0);
 
   const processed = useMemo(() => buildCounts(data), [data]);
 
@@ -174,19 +293,64 @@ export default function BomHeatmap({
         : processed.filter((d) => d.category === activeCategory);
     return [...base].sort((a, b) => {
       if (sortMode === 'total') return b.total - a.total;
-      if (sortMode === 'span') return b.span - a.span;
+      if (sortMode === 'span') {
+        const d = b.span - a.span;
+        if (d !== 0) return d;
+        if (b.chapterSpan !== null && a.chapterSpan !== null) {
+          const d = b.chapterSpan - a.chapterSpan;
+          if (d !== 0) return d;
+        }
+        return (a.firstMention ?? 0) - (b.firstMention ?? 0);
+      }
+      if (sortMode === 'first')
+        return (a.firstMention ?? 0) - (b.firstMention ?? 0);
       return a.name.localeCompare(b.name);
     });
   }, [processed, activeCategory, sortMode]);
 
-  const max = useMemo(
-    () => Math.max(...filtered.flatMap((d) => Object.values(d.bookCounts)), 1),
-    [filtered]
+  const columns = useMemo(
+    () => getColumns(zoomedBook, zoomLevel),
+    [zoomedBook, zoomLevel]
   );
+
+  const max = useMemo(
+    () =>
+      Math.max(
+        ...filtered.flatMap((d) => columns.map((col) => getCount(d, col))),
+        1
+      ),
+    [filtered, columns]
+  );
+
+  function handleBookHeaderClick(book: string) {
+    if (zoomedBook !== book) {
+      // Zoom into a new book at level 1
+      setZoomedBook(book);
+      setZoomLevel(1);
+    } else if (zoomLevel < 3) {
+      // Zoom in further on the same book
+      setZoomLevel((prev) => (prev + 1) as ZoomLevel);
+    } else {
+      // Fully zoomed — collapse back to book view
+      setZoomedBook(null);
+      setZoomLevel(0);
+    }
+  }
+
+  function handleZoomOut() {
+    if (zoomLevel <= 1) {
+      setZoomedBook(null);
+      setZoomLevel(0);
+    } else {
+      setZoomLevel((prev) => (prev - 1) as ZoomLevel);
+    }
+  }
 
   if (!show) {
     return <Button onClick={() => setShow(true)}>Show Heatmap</Button>;
   }
+
+  const isZoomed = zoomedBook !== null && zoomLevel > 0;
 
   return (
     <div className="relative min-h-screen bg-stone-50 p-6 font-serif">
@@ -194,15 +358,58 @@ export default function BomHeatmap({
       <h1 className="mb-1 text-2xl font-semibold tracking-tight text-stone-800">
         Book of Mormon — Name Frequency
       </h1>
-      <p className="mb-6 font-sans text-sm text-stone-400">
-        Each cell shows how many times a name appears in that book. Hover for
-        details.
+      <p className="mb-4 font-sans text-sm text-stone-400">
+        Each cell shows how many times a name appears in that{' '}
+        {zoomLevel === 0
+          ? 'book'
+          : zoomLevel === 3
+          ? 'chapter'
+          : 'chapter group'}
+        . Hover for details.{' '}
+        {!isZoomed && (
+          <span className="text-stone-300">
+            Click a book header to zoom into its chapters.
+          </span>
+        )}
       </p>
       <div className="absolute right-0 top-0">
         <Button mode="secondary" onClick={() => setShow(false)}>
           <XIcon className="size-4" />
         </Button>
       </div>
+
+      {/* Zoom breadcrumb */}
+      {isZoomed && (
+        <div className="mb-4 flex flex-wrap items-center gap-1.5 font-sans text-xs">
+          <button
+            onClick={() => {
+              setZoomedBook(null);
+              setZoomLevel(0);
+            }}
+            className="text-stone-400 underline hover:text-stone-600"
+          >
+            All Books
+          </button>
+          <span className="text-stone-300">›</span>
+          <span className="font-medium text-stone-700">{zoomedBook}</span>
+          <span className="text-stone-300">›</span>
+          <span className="text-stone-500">{ZOOM_LEVEL_LABELS[zoomLevel]}</span>
+          <button
+            onClick={handleZoomOut}
+            className="ml-3 rounded border border-stone-200 bg-white px-2 py-0.5 text-stone-500 hover:border-stone-400 hover:text-stone-700"
+          >
+            ← Zoom out
+          </button>
+          {zoomLevel < 3 && (
+            <button
+              onClick={() => setZoomLevel((prev) => (prev + 1) as ZoomLevel)}
+              className="rounded border border-stone-200 bg-white px-2 py-0.5 text-stone-500 hover:border-stone-400 hover:text-stone-700"
+            >
+              Zoom in →
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Controls */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -241,6 +448,7 @@ export default function BomHeatmap({
             <option value="total">Total mentions</option>
             <option value="span">Book span</option>
             <option value="name">Name (A–Z)</option>
+            <option value="first">First mention</option>
           </select>
         </div>
       </div>
@@ -265,15 +473,46 @@ export default function BomHeatmap({
           <thead>
             <tr>
               <th className="w-32 pb-2 pr-3 text-right font-sans text-xs font-normal text-stone-300" />
-              {BOOKS.map((book) => (
-                <th
-                  key={book}
-                  title={book}
-                  className="whitespace-nowrap px-0.5 pb-2 text-center font-sans text-[10px] font-medium tracking-wide text-stone-400"
-                >
-                  {BOOK_SHORT[book]}
-                </th>
-              ))}
+              {columns.map((col, i) => {
+                if (col.type === 'book') {
+                  const isCurrentZoomed = col.book === zoomedBook;
+                  return (
+                    <th
+                      key={`book-${col.book}-${i}`}
+                      title={`${col.book} — click to zoom into chapters`}
+                      onClick={() => handleBookHeaderClick(col.book)}
+                      className={`cursor-pointer select-none whitespace-nowrap px-0.5 pb-2 text-center font-sans text-[10px] font-medium tracking-wide transition-colors ${
+                        isCurrentZoomed
+                          ? 'text-stone-700 underline underline-offset-2'
+                          : 'text-stone-400 hover:text-stone-600'
+                      }`}
+                    >
+                      {col.label}
+                    </th>
+                  );
+                }
+
+                // Chapter group or individual chapter column
+                const isFirst =
+                  i === 0 ||
+                  columns[i - 1]?.book !== col.book ||
+                  columns[i - 1]?.type === 'book';
+                return (
+                  <th
+                    key={`col-${col.book}-${i}`}
+                    title={
+                      col.type === 'group'
+                        ? `${col.book} Ch ${col.start}–${col.end}`
+                        : `${col.book} Ch ${col.chapter}`
+                    }
+                    className={`whitespace-nowrap px-0.5 pb-2 text-center font-sans text-[10px] font-medium tracking-wide text-stone-500 ${
+                      isFirst ? 'border-l border-stone-200 pl-1' : ''
+                    }`}
+                  >
+                    {col.label}
+                  </th>
+                );
+              })}
               <th className="pb-2 pl-3 font-sans text-[10px] font-normal text-stone-300">
                 total
               </th>
@@ -295,11 +534,33 @@ export default function BomHeatmap({
                 </td>
 
                 {/* Cells */}
-                {BOOKS.map((book) => {
-                  const count = row.bookCounts[book] ?? 0;
+                {columns.map((col, i) => {
+                  const count = getCount(row, col);
                   const style = cellStyle(count, max, row.category);
+                  const isFirst =
+                    i === 0 ||
+                    columns[i - 1]?.book !== col.book ||
+                    columns[i - 1]?.type === 'book';
+                  const isExpandedCol = col.type !== 'book';
+
+                  let tooltipLabel: string;
+                  if (col.type === 'book') {
+                    tooltipLabel = col.book;
+                  } else if (col.type === 'group') {
+                    tooltipLabel = `${col.book} Ch ${col.start}–${col.end}`;
+                  } else {
+                    tooltipLabel = `${col.book} Ch ${col.chapter}`;
+                  }
+
                   return (
-                    <td key={book} className="p-0.5">
+                    <td
+                      key={`${col.book}-${i}`}
+                      className={`p-0.5 ${
+                        isFirst && isExpandedCol
+                          ? 'border-l border-stone-200 pl-1'
+                          : ''
+                      }`}
+                    >
                       <div
                         className="flex h-6 w-8 cursor-default items-center justify-center rounded font-sans text-[10px] font-semibold transition-transform duration-100 hover:scale-125"
                         style={style}
@@ -307,11 +568,16 @@ export default function BomHeatmap({
                           count &&
                           setTooltip({
                             name: row.name,
-                            book,
+                            columnLabel: tooltipLabel,
                             count,
                             total: row.total,
                             x: e.clientX,
                             y: e.clientY,
+                            span: row.span + 1,
+                            chapterSpan:
+                              row.chapterSpan !== null
+                                ? row.chapterSpan + 1
+                                : null,
                           })
                         }
                         onMouseMove={(e) =>
@@ -346,10 +612,17 @@ export default function BomHeatmap({
         >
           <p className="font-semibold text-stone-800">{tooltip.name}</p>
           <p className="text-stone-600">
-            {tooltip.book}: {tooltip.count} mention
+            {tooltip.columnLabel}: {tooltip.count} mention
             {tooltip.count !== 1 ? 's' : ''}
           </p>
           <p className="text-stone-400">Total mentions: {tooltip.total}</p>
+          {tooltip.chapterSpan !== null ? (
+            <p className="text-stone-400">
+              Chapter span: {tooltip.chapterSpan}
+            </p>
+          ) : (
+            <p className="text-stone-400">Book span: {tooltip.span}</p>
+          )}
         </div>
       )}
     </div>
