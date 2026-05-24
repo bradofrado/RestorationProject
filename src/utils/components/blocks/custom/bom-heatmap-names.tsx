@@ -272,12 +272,14 @@ function cellStyle(
 
 interface BomHeatmapProps {
   data?: Person[];
+  hideButton?: boolean;
 }
 
 export default function BomHeatmap({
   data = bomData as Person[],
+  hideButton = false,
 }: BomHeatmapProps) {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(hideButton);
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('all');
   const [sortMode, setSortMode] = useState<SortMode>('total');
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -372,11 +374,13 @@ export default function BomHeatmap({
           </span>
         )}
       </p>
-      <div className="absolute right-0 top-0">
-        <Button mode="secondary" onClick={() => setShow(false)}>
-          <XIcon className="size-4" />
-        </Button>
-      </div>
+      {!hideButton ? (
+        <div className="absolute right-0 top-0">
+          <Button mode="secondary" onClick={() => setShow(false)}>
+            <XIcon className="size-4" />
+          </Button>
+        </div>
+      ) : null}
 
       {/* Zoom breadcrumb */}
       {isZoomed && (
